@@ -19,7 +19,7 @@
 import re
 from typing import Any, Dict, List, Optional
 
-from leaks import check_leakcheck, check_infostealer, check_hibp
+from leaks import check_leakcheck, check_infostealer, check_hibp, check_xposedornot
 from websearch import web_search
 
 # ---------------------------------------------------------------------------
@@ -254,6 +254,25 @@ def build_dossier(value: str, kind: str = "auto") -> Dict[str, Any]:
             dossier["notes"].append(f"DeHashed: {dh['error']}")
     except Exception as e:
         dossier["notes"].append(f"DeHashed: {e}")
+
+    # ---------------- XposedOrNot (бесплатно, без ключа) ----------------
+    if kind == "email":
+        try:
+            xn = check_xposedornot(v)
+            if xn.get("breaches"):
+                dossier["breaches"]["xposedornot"] = xn["breaches"]
+                dossier["breaches"]["xposedornot_details"] = xn.get("breach_details", [])
+                dossier["breaches"].setdefault("sources", [])
+                for b in xn["breaches"]:
+                    if b and b not in dossier["breaches"]["sources"]:
+                        dossier["breaches"]["sources"].append({"name": b, "date": ""})
+                dossier["profiles"]["risk"] = xn.get("risk")
+                dossier["profiles"]["passwords_strength"] = xn.get("passwords_strength")
+                dossier["sources_used"].append("XposedOrNot")
+            elif xn.get("error"):
+                dossier["notes"].append(f"XposedOrNot: {xn['error']}")
+        except Exception as e:
+            dossier["notes"].append(f"XposedOrNot: {e}")
 
     # ---------------- HIBP ----------------
     if kind == "email":

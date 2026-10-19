@@ -93,6 +93,72 @@ def check_leakcheck(value: str) -> Dict[str, Any]:
     return out
 
 
+def check_xposedornot(email: str) -> Dict[str, Any]:
+    """XposedOrNot — бесплатный API (792 утечки, 11.6 млрд записей), без ключа.
+
+    Отдаёт: список утечек с описаниями, типы утеканных данных, риск-скор,
+    стойкость паролей, отрасль. Лимит: 2 запроса/сек с одного IP.
+    """
+    import time as _time
+
+    out: Dict[str, Any] = {"email": email, "active": True, "breaches": [],
+                           "summary": None, "risk": None, "passwords_strength": None,
+                           "error": None}
+    h = {"User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                        "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"),
+         "Accept": "application/json, text/plain, */*",
+         "Referer": "https://xposedornot.com/"}
+
+    r = None
+    for attempt in range(3):
+        try:
+            r = requests.get("https://api.xposedornot.com/v1/breach-analytics",
+                             params={"email": email}, headers=h, timeout=TIMEOUT)
+        except Exception as e:
+            out["error"] = f"{type(e).__name__}: {e}"
+            return out
+        if r.status_code != 429:
+            break
+        import time as _t
+        _t.sleep(4 + attempt * 4)   # лимит 2 req/sec + часовые/дневные капы
+
+    if r is None:
+        out["error"] = "XposedOrNot недоступен"
+        return out
+    if r.status_code == 429:
+        out["error"] = ("лимит запросов XposedOrNot исчерпан (2/сек, есть часовой и "
+                         "дневной кап) — повторите позже")
+        return out
+    if r.status_code != 200:
+        out["error"] = f"XposedOrNot: HTTP {r.status_code}"
+        return out
+
+    try:
+        d = r.json()
+    except Exception:
+        out["error"] = "не удалось разобрать ответ"
+        return out
+
+    summary = d.get("BreachesSummary") or {}
+    out["summary"] = summary.get("site")
+    out["breaches"] = [b.get("breach") for b in
+                       ((d.get("ExposedBreaches") or {}).get("breaches_details") or [])
+                       if isinstance(b, dict)]
+    out["breach_details"] = [
+        {"name": b.get("breach"), "domain": b.get("domain"),
+         "details": (b.get("details") or "")[:400]}
+        for b in ((d.get("ExposedBreaches") or {}).get("breaches_details") or [])
+        if isinstance(b, dict)]
+    bm = d.get("BreachMetrics") or {}
+    risk = bm.get("risk") or []
+    if risk:
+        out["risk"] = risk[0]
+    out["passwords_strength"] = bm.get("passwords_strength")
+    out["industries"] = bm.get("industry")
+    out["found"] = bool(out["breaches"])
+    return out
+
+
 def check_infostealer(email: str) -> Dict[str, Any]:
     """Hudson Rock: был ли компьютер заражён инфостилером (утечки ОС)."""
     out: Dict[str, Any] = {"email": email, "infected": None, "error": None}

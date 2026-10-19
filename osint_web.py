@@ -26,7 +26,7 @@ from osint_finder import (
 from scanner import scan
 from site_checks import all_categories
 from websearch import web_search
-from leaks import full_leak_check
+from leaks import full_leak_check, check_xposedornot
 from premium import (
     key_status, save_keys, KEY_MAP, serper_search,
     hunter_domain_emails, dehashed_search,
@@ -885,10 +885,31 @@ def leaks_route(value: str = Form(...), hibp_key: str = Form("")):
     lc = res.get("leakcheck", {})
     found = lc.get("found")
 
+    # XposedOrNot — бесплатный источник (11.6 млрд записей, без ключа)
+    xon = None
+    if "@" in v:
+        try:
+            xon = check_xposedornot(v)
+        except Exception:
+            xon = None
+
     srows = "".join(
         f"<tr><td><b>{_esc(s.get('name'))}</b></td><td>{_esc(s.get('date'))}</td></tr>"
         for s in (lc.get("sources") or []))
     fl = lc.get("leaked_field_labels") or []
+
+    xon_block = ""
+    if xon and xon.get("breaches"):
+        xrows = "".join(f"<tr><td><b>{_esc(b)}</b></td></tr>" for b in xon["breaches"])
+        risk = xon.get("risk") or {}
+        xon_block = (
+            f"<div class='stats'><div class='stat bad'><b>{len(xon['breaches'])}</b>"
+            f"<span>утечек (XposedOrNot)</span></div>"
+            f"<div class='stat'><b>{_esc(risk.get('risk_label', '—'))}</b>"
+            f"<span>риск-скор {_esc(risk.get('risk_score', '—'))}</span></div></div>"
+            f"<h3>Утечки по XposedOrNot <span class='count'>{len(xon['breaches'])}</span></h3>"
+            f"<div class='tablewrap'><table><thead><tr><th>Сервис</th></tr></thead>"
+            f"<tbody>{xrows}</tbody></table></div>")
 
     if found:
         summary = (f"<div class='stats'>"
@@ -903,6 +924,7 @@ def leaks_route(value: str = Form(...), hibp_key: str = Form("")):
 
     body = f"""
     {summary}
+    {xon_block}
     {_toolbar(res)}
     <h3>Источники утечек <span class="count">{lc.get('source_count', 0)}</span></h3>
     <div class="tablewrap"><table><thead><tr><th>Сервис / сайт</th><th>Дата</th></tr></thead>

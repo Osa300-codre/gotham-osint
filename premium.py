@@ -88,6 +88,22 @@ KEY_MAP = {
         "free": True,
         "what": "Поиск людей по имени, фото и контактам",
     },
+    "XON_API_KEY": {
+        "service": "xonAPI+ (XposedOrNot)",
+        "env": "XON_API_KEY",
+        "url": "https://plus.xposedornot.com/pricing",
+        "price": "$9/мес — оплата картой (Visa/MC/PayPal)",
+        "free": True,
+        "what": "Расширенный доступ к 792 утечкам / 11.6 млрд записей + домены и пасты",
+    },
+    "REVEALER_API_KEY": {
+        "service": "Revealer.us",
+        "env": "REVEALER_API_KEY",
+        "url": "https://revealer.us/pricing",
+        "price": "$12.99/мес (Starter), $29.99/мес с API — оплата картой",
+        "free": False,
+        "what": "Поиск по 800+ платформам, breach lookup, people reveal, API",
+    },
 }
 
 
