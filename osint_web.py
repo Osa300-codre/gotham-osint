@@ -244,6 +244,16 @@ details[open] summary::before{transform:rotate(90deg)}
 details[open] summary{border-bottom:1px solid var(--line);color:var(--text)}
 details ul{margin:0;padding:14px 20px 14px 40px;font-size:12.5px;color:var(--muted);max-height:340px;overflow-y:auto}
 details li{margin-bottom:5px;line-height:1.5}
+/* карта нитей */
+.threadmap{background:radial-gradient(900px 500px at 22% 50%,rgba(245,197,66,.05),transparent 70%);
+  border:1px solid var(--line);padding:10px 6px;margin:6px 0 18px;overflow:hidden}
+.threadmap svg{display:block;margin:0 auto}
+.threadmap .branch text{transition:.18s;cursor:pointer}
+.threadmap .branch:hover text{fill:#f5c542}
+.branch-detail{border:1px solid var(--line);margin:8px 0;background:rgba(0,0,0,.22)}
+.branch-detail summary:hover{color:var(--gold)}
+.branch-detail .count{margin-left:auto}
+.branch-detail[open]{background:rgba(245,197,66,.03)}
 .loading{text-align:center;padding:52px 20px;color:var(--muted);font-size:14px}
 .bat-loader{
   width:46px;height:46px;margin:0 auto 18px;background:var(--gold);
@@ -305,7 +315,7 @@ HTML = """<!DOCTYPE html>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Gotham OSINT">
-<meta name="description" content="Поиск публичной информации по username, email, телефону, IP и домену. 506 сайтов, проверка утечек, веб-поиск.">
+<meta name="description" content="Поиск публичной информации по username, email, телефону, IP и домену. 813 сайтов, проверка утечек, веб-поиск, граф связей.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -366,6 +376,7 @@ HTML = """<!DOCTYPE html>
   <div class="tab" data-t="tab-correlate">__ICO_SHIELD__Коррелятор личности</div>
   <div class="tab" data-t="tab-catalog">__ICO_GLOBE__Каталог OSINT</div>
   <div class="tab" data-t="tab-kb">__ICO_SHIELD__База знаний</div>
+  <div class="tab" data-t="tab-threads">__ICO_TARGET__Карта нитей</div>
   <div class="tab" data-t="tab-catalog">__ICO_SHIELD__Каталог</div>
   <div class="tab" data-t="tab-web">__ICO_GLOBE__Веб-поиск</div>
   <div class="tab" data-t="tab-keys">__ICO_KEY__Ключи</div>
@@ -375,7 +386,7 @@ HTML = """<!DOCTYPE html>
 <!-- ===== SCAN ===== -->
 <div class="panel active" id="tab-scan">
   <div class="panel-title">Сканирование профилей</div>
-  <div class="panel-sub">Проверка username по 506 сайтам в 21 категории. Занимает 10&ndash;30 секунд.</div>
+  <div class="panel-sub">Проверка username по 813 сайтам в 33 категориях. Занимает 10&ndash;30 секунд.</div>
   <form method="post" action="/scan" id="scanform">
     <label>Username / идентификатор</label>
     <input name="value" id="scanvalue" placeholder="octocat" required>
@@ -569,6 +580,12 @@ HTML = """<!DOCTYPE html>
   <div id="dossier-result"></div>
 </div>
 
+<div class="panel" id="tab-threads">
+  <div class="panel-title">Карта нитей</div>
+  <div class="panel-sub">Каждая нить — группа источников. Клик по названию раскрывает состав ветви.</div>
+  __THREADS__
+</div>
+
 <div class="panel" id="tab-catalog">
   <div class="panel-title">Каталог OSINT-ресурсов</div>
   <div class="panel-sub">14 категорий, __TOTALTOOLS__ инструментов — от поиска и мониторинга до дорок и портов.</div>
@@ -655,11 +672,18 @@ $$('#chips .chip').forEach(c=>c.addEventListener('click',()=>{
 function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;
   document.body.appendChild(t);setTimeout(()=>t.remove(),2200);}
 
-/* --- COPY / EXPORT --- */
+/* --- карта нитей: клик по ветке раскрывает состав --- */
 document.addEventListener('click',e=>{
-  const c=e.target.closest('[data-copy]');
+  const g = e.target.closest && e.target.closest('.branch');
+  if(g){
+    const cat = g.getAttribute('data-cat');
+    const det = document.querySelector(".branch-detail[data-cat='"+CSS.escape(cat)+"']");
+    if(det){ det.open = true; det.scrollIntoView({behavior:'smooth', block:'center'}); }
+    return;
+  }
+  const c = e.target.closest('[data-copy]');
   if(c){navigator.clipboard.writeText(c.dataset.copy).then(()=>toast('Скопировано в буфер'));return;}
-  const d=e.target.closest('[data-download]');
+  const d = e.target.closest('[data-download]');
   if(d){
     const blob=new Blob([d.dataset.download],{type:'application/json'});
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);
@@ -710,7 +734,7 @@ function showLoading(target,text){
 }
 
 /* --- FORMS --- */
-$('#scanform').addEventListener('submit',()=>showLoading('scan-result','Перепроверяем 506 сайтов &mdash; это займёт 10&ndash;30 секунд'));
+$('#scanform').addEventListener('submit',()=>showLoading('scan-result','Перепроверяем 813 сайтов &mdash; это займёт 10&ndash;30 секунд'));
 $('#scanform').addEventListener('submit',e=>{
   const v=$('#scanvalue').value.trim();
   if(!v){e.preventDefault();toast('Введите username');}
@@ -814,15 +838,23 @@ def _keyinfo_html() -> str:
 
 
 def _catalog_counts() -> Dict[str, int]:
+    """Реальные счётчики: сколько сайтов в каталоге, категорий и ресурсов."""
+    sites = cats = 0
+    try:
+        import site_checks as SC
+        sites = len(SC.SITES) + len(SC.API_SITES)
+        cats = len(SC.all_categories())
+    except Exception:
+        pass
+    resources = branches = 0
     try:
         import catalog as CAT
-        st = CAT.stats()
-        return {"sites": st["total_sources"], "checkable": st["checkable"],
-                "resources": st["resources"], "categories": st["categories"],
-                "branches": len(st["branches"])}
+        resources = CAT.total()
+        branches = len(CAT.CATEGORIES)
     except Exception:
-        return {"sites": 506, "checkable": 0, "resources": 0,
-                "categories": 21, "branches": 0}
+        pass
+    return {"sites": sites or 506, "checkable": sites, "resources": resources,
+            "categories": cats or 21, "branches": branches}
 
 
 def _page(active: str = "tab-scan") -> str:
@@ -837,6 +869,7 @@ def _page(active: str = "tab-scan") -> str:
             .replace("__KEYTABLE__", _keytable_html())
             .replace("__KEYINFO__", _keyinfo_html())
             .replace("__CATALOG__", _catalog_html())
+            .replace("__THREADS__", _threads_html())
             .replace("__TOTALTOOLS__", str(_catalog_total()))
             .replace("__NKEYS__", str(nkeys)))
     cc = _catalog_counts()
@@ -942,6 +975,19 @@ self.addEventListener('fetch',e=>{
 """
     return Response(sw, media_type="application/javascript",
                     headers={"Cache-Control": "no-cache"})
+
+
+def _threads_html() -> str:
+    """Карта нитей: SVG-дерево + раскрывающиеся составы ветвей."""
+    from threads_map import build_branches, render_svg, render_detail
+    branches = build_branches()
+    total = sum(b["count"] for b in branches)
+    return (f'<div class="stats">'
+            f'<div class="stat ok"><b>{total}</b><span>источников</span></div>'
+            f'<div class="stat"><b>{len(branches)}</b><span>нитей</span></div>'
+            f'</div>'
+            f'<div class="threadmap">{render_svg(branches)}</div>'
+            f'{render_detail(branches)}')
 
 
 def _catalog_html() -> str:
