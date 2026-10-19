@@ -522,6 +522,21 @@ SITES = [
 ]
 
 
+# ---------------------------------------------------------------------------
+# Расширенный каталог (site_checks_ext.py): +399 площадок, 41 категория,
+# 13 ветвей таксономии OSINT Catalog.
+# ---------------------------------------------------------------------------
+try:
+    from site_checks_ext import EXTRA_SITES as _EXTRA_SITES
+    _seen = {(s[0], s[2]) for s in SITES}
+    for _s in _EXTRA_SITES:
+        if (_s[0], _s[2]) not in _seen:
+            SITES.append(_s)
+            _seen.add((_s[0], _s[2]))
+except Exception:  # pragma: no cover
+    pass
+
+
 def get_sites(categories=None):
     """Возвращает список сайтов, отфильтрованный по категориям."""
     out = []

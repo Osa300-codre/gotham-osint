@@ -1,0 +1,6931 @@
+{
+  "generated_by": "Gotham OSINT — OSINT Catalog",
+  "stats": {
+    "branches": [
+      {
+        "branch": "Geo и объекты",
+        "categories": 8,
+        "sources": 218
+      },
+      {
+        "branch": "Соцсети и мессенджеры",
+        "categories": 5,
+        "sources": 157
+      },
+      {
+        "branch": "Медиа и файлы",
+        "categories": 3,
+        "sources": 126
+      },
+      {
+        "branch": "Рабочая среда",
+        "categories": 4,
+        "sources": 118
+      },
+      {
+        "branch": "Домены, сеть и угрозы",
+        "categories": 4,
+        "sources": 81
+      },
+      {
+        "branch": "Код и репозитории",
+        "categories": 2,
+        "sources": 75
+      },
+      {
+        "branch": "Люди и контакты",
+        "categories": 4,
+        "sources": 49
+      },
+      {
+        "branch": "Реестры и бизнес",
+        "categories": 2,
+        "sources": 29
+      },
+      {
+        "branch": "Промпты / скрипты",
+        "categories": 2,
+        "sources": 26
+      },
+      {
+        "branch": "OPSEC и обучение",
+        "categories": 2,
+        "sources": 25
+      },
+      {
+        "branch": "Поиск и мониторинг",
+        "categories": 3,
+        "sources": 20
+      },
+      {
+        "branch": "Порты",
+        "categories": 1,
+        "sources": 19
+      },
+      {
+        "branch": "Дорки",
+        "categories": 1,
+        "sources": 8
+      }
+    ],
+    "total_sources": 951,
+    "checkable": 844,
+    "resources": 107,
+    "categories": 41
+  },
+  "tree": {
+    "Поиск и мониторинг": {
+      "search": {
+        "label": "Поисковые системы и агрегаторы",
+        "count": 6,
+        "items": [
+          {
+            "name": "Apple App Store",
+            "url": "https://apps.apple.com/developer/id{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Bing",
+            "url": "https://www.bing.com/search?q=site%3A{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Google Play (автор)",
+            "url": "https://play.google.com/store/apps/developer?id={}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Google Scholar",
+            "url": "https://scholar.google.com/citations?user={}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Microsoft Store",
+            "url": "https://apps.microsoft.com/search/publisher?name={}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Yandex Zen (автор)",
+            "url": "https://dzen.ru/{}/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      },
+      "archive": {
+        "label": "Архивы и веб-история",
+        "count": 6,
+        "items": [
+          {
+            "name": "Archive.today",
+            "url": "https://archive.ph/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Common Crawl Index",
+            "url": "https://index.commoncrawl.org/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Google Кэш",
+            "url": "https://webcache.googleusercontent.com/search?q=cache:{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Memento Time Travel",
+            "url": "https://timetravel.mementoweb.org/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Wayback Availability API",
+            "url": "https://archive.org/wayback/available?url={}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Wayback Machine",
+            "url": "https://web.archive.org/web/*/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      },
+      "monitoring": {
+        "label": "Мониторинг сайтов и соцсетей",
+        "count": 8,
+        "items": [
+          {
+            "name": "ChangeDetection.io",
+            "url": "https://changedetection.io/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "ChangeTower",
+            "url": "https://www.changetower.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Distill.io",
+            "url": "https://distill.io/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Google Alerts",
+            "url": "https://www.google.com/alerts/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Mention",
+            "url": "https://mention.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "urlscan.io",
+            "url": "https://urlscan.io/search/#user:{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Versionista",
+            "url": "https://versionista.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Visualping",
+            "url": "https://visualping.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      }
+    },
+    "Люди и контакты": {
+      "health": {
+        "label": "Здоровье",
+        "count": 11,
+        "items": [
+          {
+            "name": "Adidas",
+            "url": "https://www.adidas.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Calm",
+            "url": "https://www.calm.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Fitbit",
+            "url": "https://www.fitbit.com/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Garmin",
+            "url": "https://connect.garmin.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Headspace",
+            "url": "https://www.headspace.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Life360",
+            "url": "https://life360.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "MyFitnessPal",
+            "url": "https://www.myfitnesspal.com/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Nike",
+            "url": "https://www.nike.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Runkeeper",
+            "url": "https://runkeeper.com/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Strava",
+            "url": "https://www.strava.com/athletes/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Yogi",
+            "url": "https://yogi.life/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      },
+      "mail": {
+        "label": "Почтовые сервисы",
+        "count": 13,
+        "items": [
+          {
+            "name": "AOL",
+            "url": "https://mail.aol.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "BumMail",
+            "url": "https://webmail.bum.ru/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Fastmail",
+            "url": "https://www.fastmail.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Gmail",
+            "url": "https://mail.google.com/mail/u/0/#search/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "iCloud",
+            "url": "https://www.icloud.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Inbox.lv",
+            "url": "https://go.inbox.lv/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Mail.ru",
+            "url": "https://go.mail.ru/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Outlook",
+            "url": "https://outlook.live.com/mail/0/inbox",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "ProtonMail",
+            "url": "https://proton.me/u/0/all-mail",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Rambler Mail",
+            "url": "https://go.rambler.ru/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Tutanota",
+            "url": "https://app.tuta.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Yahoo",
+            "url": "https://mail.yahoo.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Zoho",
+            "url": "https://mail.zoho.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      },
+      "email": {
+        "label": "Почта и почтовые сервисы",
+        "count": 19,
+        "items": [
+          {
+            "name": "EmailCheck",
+            "url": "https://emailcheck.co/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "EmailRep",
+            "url": "https://emailrep.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Epieos",
+            "url": "https://epieos.com/?q={}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "GMX Mail",
+            "url": "https://www.gmx.com/mail/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Gravatar",
+            "url": "https://www.gravatar.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Gravatar email",
+            "url": "https://en.gravatar.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "HIBP",
+            "url": "https://haveibeenpwned.com/account/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Hunter.io email",
+            "url": "https://hunter.io/email-verifier/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "iCloud Mail",
+            "url": "https://www.icloud.com/mail/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "IntelX",
+            "url": "https://intelx.io/?s={}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Mail.ru",
+            "url": "https://mail.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "MailChimp",
+            "url": "https://mailchimp.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Pipl",
+            "url": "https://pipl.com/search/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Proton Mail",
+            "url": "https://proton.me/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "SPF记录 (MXToolbox)",
+            "url": "https://mxtoolbox.com/SuperTool.aspx?action=mxlookup&run=toolpage&host={}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Tutanota",
+            "url": "https://tuta.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Yahoo Mail",
+            "url": "https://mail.yahoo.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Yandex Почта",
+            "url": "https://passport.yandex.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Zoho Mail",
+            "url": "https://www.zoho.com/mail/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      },
+      "phone": {
+        "label": "Телефоны и операторы",
+        "count": 6,
+        "items": [
+          {
+            "name": "PhoneBooker",
+            "url": "https://phonebooker.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "ShouldIAnswer",
+            "url": "https://www.shouldianswer.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "SpamCalls",
+            "url": "https://www.spamcalls.net/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Sync.me",
+            "url": "https://sync.me/search/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Truecaller",
+            "url": "https://www.truecaller.com/search/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "WhitePages",
+            "url": "https://www.whitepages.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      }
+    },
+    "Соцсети и мессенджеры": {
+      "social": {
+        "label": "Соцсети и мессенджеры",
+        "count": 65,
+        "items": [
+          {
+            "name": "Archive.org",
+            "url": "https://archive.org/details/@{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Ask.fm",
+            "url": "https://ask.fm/{}",
+            "type": "any",
+            "marker": "og:title",
+            "kind": "check"
+          },
+          {
+            "name": "Bebo",
+            "url": "https://www.bebo.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Bigo",
+            "url": "https://www.bigo.tv/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Bluesky",
+            "url": "https://bsky.app/profile/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Chaturbate",
+            "url": "https://chaturbate.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Diaspora",
+            "url": "https://diaspora.io/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Discord (邀请)",
+            "url": "https://discord.com/users/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Douban",
+            "url": "https://www.douban.com/people/{}/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Facebook",
+            "url": "https://www.facebook.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Fansly",
+            "url": "https://fansly.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Foursquare",
+            "url": "https://foursquare.com/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "FriendFeed",
+            "url": "https://friendfeed.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Friendster",
+            "url": "https://friendster.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Gab",
+            "url": "https://gab.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Gettr",
+            "url": "https://gettr.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Giphy",
+            "url": "https://giphy.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Hi5",
+            "url": "https://www.hi5.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Hi5",
+            "url": "https://www.hi5.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Instagram",
+            "url": "https://www.instagram.com/{}/",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "KakaoStory",
+            "url": "https://www.kakaostory.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Keybase",
+            "url": "https://keybase.io/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Keybase",
+            "url": "https://keybase.io/_/api/1.0/user/lookup.json?username={}",
+            "type": "api",
+            "marker": "json_field",
+            "field": "username",
+            "kind": "check"
+          },
+          {
+            "name": "Last.fm",
+            "url": "https://www.last.fm/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Likee",
+            "url": "https://likee.video/@{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "LiveTyping",
+            "url": "https://livetyping.com/u/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Mastodon",
+            "url": "https://mastodon.social/@{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Mastodon",
+            "url": "https://mastodon.social/api/v1/accounts/lookup?acct={}",
+            "type": "api",
+            "marker": "json_field",
+            "field": "username",
+            "kind": "check"
+          },
+          {
+            "name": "MySpace",
+            "url": "https://myspace.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Naver",
+            "url": "https://blog.naver.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Odnoklassniki",
+            "url": "https://ok.ru/profile/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "OK",
+            "url": "https://ok.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Parler",
+            "url": "https://www.parler.com/profile/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Pikabu (alt)",
+            "url": "https://pikabu.ru/@{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Pinterest",
+            "url": "https://www.pinterest.com/{}/",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Plurk",
+            "url": "https://www.plurk.com/{}",
+            "type": "message",
+            "marker": "user not found",
+            "kind": "check"
+          },
+          {
+            "name": "Pornhub",
+            "url": "https://www.pornhub.com/users/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Quora",
+            "url": "https://www.quora.com/profile/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Reddit",
+            "url": "https://www.reddit.com/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Reddit",
+            "url": "https://www.reddit.com/user/{}/about.json",
+            "type": "api",
+            "marker": "json_nonempty",
+            "field": "",
+            "kind": "check"
+          },
+          {
+            "name": "Signal",
+            "url": "https://signal.me/#p/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Snapchat",
+            "url": "https://www.snapchat.com/add/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Taringa",
+            "url": "https://www.taringa.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Telegram",
+            "url": "https://t.me/{}",
+            "type": "any",
+            "marker": "tgme_page_title",
+            "kind": "check"
+          },
+          {
+            "name": "Telegram Web",
+            "url": "https://web.telegram.org/k/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Threads",
+            "url": "https://www.threads.net/@{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "TikTok",
+            "url": "https://www.tiktok.com/@{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Triller",
+            "url": "https://triller.co/@{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Truth Social",
+            "url": "https://truthsocial.com/@{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Tumblr",
+            "url": "https://{}.tumblr.com",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Twitter/X",
+            "url": "https://x.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Untappd",
+            "url": "https://untappd.com/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Vero",
+            "url": "https://vero.co/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Viber",
+            "url": "https://invite.viber.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "VK",
+            "url": "https://vk.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Wattpad",
+            "url": "https://www.wattpad.com/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Weibo",
+            "url": "https://weibo.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "WhatsApp",
+            "url": "https://wa.me/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Winds",
+            "url": "https://winds.social/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Xiaohongshu",
+            "url": "https://www.xiaohongshu.com/user/profile/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Yandex Zen",
+            "url": "https://dzen.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "YouTube",
+            "url": "https://www.youtube.com/@{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Zhihu",
+            "url": "https://www.zhihu.com/people/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Одноклассники",
+            "url": "https://ok.ru/profile/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Пикабу",
+            "url": "https://pikabu.ru/@{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      },
+      "professional": {
+        "label": "Профессиональные сети",
+        "count": 20,
+        "items": [
+          {
+            "name": "Apollo.io",
+            "url": "https://www.apollo.io/people/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Behance (alt)",
+            "url": "https://www.behance.net/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Clodura",
+            "url": "https://clodura.ai/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "ContactOut",
+            "url": "https://contactout.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Contra",
+            "url": "https://contra.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "LinkedIn",
+            "url": "https://www.linkedin.com/in/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Lusha",
+            "url": "https://www.lusha.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Medium (alt)",
+            "url": "https://medium.com/@{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Peerlist",
+            "url": "https://peerlist.io/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Polywork",
+            "url": "https://www.polywork.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Read.cv",
+            "url": "https://read.cv/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "RocketReach",
+            "url": "https://rocketreach.co/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "SignalHire",
+            "url": "https://www.signalhire.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Topmate",
+            "url": "https://topmate.io/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "VC.ru",
+            "url": "https://vc.ru/u/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "VC.ru (alt)",
+            "url": "https://vc.ru/u/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Xing",
+            "url": "https://www.xing.com/profile/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "ZoomInfo",
+            "url": "https://www.zoominfo.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Дзен (автор)",
+            "url": "https://dzen.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Хабр (пользователь)",
+            "url": "https://habr.com/ru/users/{}/",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      },
+      "games": {
+        "label": "Игры и гейминг",
+        "count": 38,
+        "items": [
+          {
+            "name": "Armor Games",
+            "url": "https://armorgames.com/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Battle.net",
+            "url": "https://battle.net/account/id/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Chegg",
+            "url": "https://www.chegg.com/profile/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Chess.com",
+            "url": "https://www.chess.com/member/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Chess.com",
+            "url": "https://api.chess.com/pub/player/{}",
+            "type": "api",
+            "marker": "json_field",
+            "field": "player_id",
+            "kind": "check"
+          },
+          {
+            "name": "Chess.com (alt)",
+            "url": "https://www.chess.com/member/{}",
+            "type": "html_title",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Chess24",
+            "url": "https://www.chess24.com/en/profile/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Chess24",
+            "url": "https://www.chess24.com/en/profile/{}",
+            "type": "api",
+            "marker": "html_title",
+            "field": "",
+            "kind": "check"
+          },
+          {
+            "name": "Chessable",
+            "url": "https://www.chessable.com/users/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "ChessBase",
+            "url": "https://www.chessbase.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Duolingo Chess",
+            "url": "https://www.duolingo.com/profile/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Duolingo(alt)",
+            "url": "https://www.duolingo.com/profile/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Epic Games",
+            "url": "https://www.epicgames.com/id/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "GameFAQs",
+            "url": "https://gamefaqs.gamespot.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "GameFAQs Alt",
+            "url": "https://gamefaqs.gamespot.com/u/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "GamersGate",
+            "url": "https://www.gamersgate.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Games for Windows",
+            "url": "https://steamcommunity.com/id/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "itch",
+            "url": "https://itch.io/profile/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "itch.io (alt)",
+            "url": "https://{}.itch.io/",
+            "type": "html_title",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Kongregate",
+            "url": "https://www.kongregate.com/accounts/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Lichess",
+            "url": "https://lichess.org/@/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Lichess",
+            "url": "https://lichess.org/api/user/{}",
+            "type": "api",
+            "marker": "json_field",
+            "field": "id",
+            "kind": "check"
+          },
+          {
+            "name": "Lichess (alt)",
+            "url": "https://lichess.org/@/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Minecraft (namemc)",
+            "url": "https://namemc.com/profile/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Newgrounds",
+            "url": "https://{}.newgrounds.com",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "osu!",
+            "url": "https://osu.ppy.sh/users/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Plug-in Digital",
+            "url": "https://www.plug-in-digital.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Riot Games",
+            "url": "https://riotgames.com/en/profile/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Roblox",
+            "url": "https://www.roblox.com/user.aspx?username={}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Roblox",
+            "url": "https://www.roblox.com/user.aspx?username={}",
+            "type": "api",
+            "marker": "html_title",
+            "field": "",
+            "kind": "check"
+          },
+          {
+            "name": "Roblox (alt)",
+            "url": "https://www.roblox.com/user.aspx?username={}",
+            "type": "html_title",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Speedrun(alt)",
+            "url": "https://www.speedrun.com/users/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Speedrun.com",
+            "url": "https://speedrun.com/users/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Speedrun.com",
+            "url": "https://www.speedrun.com/users/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Steam",
+            "url": "https://steamcommunity.com/id/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Steam",
+            "url": "https://steamcommunity.com/id/{}/?xml=1",
+            "type": "api",
+            "marker": "xml_profile",
+            "field": "",
+            "kind": "check"
+          },
+          {
+            "name": "Twitch (alt)",
+            "url": "https://www.twitch.tv/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Ubisoft",
+            "url": "https://www.ubisoft.com/en-us/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      },
+      "forum": {
+        "label": "Форумы и сообщества",
+        "count": 27,
+        "items": [
+          {
+            "name": "3DToday",
+            "url": "https://3dtoday.ru/3d/forum/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "4chan",
+            "url": "https://boards.4chan.org/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "AnandTech",
+            "url": "https://forums.anandtech.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "AskUbuntu",
+            "url": "https://askubuntu.com/users?search={}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "BleepingComputer форум",
+            "url": "https://www.bleepingcomputer.com/forums/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Disqus",
+            "url": "https://disqus.com/by/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Fandom",
+            "url": "https://www.fandom.com/u/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Hacker News (поиск)",
+            "url": "https://hn.algolia.com/?q={}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Les Hacker",
+            "url": "https://lesherault.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Letterboxd форум",
+            "url": "https://letterboxd.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Math StackExchange",
+            "url": "https://math.stackexchange.com/users",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Nulled",
+            "url": "https://www.nulled.to/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Ok.ru (группа)",
+            "url": "https://ok.ru/group/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Overclockers",
+            "url": "https://forums.overclockers.co.uk/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Overclockers",
+            "url": "https://forums.overclockers.co.uk/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Pikabu forum",
+            "url": "https://pikabu.ru/@{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Reddit (поиск)",
+            "url": "https://www.reddit.com/search/?q={}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Reddit alt",
+            "url": "https://www.reddit.com/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Reddit r/",
+            "url": "https://www.reddit.com/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Rutracker",
+            "url": "https://rutracker.org/forum/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Server Fault",
+            "url": "https://serverfault.com/users",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Stack Exchange",
+            "url": "https://stackexchange.com/users?tab=Reputation&filter=all",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Telegram (чат)",
+            "url": "https://t.me/s/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Tom's Hardware",
+            "url": "https://forums.tomshardware.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Wikitia",
+            "url": "https://www.wikitia.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "WordPress Forum",
+            "url": "https://wordpress.org/support/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Пикабу (поиск)",
+            "url": "https://pikabu.ru/search?q={}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      },
+      "dating": {
+        "label": "Знакомства",
+        "count": 7,
+        "items": [
+          {
+            "name": "Badoo",
+            "url": "https://badoo.com/profile/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Grindr",
+            "url": "https://grindr.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Love.mail.ru",
+            "url": "https://love.mail.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Mamba",
+            "url": "https://www.mamba.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Rumble",
+            "url": "https://rumble.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Teamo",
+            "url": "https://teamo.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Tinder",
+            "url": "https://tinder.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      }
+    },
+    "Домены, сеть и угрозы": {
+      "cloud": {
+        "label": "Облака, хостинги, CDN",
+        "count": 37,
+        "items": [
+          {
+            "name": "Alibaba Cloud",
+            "url": "https://www.alibabacloud.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Beget",
+            "url": "https://my.beget.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Cloudflare",
+            "url": "https://www.cloudflare.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Cloudflare Pages",
+            "url": "https://pages.cloudflare.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "DigitalOcean",
+            "url": "https://www.digitalocean.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "DigitalOcean",
+            "url": "https://cloud.digitalocean.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Dropbox",
+            "url": "https://www.dropbox.com/home",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Firebase",
+            "url": "https://firebase.google.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "FirstVDS",
+            "url": "https://firstvds.ru/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "FirstVDS",
+            "url": "https://my.firstvds.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Gcore",
+            "url": "https://gcore.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "GitLab Pages",
+            "url": "https://pages.gitlab.io/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Google Drive",
+            "url": "https://drive.google.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Heroku",
+            "url": "https://www.heroku.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Heroku",
+            "url": "https://dashboard.heroku.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Jino",
+            "url": "https://jino.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Linode/Akamai",
+            "url": "https://cloud.linode.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "MEGA",
+            "url": "https://mega.nz/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Netlify",
+            "url": "https://www.netlify.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "OneDrive",
+            "url": "https://onedrive.live.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Oracle Cloud",
+            "url": "https://cloud.oracle.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "PQ.Hosting",
+            "url": "https://pq.hosting/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Railway",
+            "url": "https://railway.app/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "REG.RU",
+            "url": "https://www.reg.ru/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Reg.ru",
+            "url": "https://www.reg.ru/user/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Render",
+            "url": "https://render.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Scaleway",
+            "url": "https://console.scaleway.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Selectel",
+            "url": "https://selectel.ru/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Selectel",
+            "url": "https://my.selectel.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Spaceweb",
+            "url": "https://my.spaceweb.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Time4VPS",
+            "url": "https://my.time4vps.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Timeweb",
+            "url": "https://timeweb.cloud/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Timeweb Cloud",
+            "url": "https://timeweb.cloud/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Vercel",
+            "url": "https://vercel.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "VPS Timeweb",
+            "url": "https://vps.timeweb.cloud/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Vultr",
+            "url": "https://my.vultr.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Yandex Disk",
+            "url": "https://disk.yandex.ru/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      },
+      "network": {
+        "label": "Сеть, IP, инфраструктура",
+        "count": 14,
+        "items": [
+          {
+            "name": "BGP.Tools",
+            "url": "https://bgp.tools/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Cloudflare Radar",
+            "url": "https://radar.cloudflare.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Hurricane Electric BGP",
+            "url": "https://bgp.he.net/AS{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "ip-api.com",
+            "url": "http://ip-api.com/json/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "ipinfo.io",
+            "url": "https://ipinfo.io/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Miralash",
+            "url": "https://ip.miralash.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "OpenCelliD",
+            "url": "https://opencellid.org/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "PeeringDB",
+            "url": "https://www.peeringdb.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "RIPE Database",
+            "url": "https://apps.db.ripe.net/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "RIPEstat",
+            "url": "https://stat.ripe.net/app/launchpad/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Tor Metrics",
+            "url": "https://metrics.torproject.org/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Wikidata",
+            "url": "https://www.wikidata.org/wiki/Special:Search?search={}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Wikidata SPARQL",
+            "url": "https://query.wikidata.org/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Wikimedia",
+            "url": "https://meta.wikimedia.org/wiki/User:{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      },
+      "domains": {
+        "label": "Домены, DNS, WHOIS",
+        "count": 12,
+        "items": [
+          {
+            "name": "BuiltWith",
+            "url": "https://builtwith.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "crt.sh",
+            "url": "https://crt.sh/?q={}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "DNSdumpster",
+            "url": "https://dnsdumpster.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "DNSlytics",
+            "url": "https://dnslytics.com/domain/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "ICANN Lookup",
+            "url": "https://lookup.icann.org/en/lookup?name={}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Opendnssec",
+            "url": "https://www.opendnssec.org/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "RDAP (IANA)",
+            "url": "https://rdap.org/domain/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "SecurityTrails",
+            "url": "https://securitytrails.com/domain/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "ViewDNS",
+            "url": "https://viewdns.info/whois/?domain={}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "VirusTotal (domain)",
+            "url": "https://www.virustotal.com/gui/domain/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Wappalyzer",
+            "url": "https://www.wappalyzer.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "WhoisXML API",
+            "url": "https://www.whoisxmlapi.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      },
+      "threat": {
+        "label": "Кибер-угрозы и уязвимости",
+        "count": 18,
+        "items": [
+          {
+            "name": "AbuseIPDB",
+            "url": "https://www.abuseipdb.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "AlienVault OTX (pulses)",
+            "url": "https://otx.alienvault.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Bugcrowd",
+            "url": "https://bugcrowd.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "CVE Search",
+            "url": "https://www.cvedetails.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Exploit-DB",
+            "url": "https://www.exploit-db.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "GitHub Advisory DB",
+            "url": "https://github.com/advisories",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "HackerOne",
+            "url": "https://hackerone.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "NVD",
+            "url": "https://nvd.nist.gov/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Open Bug Bounty",
+            "url": "https://www.openbugbounty.org/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "OpenPhish",
+            "url": "https://openphish.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "OpenSSF",
+            "url": "https://openssf.org/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "OSV.dev",
+            "url": "https://osv.dev/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "OWASP",
+            "url": "https://owasp.org/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Packet Storm",
+            "url": "https://packetstormsecurity.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "PhishTank",
+            "url": "https://phishtank.org/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Snyk Advisor",
+            "url": "https://security.snyk.io/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "ThreatFox API",
+            "url": "https://threatfox.abuse.ch/api/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "URLhaus",
+            "url": "https://urlhaus.abuse.ch/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      }
+    },
+    "Geo и объекты": {
+      "wallet": {
+        "label": "Кошельки и платежи",
+        "count": 74,
+        "items": [
+          {
+            "name": "AdvCash",
+            "url": "https://advcash.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Advcash",
+            "url": "https://advcash.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Alfa-bank",
+            "url": "https://alfabank.ru/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Alipay",
+            "url": "https://www.alipay.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "B2C (crypto)",
+            "url": "https://www.b2c2.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Binance",
+            "url": "https://www.binance.com/en/users/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Bitcoin.com",
+            "url": "https://www.bitcoin.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Bitcointalk",
+            "url": "https://bitcointalk.org/index.php?action=profile;u={}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Bitfinex",
+            "url": "https://www.bitfinex.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Bitpanda",
+            "url": "https://www.bitpanda.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Bitpanda",
+            "url": "https://www.bitpanda.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Bitstamp",
+            "url": "https://www.bitstamp.net/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Blockchain.com",
+            "url": "https://www.blockchain.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Blockchain.com",
+            "url": "https://www.blockchain.com/explorer/addresses/btc/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Blockchair",
+            "url": "https://blockchair.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Bybit",
+            "url": "https://www.bybit.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Cash App",
+            "url": "https://cash.app/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Clearbit",
+            "url": "https://clearbit.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Coinbase",
+            "url": "https://www.coinbase.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "CoinGecko",
+            "url": "https://www.coingecko.com/en/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "CoinMarketCap",
+            "url": "https://coinmarketcap.com/community/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Crypto.com",
+            "url": "https://crypto.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Crypto.com",
+            "url": "https://crypto.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Delta Bank",
+            "url": "https://delta.by/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "EasyMoney",
+            "url": "https://www.easymoney.la/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Etherscan",
+            "url": "https://etherscan.io/address/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "eToro",
+            "url": "https://www.etoro.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Gate.io",
+            "url": "https://www.gate.io/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Gravatar",
+            "url": "https://en.gravatar.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Hunter.io",
+            "url": "https://hunter.io/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Kraken",
+            "url": "https://www.kraken.com/u/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "KuCoin",
+            "url": "https://www.kucoin.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Ledger",
+            "url": "https://www.ledger.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "LocalBitcoins",
+            "url": "https://localbitcoins.com/{}/",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "MetaMask",
+            "url": "https://metamask.io/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "MEXC",
+            "url": "https://www.mexc.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Mobikwik",
+            "url": "https://www.mobikwik.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Monero",
+            "url": "https://www.monero.how/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "MoneyGram",
+            "url": "https://www.moneygram.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "OKX",
+            "url": "https://www.okx.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Payeer",
+            "url": "https://payeer.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Payeer",
+            "url": "https://payeer.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Payoneer",
+            "url": "https://www.payoneer.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "PayPal",
+            "url": "https://www.paypal.com/paypal/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Paytm",
+            "url": "https://www.paytm.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Perfect Money",
+            "url": "https://perfectmoney.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Perfect Money",
+            "url": "https://perfectmoney.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Phantom",
+            "url": "https://phantom.app/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "PhonePe",
+            "url": "https://www.phonepe.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Qiwi",
+            "url": "https://qiwi.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "QIWI (archived)",
+            "url": "https://qiwi.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Revolut",
+            "url": "https://www.revolut.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Robinhood",
+            "url": "https://robinhood.com/us/en/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Robinhood",
+            "url": "https://robinhood.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Robokassa",
+            "url": "https://robokassa.ru/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Sberbank",
+            "url": "https://www.sberbank.ru/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "SBP (СБП)",
+            "url": "https://sbp.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Solscan",
+            "url": "https://solscan.io/account/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Tinkoff",
+            "url": "https://www.tinkoff.ru/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "TradingView",
+            "url": "https://www.tradingview.com/u/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Trezor",
+            "url": "https://trezor.io/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Tron",
+            "url": "https://tronscan.org/#/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Trust Wallet",
+            "url": "https://trustwallet.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Venmo",
+            "url": "https://venmo.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "VK Mini Apps",
+            "url": "https://vk.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Voluum",
+            "url": "https://www.voluum.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "WebMoney",
+            "url": "https://www.wmtransfer.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "WeChat Pay",
+            "url": "https://pay.weixin.qq.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Western Union",
+            "url": "https://www.westernunion.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Who.is",
+            "url": "https://who.is/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Wise",
+            "url": "https://wise.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "YooMoney",
+            "url": "https://yoomoney.ru/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Zelle",
+            "url": "https://www.zellepay.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "ЮMoney",
+            "url": "https://yoomoney.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      },
+      "transport": {
+        "label": "Транспорт и такси",
+        "count": 34,
+        "items": [
+          {
+            "name": "Aeroflot",
+            "url": "https://www.aeroflot.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Aviasales",
+            "url": "https://www.aviasales.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Avtobus",
+            "url": "https://avtobus.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "BlaBlaCar",
+            "url": "https://www.blablacar.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Bolt",
+            "url": "https://bolt.eu/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Citymobil",
+            "url": "https://citymobil.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Didi",
+            "url": "https://www.didi.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Domodedovo",
+            "url": "https://www.domodedovo.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "easyJet",
+            "url": "https://www.easyjet.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Emirates",
+            "url": "https://www.emirates.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "FlixBus",
+            "url": "https://www.flixbus.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "FreeNow",
+            "url": "https://free-now.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Gett",
+            "url": "https://gett.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Maxim",
+            "url": "https://maxim.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Moscow Metro",
+            "url": "https://transport.mosmetro.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Moscow Railways",
+            "url": "https://www.moscowrailways.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Pulkovo Airport",
+            "url": "https://www.pulkovoairport.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Razgulay",
+            "url": "https://www.razgulyaevka.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Roskachestvo",
+            "url": "https://www.roskachestvo.gov.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Ryanair",
+            "url": "https://www.ryanair.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "RZD (railway)",
+            "url": "https://www.rzd.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "S7 Airlines",
+            "url": "https://www.s7.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Sheremetyevo",
+            "url": "https://www.sheremetyevo.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Travelpayouts",
+            "url": "https://www.travelpayouts.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Turkish Airlines",
+            "url": "https://www.turkishairlines.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Uber",
+            "url": "https://www.uber.com/u/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Uber",
+            "url": "https://www.uber.com/riders/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Utkasa",
+            "url": "https://www.utkasa.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Vueling",
+            "url": "https://www.vueling.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Wizz Air",
+            "url": "https://wizzair.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Yandex Go",
+            "url": "https://go.yandex.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Максим",
+            "url": "https://www.maxim.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Ситимобил",
+            "url": "https://www.citimobil.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Яндекс Go",
+            "url": "https://go.yandex.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      },
+      "travel": {
+        "label": "Путешествия",
+        "count": 30,
+        "items": [
+          {
+            "name": "Agoda",
+            "url": "https://www.agoda.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Airbnb",
+            "url": "https://www.airbnb.com/users/show/{}",
+            "type": "message",
+            "marker": "not found",
+            "kind": "check"
+          },
+          {
+            "name": "Booking",
+            "url": "https://www.booking.com/{}",
+            "type": "message",
+            "marker": "not found",
+            "kind": "check"
+          },
+          {
+            "name": "Booking (reviews)",
+            "url": "https://www.booking.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Booking Transport",
+            "url": "https://www.booking.com/transport/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Hostelworld",
+            "url": "https://www.hostelworld.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Hotellook",
+            "url": "https://hotellook.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Hotels.com",
+            "url": "https://www.hotels.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Kiwi",
+            "url": "https://www.kiwi.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Level.Travel",
+            "url": "https://level.travel/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Localrent",
+            "url": "https://localrent.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Onavo",
+            "url": "https://www.onavo.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Onlinetours",
+            "url": "https://www.onlinetours.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Ozon Travel",
+            "url": "https://travel.ozon.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Parkomat",
+            "url": "https://www.parkomat.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "RentRide",
+            "url": "https://rentride.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Sletat",
+            "url": "https://www.sletat.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Strava (alt)",
+            "url": "https://www.strava.com/athletes/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "TezTour",
+            "url": "https://www.tez-tour.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Tinkoff Travel",
+            "url": "https://www.travel.tinkoff.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Tiqets",
+            "url": "https://www.tiqets.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Trip.com",
+            "url": "https://www.trip.com/member/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "TripAdvisor",
+            "url": "https://www.tripadvisor.com/Profile/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Tripadvisor",
+            "url": "https://www.tripadvisor.com/members/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Tripit",
+            "url": "https://www.tripit.com/web/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "TripIt",
+            "url": "https://www.tripit.com/web/people/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Trulia",
+            "url": "https://www.trulia.com/real-estate/agent/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Windy Trails",
+            "url": "https://www.windingtrails.com/users/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Yandex Travel",
+            "url": "https://travel.yandex.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Zillow",
+            "url": "https://www.zillow.com/profile/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      },
+      "food": {
+        "label": "Доставка и рестораны",
+        "count": 19,
+        "items": [
+          {
+            "name": "Deliveroo",
+            "url": "https://deliveroo.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Delivery Club",
+            "url": "https://deliveryclub.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Delivery Club (alt)",
+            "url": "https://delivery-club.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "DoorDash",
+            "url": "https://www.doordash.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Foodpanda",
+            "url": "https://www.foodpanda.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Glovo",
+            "url": "https://glovoapp.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Glovo",
+            "url": "https://glovoapp.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Grab",
+            "url": "https://www.grab.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "iFood",
+            "url": "https://www.ifood.com.br/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Just Eat",
+            "url": "https://www.justeattakeaway.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Postmate",
+            "url": "https://postmate.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Restorator",
+            "url": "https://restorator.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Swiggy",
+            "url": "https://www.swiggy.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "TripAdvisor Reviews",
+            "url": "https://www.tripadvisor.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Uber Eats",
+            "url": "https://www.ubereats.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Wolt",
+            "url": "https://wolt.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Wolt",
+            "url": "https://wolt.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Yandex Eda",
+            "url": "https://eda.yandex.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Zomato",
+            "url": "https://www.zomato.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      },
+      "market": {
+        "label": "Маркетплейсы и объявления",
+        "count": 31,
+        "items": [
+          {
+            "name": "AliExpress",
+            "url": "https://www.aliexpress.com/store/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "AliExpress seller",
+            "url": "https://www.aliexpress.com/store/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Amazon",
+            "url": "https://www.amazon.com/shop/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Apple",
+            "url": "https://www.apple.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Auto.ru",
+            "url": "https://www.auto.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Avito",
+            "url": "https://www.avito.ru/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Avito (объявления)",
+            "url": "https://www.avito.ru/user/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Citilink",
+            "url": "https://www.citilink.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "DNS",
+            "url": "https://www.dns-shop.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "DNS (магазин)",
+            "url": "https://www.dns-shop.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Drom",
+            "url": "https://www.drom.ru/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "eBay",
+            "url": "https://www.ebay.com/usr/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Eldorado",
+            "url": "https://www.eldorado.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Etsy (shop)",
+            "url": "https://www.etsy.com/shop/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Lamoda",
+            "url": "https://www.lamoda.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "M.Video",
+            "url": "https://www.mvideo.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Ozon",
+            "url": "https://www.ozon.ru/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Ozon (отзывы)",
+            "url": "https://www.ozon.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Ozon Seller",
+            "url": "https://seller.ozon.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Samsung",
+            "url": "https://www.samsung.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Sbermegamarket",
+            "url": "https://megamarket.sber.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Shein",
+            "url": "https://www.shein.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Temu",
+            "url": "https://www.temu.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Wildberries",
+            "url": "https://www.wildberries.ru/{}",
+            "type": "message",
+            "marker": "not found",
+            "kind": "check"
+          },
+          {
+            "name": "Wildberries продавец",
+            "url": "https://www.wildberries.ru/seller/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Xiaomi Store",
+            "url": "https://www.mi.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Youla",
+            "url": "https://youla.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Лампа",
+            "url": "https://www.lampa.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "М.Видео",
+            "url": "https://www.mvideo.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Юла",
+            "url": "https://youla.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Яндекс Маркет",
+            "url": "https://market.yandex.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      },
+      "maps": {
+        "label": "Карты и геокодирование",
+        "count": 18,
+        "items": [
+          {
+            "name": "2GIS",
+            "url": "https://2gis.ru/geo/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "2GIS (профиль)",
+            "url": "https://2gis.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "AllTrails",
+            "url": "https://www.alltrails.com/users/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Geocaching",
+            "url": "https://www.geocaching.com/p/?u={}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "GeoHack",
+            "url": "https://geohack.toolforge.org/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Google Maps",
+            "url": "https://www.google.com/maps/contrib/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Hotmaps",
+            "url": "https://hotmaps.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Komoot",
+            "url": "https://www.komoot.com/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Mapillary",
+            "url": "https://www.mapillary.com/app/profile/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Nominatim",
+            "url": "https://nominatim.openstreetmap.org/search?q={}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "OpenStreetMap",
+            "url": "https://www.openstreetmap.org/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Overpass API (OSM)",
+            "url": "https://overpass-api.de/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Roscosmos",
+            "url": "https://www.roscosmos.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Wikimapia",
+            "url": "https://wikimapia.org/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Wikimapia",
+            "url": "https://wikimapia.org/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Yandex Maps",
+            "url": "https://yandex.ru/maps/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Геопортал Роскосмос",
+            "url": "https://www.geoportaldata.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Спутник (Спутник карты)",
+            "url": "https://maps.yandex.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      },
+      "geo": {
+        "label": "Объекты, транспорт, погода",
+        "count": 10,
+        "items": [
+          {
+            "name": "Earth Observatory (NASA)",
+            "url": "https://earthobservatory.nasa.gov/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "FlightAware",
+            "url": "https://www.flightaware.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Flightradar24",
+            "url": "https://www.flightradar24.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "MarineTraffic",
+            "url": "https://www.marinetraffic.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "OpenSky Network",
+            "url": "https://opensky-network.org/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Windy",
+            "url": "https://www.windy.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Zoom Earth",
+            "url": "https://zoom.earth/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "РЖД — расписание",
+            "url": "https://www.rzd.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Росгидромет",
+            "url": "https://meteoinfo.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Яндекс Погода",
+            "url": "https://yandex.ru/pogoda/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      },
+      "business": {
+        "label": "Организации и бизнес",
+        "count": 2,
+        "items": [
+          {
+            "name": "Авто.ру (профиль)",
+            "url": "https://www.auto.ru/user/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "СберАвто",
+            "url": "https://sberauto.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      }
+    },
+    "Медиа и файлы": {
+      "media": {
+        "label": "Медиа, фото, видео",
+        "count": 61,
+        "items": [
+          {
+            "name": "500px",
+            "url": "https://500px.com/p/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "9GAG",
+            "url": "https://9gag.com/u/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Afisha",
+            "url": "https://www.afisha.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "AniList",
+            "url": "https://anilist.co/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Apple Music",
+            "url": "https://music.apple.com/profile/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Bandcamp",
+            "url": "https://{}.bandcamp.com",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Bandcamp",
+            "url": "https://{}.bandcamp.com/",
+            "type": "html_title",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Bandcamp",
+            "url": "https://bandcamp.com/api/mobile/24/tralbum_details?band_id={}",
+            "type": "api",
+            "marker": "json_field",
+            "field": "band_id",
+            "kind": "check"
+          },
+          {
+            "name": "Bilibili",
+            "url": "https://space.bilibili.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Bitchute",
+            "url": "https://www.bitchute.com/profile/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Blogger",
+            "url": "https://{}.blogspot.com",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Bookbub",
+            "url": "https://www.bookbub.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Boomplay",
+            "url": "https://www.boomplay.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Dailymotion",
+            "url": "https://www.dailymotion.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Deezer",
+            "url": "https://www.deezer.com/profile/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Discogs",
+            "url": "https://www.discogs.com/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Drive2",
+            "url": "https://www.drive2.ru/users/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Dzen",
+            "url": "https://dzen.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Flickr",
+            "url": "https://www.flickr.com/people/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Flickr (new)",
+            "url": "https://www.flickr.com/people/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Genius",
+            "url": "https://genius.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Goodreads",
+            "url": "https://www.goodreads.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Habr",
+            "url": "https://habr.com/ru/users/{}/",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "IMDb",
+            "url": "https://www.imdb.com/name/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Imgur",
+            "url": "https://imgur.com/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Kick",
+            "url": "https://kick.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Kinopoisk",
+            "url": "https://www.kinopoisk.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Last.fm",
+            "url": "https://last.fm/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Letterboxd",
+            "url": "https://letterboxd.com/{}/",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Letterboxd",
+            "url": "https://letterboxd.com/{}/",
+            "type": "api",
+            "marker": "html_title",
+            "field": "",
+            "kind": "check"
+          },
+          {
+            "name": "Letterboxd (alt)",
+            "url": "https://letterboxd.com/{}/",
+            "type": "html_title",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "LibraryThing",
+            "url": "https://www.librarything.com/profile/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "LiveJournal",
+            "url": "https://{}.livejournal.com",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Metal Archives",
+            "url": "https://www.metal-archives.com/users/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Mixcloud",
+            "url": "https://www.mixcloud.com/{}/",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Moj",
+            "url": "https://moj.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "MusicBrainz",
+            "url": "https://musicbrainz.org/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "MyAnimeList",
+            "url": "https://myanimelist.net/profile/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Myzuka",
+            "url": "https://myzuka.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Niconico",
+            "url": "https://www.nicovideo.jp/user/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Pikabu",
+            "url": "https://pikabu.ru/@{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "ReverbNation",
+            "url": "https://www.reverbnation.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Rotten Tomatoes",
+            "url": "https://www.rottentomatoes.com/user/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Rumble",
+            "url": "https://rumble.com/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Rutube",
+            "url": "https://rutube.ru/channel/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Serializd",
+            "url": "https://serializd.com/user/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Setlist.fm",
+            "url": "https://www.setlist.fm/user/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "SoundCloud",
+            "url": "https://soundcloud.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Spotify",
+            "url": "https://open.spotify.com/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Tidal",
+            "url": "https://tidal.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Trakt",
+            "url": "https://trakt.tv/users/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Trakt",
+            "url": "https://www.trakt.tv/users/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Trovo",
+            "url": "https://www.trovo.live/en/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Tut.by",
+            "url": "https://tut.by/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "TVTime",
+            "url": "https://www.tvtime.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Twitch",
+            "url": "https://www.twitch.tv/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "vc.ru",
+            "url": "https://vc.ru/u/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Vimeo",
+            "url": "https://vimeo.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "WordPress.com",
+            "url": "https://{}.wordpress.com",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Yandex Музыка",
+            "url": "https://music.yandex.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Zvuk",
+            "url": "https://www.zvuk.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      },
+      "creative": {
+        "label": "Творческие платформы",
+        "count": 52,
+        "items": [
+          {
+            "name": "About.me",
+            "url": "https://about.me/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "ArtStation",
+            "url": "https://www.artstation.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Awwwards",
+            "url": "https://www.awwwards.com/@{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Behance",
+            "url": "https://www.behance.net/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Behance",
+            "url": "https://www.behance.net/v2/users/{}/projects",
+            "type": "api",
+            "marker": "json_field",
+            "field": "username",
+            "kind": "check"
+          },
+          {
+            "name": "Boosty",
+            "url": "https://boosty.to/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "BuyMeACoffee",
+            "url": "https://www.buymeacoffee.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Canva",
+            "url": "https://www.canva.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Carrd",
+            "url": "https://{}.carrd.co",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Carrd",
+            "url": "https://{}.carrd.co/",
+            "type": "html_title",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Carrd (alt)",
+            "url": "https://{}.carrd.co/",
+            "type": "html_title",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "CGSociety",
+            "url": "https://www.cgsociety.org/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "DeviantArt",
+            "url": "https://www.deviantart.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "DeviantArt",
+            "url": "https://{}.deviantart.com/",
+            "type": "html_title",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Dribbble",
+            "url": "https://dribbble.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Dribbble",
+            "url": "https://dribbble.com/v2/users/{}",
+            "type": "api",
+            "marker": "json_field",
+            "field": "username",
+            "kind": "check"
+          },
+          {
+            "name": "Dribbble Blog",
+            "url": "https://dribbble.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Etsy",
+            "url": "https://www.etsy.com/shop/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Figma",
+            "url": "https://www.figma.com/@{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Figma Community",
+            "url": "https://www.figma.com/@{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Framer",
+            "url": "https://www.framer.com/@{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Fur Affinity",
+            "url": "https://www.furaffinity.net/user/{}/",
+            "type": "api",
+            "marker": "html_title",
+            "field": "",
+            "kind": "check"
+          },
+          {
+            "name": "GFXartist",
+            "url": "https://www.gfxtra.com/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Gumroad",
+            "url": "https://{}.gumroad.com",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Gumroad",
+            "url": "https://{}.gumroad.com/",
+            "type": "html_title",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Gumroad",
+            "url": "https://{}.gumroad.com",
+            "type": "api",
+            "marker": "html_title",
+            "field": "",
+            "kind": "check"
+          },
+          {
+            "name": "Itch.io",
+            "url": "https://{}.itch.io",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Itch.io",
+            "url": "https://{}.itch.io/",
+            "type": "html_title",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Ko-fi",
+            "url": "https://ko-fi.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Ko-fi",
+            "url": "https://ko-fi.com/api/lookup/{}",
+            "type": "api",
+            "marker": "json_field",
+            "field": "username",
+            "kind": "check"
+          },
+          {
+            "name": "Linktree",
+            "url": "https://linktr.ee/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Napkin",
+            "url": "https://napkin.ai/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Newgrounds",
+            "url": "https://{}.newgrounds.com/",
+            "type": "html_title",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Pastebin",
+            "url": "https://pastebin.com/u/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Patreon",
+            "url": "https://www.patreon.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Pixiv",
+            "url": "https://www.pixiv.net/ajax/users/{}/profile/all?lang=en",
+            "type": "api",
+            "marker": "json_field",
+            "field": "name",
+            "kind": "check"
+          },
+          {
+            "name": "Prezi",
+            "url": "https://prezi.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Redbubble",
+            "url": "https://www.redbubble.com/people/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Redbubble Shop",
+            "url": "https://www.redbubble.com/people/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Scribd",
+            "url": "https://www.scribd.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Sellfy",
+            "url": "https://sellfy.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Slides",
+            "url": "https://slides.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Slideshare",
+            "url": "https://www.slideshare.net/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Society6",
+            "url": "https://society6.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Society6",
+            "url": "https://{}.society6.com/",
+            "type": "html_title",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Speaker Deck",
+            "url": "https://speakerdeck.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "TeePublic",
+            "url": "https://www.teepublic.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Threadless",
+            "url": "https://shop.threadless.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Trello",
+            "url": "https://trello.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Webflow",
+            "url": "https://webflow.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Zazzle",
+            "url": "https://www.zazzle.com/stores/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Zazzle",
+            "url": "https://www.zazzle.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      },
+      "files": {
+        "label": "Файлы, хеши, метаданные",
+        "count": 13,
+        "items": [
+          {
+            "name": "Any.Run",
+            "url": "https://any.run/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Archive.org",
+            "url": "https://archive.org/details/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Bing Visual Search",
+            "url": "https://www.bing.com/visualsearch",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "ExifTool",
+            "url": "https://exiftool.org/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Google Lens",
+            "url": "https://lens.google.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Hybrid Analysis",
+            "url": "https://www.hybrid-analysis.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Jotti",
+            "url": "https://virustotal.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Triage",
+            "url": "https://tria.ge/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Vimeo (files)",
+            "url": "https://vimeo.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "VirusTotal (hash)",
+            "url": "https://www.virustotal.com/gui/search/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Yandex Images",
+            "url": "https://yandex.ru/images/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Поиск по PDF (Google)",
+            "url": "https://www.google.com/search?q=filetype%3Apdf+{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Поиск по фото (Bing)",
+            "url": "https://www.bing.com/images/search?q={}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      }
+    },
+    "Реестры и бизнес": {
+      "registries": {
+        "label": "Реестры, ИНН/ОГРН, товарные знаки",
+        "count": 22,
+        "items": [
+          {
+            "name": "Checko — проверка контрагентов",
+            "url": "https://checko.ru/",
+            "scope": "Россия",
+            "kind": "resource"
+          },
+          {
+            "name": "Companies House (UK)",
+            "url": "https://find-and-update.company-information.service.gov.uk/",
+            "scope": "UK",
+            "kind": "resource"
+          },
+          {
+            "name": "EUIPO — торговые марки",
+            "url": "https://www.tmdn.org/",
+            "scope": "ЕС",
+            "kind": "resource"
+          },
+          {
+            "name": "GLEIF — LEI",
+            "url": "https://search.gleif.org/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "OpenCorporates",
+            "url": "https://opencorporates.com/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "Rusprofile — досье на юрлиц",
+            "url": "https://www.rusprofile.ru/",
+            "scope": "Россия",
+            "kind": "resource"
+          },
+          {
+            "name": "SEC EDGAR (США)",
+            "url": "https://www.sec.gov/edgar/search/",
+            "scope": "США",
+            "kind": "resource"
+          },
+          {
+            "name": "USPTO — товарные знаки",
+            "url": "https://tmsearch.uspto.gov/",
+            "scope": "США",
+            "kind": "resource"
+          },
+          {
+            "name": "VIES — VAT-проверка ЕС",
+            "url": "https://ec.europa.eu/taxation_customs/vies/",
+            "scope": "ЕС",
+            "kind": "resource"
+          },
+          {
+            "name": "WIPO Global Brand Database",
+            "url": "https://branddb.wipo.int/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "ЕГРЗ — записи о недвижимости",
+            "url": "https://egrz.nalog.ru/",
+            "scope": "Россия",
+            "kind": "resource"
+          },
+          {
+            "name": "ЕГРН — недвижимость",
+            "url": "https://rosreestr.gov.ru/",
+            "scope": "Россия",
+            "kind": "resource"
+          },
+          {
+            "name": "Карточки организаций (РуКонтор)",
+            "url": "https://rucont.ru/",
+            "scope": "Россия",
+            "kind": "resource"
+          },
+          {
+            "name": "Контур.Бухгалтерия",
+            "url": "https://kontur.ru/",
+            "scope": "Россия",
+            "kind": "resource"
+          },
+          {
+            "name": "Контур.Фокус",
+            "url": "https://focus.kontur.ru/",
+            "scope": "Россия",
+            "kind": "resource"
+          },
+          {
+            "name": "Реестр дисквалифицированных лиц",
+            "url": "https://service.nalog.ru/disqualified.do",
+            "scope": "Россия",
+            "kind": "resource"
+          },
+          {
+            "name": "Реестр МСП",
+            "url": "https://rmp.nalog.ru/",
+            "scope": "Россия",
+            "kind": "resource"
+          },
+          {
+            "name": "Роспатент — товарные знаки",
+            "url": "https://new.fips.ru/",
+            "scope": "Россия",
+            "kind": "resource"
+          },
+          {
+            "name": "СБИС",
+            "url": "https://sbis.ru/",
+            "scope": "Россия",
+            "kind": "resource"
+          },
+          {
+            "name": "СПАРК",
+            "url": "https://spark-interfax.ru/",
+            "scope": "Россия",
+            "kind": "resource"
+          },
+          {
+            "name": "Федресурс (ЕФРСБ)",
+            "url": "https://fedresurs.ru/",
+            "scope": "Россия",
+            "kind": "resource"
+          },
+          {
+            "name": "ФНС — выписка ЕГРЮЛ/ЕГРИП",
+            "url": "https://egrul.nalog.ru/",
+            "scope": "Россия",
+            "kind": "resource"
+          }
+        ]
+      },
+      "finance": {
+        "label": "Финансы и отчётность",
+        "count": 7,
+        "items": [
+          {
+            "name": "Companies House — отчётность",
+            "url": "https://find-and-update.company-information.service.gov.uk/",
+            "scope": "UK",
+            "kind": "resource"
+          },
+          {
+            "name": "OpenCorporates — финансы",
+            "url": "https://opencorporates.com/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "SEC EDGAR — XBRL финансы",
+            "url": "https://www.sec.gov/search-filings",
+            "scope": "США",
+            "kind": "resource"
+          },
+          {
+            "name": "Банк России — реестр кредитных организаций",
+            "url": "https://www.cbr.ru/ru/credit_org/",
+            "scope": "Россия",
+            "kind": "resource"
+          },
+          {
+            "name": "Банк России — РНКО",
+            "url": "https://www.cbr.ru/ru/rko/",
+            "scope": "Россия",
+            "kind": "resource"
+          },
+          {
+            "name": "СПАРК — финансовая отчётность",
+            "url": "https://spark-interfax.ru/",
+            "scope": "Россия",
+            "kind": "resource"
+          },
+          {
+            "name": "ЦБ РФ — раскрытие информации",
+            "url": "https://disclosure.skrin.ru/",
+            "scope": "Россия",
+            "kind": "resource"
+          }
+        ]
+      }
+    },
+    "Рабочая среда": {
+      "education": {
+        "label": "Обучение",
+        "count": 34,
+        "items": [
+          {
+            "name": "AnkiWeb",
+            "url": "https://ankiweb.net/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Codecademy",
+            "url": "https://www.codecademy.com/profiles/{}/",
+            "type": "api",
+            "marker": "html_title",
+            "field": "",
+            "kind": "check"
+          },
+          {
+            "name": "Course Hero",
+            "url": "https://www.coursehero.com/profile/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Coursera",
+            "url": "https://www.coursera.org/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Coursera",
+            "url": "https://www.coursera.org/api/login/v1/user/{}/",
+            "type": "api",
+            "marker": "json_field",
+            "field": "id",
+            "kind": "check"
+          },
+          {
+            "name": "Coursera (alt)",
+            "url": "https://www.coursera.com/user/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Coursera alt",
+            "url": "https://www.coursera.org/learn/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Coursera Studio",
+            "url": "https://www.coursera.org/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Domashka",
+            "url": "https://domashka.school/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Duolingo",
+            "url": "https://www.duolingo.com/2017-06-30/users?username={}",
+            "type": "api",
+            "marker": "json_field",
+            "field": "username",
+            "kind": "check"
+          },
+          {
+            "name": "Duolingo (alt)",
+            "url": "https://www.duolingo.com/profile/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "edX",
+            "url": "https://www.edx.org/profile/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Foxford",
+            "url": "https://foxford.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Foxford",
+            "url": "https://foxford.ru/teachers/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "GeekBrains",
+            "url": "https://profile.geekbrains.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Italki",
+            "url": "https://www.italki.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Khan Academy",
+            "url": "https://www.khanacademy.org/profile/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Lettorus",
+            "url": "https://www.lettorus.ru/teachers/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Lingoda",
+            "url": "https://www.lingoda.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "MIT OCW",
+            "url": "https://ocw.mit.edu/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "MIT OCW",
+            "url": "https://ocw.mit.edu/search/?q={}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Preply",
+            "url": "https://preply.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Programiz",
+            "url": "https://www.programiz.com/users/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Quizlet",
+            "url": "https://quizlet.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Skillbox",
+            "url": "https://skillbox.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Skillbox",
+            "url": "https://skillbox.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Skyeng",
+            "url": "https://skyeng.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Skyeng",
+            "url": "https://skyeng.ru/profile/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Stepik",
+            "url": "https://stepik.org/users/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Udacity",
+            "url": "https://www.udacity.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Udemy",
+            "url": "https://www.udemy.com/user/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Udemy Instructor",
+            "url": "https://www.udemy.com/user/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Нетология",
+            "url": "https://netology.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Нетология",
+            "url": "https://netology.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      },
+      "startup": {
+        "label": "Стартапы и акселераторы",
+        "count": 14,
+        "items": [
+          {
+            "name": "Acquired",
+            "url": "https://acquired.com/company/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "AngelList",
+            "url": "https://angel.co/u/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Apple Developer",
+            "url": "https://developer.apple.com/account/profile/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "BetaList",
+            "url": "https://www.betalist.com/u/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Crunchbase",
+            "url": "https://www.crunchbase.com/person/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Google Play Developer",
+            "url": "https://play.google.com/console/developer",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Indie Hackers",
+            "url": "https://www.indiehackers.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Kickstarter",
+            "url": "https://www.kickstarter.com/profile/{}/creator_bio",
+            "type": "api",
+            "marker": "html_title",
+            "field": "",
+            "kind": "check"
+          },
+          {
+            "name": "PitchBook",
+            "url": "https://pitchbook.com/profiles/investor/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "PitchBook",
+            "url": "https://pitchbook.com/profiles/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Product Hunt",
+            "url": "https://www.producthunt.com/@{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Startup Russia",
+            "url": "https://startuprussia.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Wellfound",
+            "url": "https://wellfound.com/u/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Y Combinator",
+            "url": "https://www.ycombinator.com/companies?query={}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      },
+      "work": {
+        "label": "Поиск работы и фриланс",
+        "count": 52,
+        "items": [
+          {
+            "name": "Behance (jobs)",
+            "url": "https://www.behance.net/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Careem",
+            "url": "https://www.careem.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Codementor",
+            "url": "https://www.codementor.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "CVMaker",
+            "url": "https://cvmaker.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Fiverr",
+            "url": "https://www.fiverr.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "FL.ru",
+            "url": "https://www.fl.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Freelancer",
+            "url": "https://www.freelancer.com/u/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Freelancer (alt)",
+            "url": "https://www.freelancer.com/u/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Freelancer Jobs",
+            "url": "https://www.guru.com/d/freelancers/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Gigwalk",
+            "url": "https://www.gigwalk.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Glassdoor",
+            "url": "https://www.glassdoor.com/Profile/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Glassdoor",
+            "url": "https://www.glassdoor.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Guru",
+            "url": "https://guru.com/d/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Habr Freelance",
+            "url": "https://freelance.habr.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "hh.ru",
+            "url": "https://hh.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "HH.ru",
+            "url": "https://hh.ru/user/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Houzz",
+            "url": "https://www.houzz.com/professionals/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Indeed",
+            "url": "https://www.indeed.com/cmp/{}/",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Indeed",
+            "url": "https://ru.indeed.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Jooble",
+            "url": "https://jooble.org/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Kwork",
+            "url": "https://kwork.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Nextdoor",
+            "url": "https://nextdoor.com/profile/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Novoresume",
+            "url": "https://novoresume.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Odesk (alt)",
+            "url": "https://www.upwork.com/freelancer/~{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "PeoplePerHour",
+            "url": "https://www.peopleperhour.com/freelancer/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Profi.ru",
+            "url": "https://www.profi.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Rabota.ru",
+            "url": "https://www.rabota.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Resume.io",
+            "url": "https://resume.io/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "SuperJob",
+            "url": "https://www.superjob.ru/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "SuperJob",
+            "url": "https://www.superjob.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "TaskRabbit",
+            "url": "https://www.taskrabbit.com/profile/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Telegram-каналы поиска",
+            "url": "https://t.me/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Thumbtack",
+            "url": "https://www.thumbtack.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Toptal",
+            "url": "https://www.toptal.com/freelancers/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "TripAdvisor Jobs",
+            "url": "https://www.angi.com/companylist/us/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Upwork",
+            "url": "https://www.upwork.com/freelancer/{}",
+            "type": "message",
+            "marker": "not found",
+            "kind": "check"
+          },
+          {
+            "name": "Upwork",
+            "url": "https://www.upwork.com/freelancer/~{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "We Work Remotely",
+            "url": "https://weworkremotely.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Weblancer",
+            "url": "https://www.weblancer.net/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Weblancer",
+            "url": "https://weblancer.net/freelancer/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Workspace (фриланс)",
+            "url": "https://workspace.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Workzilla",
+            "url": "https://work-zilla.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "YouDo",
+            "url": "https://youdo.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "YouDo",
+            "url": "https://youdo.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "YouDo Pro",
+            "url": "https://pro.youdo.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Биржа фриланса (FL.ru)",
+            "url": "https://www.fl.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Дзен-блогеры",
+            "url": "https://dzen.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Поиск в Телеграм (tgstat)",
+            "url": "https://tgstat.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Профи.ру",
+            "url": "https://profi.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Работа.ру",
+            "url": "https://www.rabota.ru/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Хабр Карьера",
+            "url": "https://career.habr.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Хабр Фриланс",
+            "url": "https://freelance.habr.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      },
+      "workplace": {
+        "label": "Команды, доски задач, CRM",
+        "count": 18,
+        "items": [
+          {
+            "name": "1Password vaults",
+            "url": "https://{}.1password.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Airtable",
+            "url": "https://airtable.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Airtable (alt)",
+            "url": "https://airtable.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Asana",
+            "url": "https://app.asana.com/0/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Basecamp",
+            "url": "https://basecamp.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Bitbucket Workspace",
+            "url": "https://bitbucket.org/{}/",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Bitwarden",
+            "url": "https://bitwarden.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Coda",
+            "url": "https://coda.io/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Confluence",
+            "url": "https://{}.atlassian.net/wiki/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "IFTTT",
+            "url": "https://ifttt.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Jira",
+            "url": "https://{}.atlassian.net/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Microsoft Teams",
+            "url": "https://teams.microsoft.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Miro",
+            "url": "https://miro.com/app/board/uXjV{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Mural",
+            "url": "https://mural.co/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Notion",
+            "url": "https://www.notion.so/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Slack",
+            "url": "https://{}.slack.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Zapier",
+            "url": "https://zapier.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Zoom",
+            "url": "https://zoom.us/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      }
+    },
+    "OPSEC и обучение": {
+      "opsec": {
+        "label": "Приватность и OPSEC",
+        "count": 15,
+        "items": [
+          {
+            "name": "2ГИС",
+            "url": "https://2gis.ru/",
+            "scope": "Россия",
+            "kind": "resource"
+          },
+          {
+            "name": "Bellingcat — How to",
+            "url": "https://bellingcat.gitbook.io/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "EFF — Security Education Companion",
+            "url": "https://sec.eff.org/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "EFF — Surveillance Self-Defense",
+            "url": "https://ssd.eff.org/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "Google transparency — удаление данных",
+            "url": "https://myactivity.google.com/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "Have I Been Pwned",
+            "url": "https://haveibeenpwned.com/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "IntelRivers — ресурсы",
+            "url": "https://intelrivers.net/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "OSINT Curious — OSINT Catalog",
+            "url": "https://osintcurious.com/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "OSINT Dojo",
+            "url": "https://osintdojo.com/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "Privacy Guides",
+            "url": "https://www.privacyguides.org/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "Trace Labs",
+            "url": "https://www.tracelabs.org/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "Авто.ру",
+            "url": "https://www.auto.ru/",
+            "scope": "Россия",
+            "kind": "resource"
+          },
+          {
+            "name": "Инспектор сети — определение оператора",
+            "url": "https://whatismyipaddress.com/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "ФЛАМП",
+            "url": "https://flamp.ru/",
+            "scope": "Россия",
+            "kind": "resource"
+          },
+          {
+            "name": "Яндекс.Карты",
+            "url": "https://yandex.ru/maps/",
+            "scope": "Россия",
+            "kind": "resource"
+          }
+        ]
+      },
+      "training": {
+        "label": "Обучение и методология OSINT",
+        "count": 10,
+        "items": [
+          {
+            "name": "Bellingcat — гайдлайны",
+            "url": "https://bellingcat.gitbook.io/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "Intelligence Community Directive 203",
+            "url": "https://www.dni.gov/index.php/ic-legal-reference-book",
+            "scope": "США",
+            "kind": "resource"
+          },
+          {
+            "name": "NATO OSINT handbook (CRISP)",
+            "url": "https://www.osintmodule.com/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "NYT Visual Investigations",
+            "url": "https://www.nytimes.com/interactive/projects/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "OSINT Combine (Shodan)",
+            "url": "https://www.osintcombine.com/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "OSINT Framework",
+            "url": "https://osintframework.com/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "Recon — учебные курсы по OSINT",
+            "url": "https://recon.training/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "SANS — OSINT курсы",
+            "url": "https://www.sans.org/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "The OSINT Curious Project — курсы",
+            "url": "https://osintcurious.com/courses.html",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "Trace Labs — OSINT-ресурсы",
+            "url": "https://www.tracelabs.org/",
+            "scope": "Мир",
+            "kind": "resource"
+          }
+        ]
+      }
+    },
+    "Код и репозитории": {
+      "dev": {
+        "label": "Репозитории и пакеты",
+        "count": 65,
+        "items": [
+          {
+            "name": "Astro.build",
+            "url": "https://astro.build/u/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Bitbucket",
+            "url": "https://bitbucket.org/{}/",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Bun",
+            "url": "https://bun.sh/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Codeberg",
+            "url": "https://codeberg.org/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Codecademy",
+            "url": "https://www.codecademy.com/profiles/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "CodePen",
+            "url": "https://codepen.io/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "CodePen (alt)",
+            "url": "https://codepen.io/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Coderwall",
+            "url": "https://coderwall.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Coderwall",
+            "url": "https://coderwall.com/api/v1/users/{}.json",
+            "type": "api",
+            "marker": "json_field",
+            "field": "username",
+            "kind": "check"
+          },
+          {
+            "name": "Codewars",
+            "url": "https://www.codewars.com/users/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Codewars",
+            "url": "https://www.codewars.com/api/users/{}/profile",
+            "type": "api",
+            "marker": "json_field",
+            "field": "username",
+            "kind": "check"
+          },
+          {
+            "name": "CPAN",
+            "url": "https://metacpan.org/author/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Crates.io",
+            "url": "https://crates.io/users/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Crates.io",
+            "url": "https://crates.io/api/v1/crates/{}",
+            "type": "api",
+            "marker": "json_field",
+            "field": "crate",
+            "kind": "check"
+          },
+          {
+            "name": "Deepnote",
+            "url": "https://deepnote.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Deno Deploy",
+            "url": "https://dash.deno.com/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Dev.to",
+            "url": "https://dev.to/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Docker Hub",
+            "url": "https://hub.docker.com/u/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Docker Hub",
+            "url": "https://hub.docker.com/v2/users/{}/",
+            "type": "api",
+            "marker": "json_field",
+            "field": "username",
+            "kind": "check"
+          },
+          {
+            "name": "Exercism",
+            "url": "https://exercism.org/profiles/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "freeCodeCamp",
+            "url": "https://www.freecodecamp.org/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "GitBook",
+            "url": "https://gitbook.com/~/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Gitee",
+            "url": "https://gitee.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "GitHub",
+            "url": "https://github.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "GitHub",
+            "url": "https://api.github.com/users/{}",
+            "type": "api",
+            "marker": "json_field",
+            "field": "login",
+            "kind": "check"
+          },
+          {
+            "name": "GitHub Gists",
+            "url": "https://gist.github.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "GitLab",
+            "url": "https://gitlab.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "GitLab",
+            "url": "https://gitlab.com/api/v4/users?username={}",
+            "type": "api",
+            "marker": "json_list",
+            "field": "username",
+            "kind": "check"
+          },
+          {
+            "name": "Gitpod",
+            "url": "https://www.gitpod.io/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "HackerNews",
+            "url": "https://news.ycombinator.com/user?id={}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "HackerNews",
+            "url": "https://hacker-news.firebaseio.com/v0/user/{}.json",
+            "type": "api",
+            "marker": "json_nonempty",
+            "field": "",
+            "kind": "check"
+          },
+          {
+            "name": "HackerRank",
+            "url": "https://www.hackerrank.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "HackerRank",
+            "url": "https://www.hackerrank.com/rest/hackers/{}/profile",
+            "type": "api",
+            "marker": "json_field",
+            "field": "username",
+            "kind": "check"
+          },
+          {
+            "name": "Hashnode",
+            "url": "https://hashnode.com/@{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Hex.pm",
+            "url": "https://hex.pm/users/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Hugging Face",
+            "url": "https://huggingface.co/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "JSFiddle",
+            "url": "https://jsfiddle.net/user/{}/",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Kaggle",
+            "url": "https://www.kaggle.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Kotlin",
+            "url": "https://kotlinlang.org/community/users/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Launchpad",
+            "url": "https://launchpad.net/~{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "LeetCode",
+            "url": "https://leetcode.com/{}/",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Maven Central",
+            "url": "https://central.sonatype.com/u/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Medium",
+            "url": "https://medium.com/@{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "ModelScope",
+            "url": "https://modelscope.cn/profile/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "npm",
+            "url": "https://www.npmjs.com/~{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "NPM",
+            "url": "https://registry.npmjs.org/{}",
+            "type": "api",
+            "marker": "json_field",
+            "field": "name",
+            "kind": "check"
+          },
+          {
+            "name": "Observable",
+            "url": "https://observablehq.com/@{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Observable (alt)",
+            "url": "https://observablehq.com/@{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Packagist",
+            "url": "https://packagist.org/users/{}/",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "PyPI",
+            "url": "https://pypi.org/user/{}/",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "PyPI",
+            "url": "https://pypi.org/pypi/{}/json",
+            "type": "api",
+            "marker": "json_field",
+            "field": "info",
+            "kind": "check"
+          },
+          {
+            "name": "Python Discord",
+            "url": "https://discord.com/users/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Read the Docs",
+            "url": "https://readthedocs.org/profiles/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Replicate",
+            "url": "https://replicate.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Replit",
+            "url": "https://replit.com/@{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Replit (alt)",
+            "url": "https://replit.com/@{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "RubyGems",
+            "url": "https://rubygems.org/profiles/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Rubygems",
+            "url": "https://rubygems.org/api/v1/versions/{}.json",
+            "type": "api",
+            "marker": "json_nonempty",
+            "field": "",
+            "kind": "check"
+          },
+          {
+            "name": "Runkit",
+            "url": "https://runkit.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Rust Forum",
+            "url": "https://users.rust-lang.org/u/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "SoloLearn",
+            "url": "https://www.sololearn.com/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "SourceForge",
+            "url": "https://sourceforge.net/u/{}/",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "SourceHut",
+            "url": "https://sr.ht/~{}/",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "StackOverflow",
+            "url": "https://stackoverflow.com/users/filter?search={}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "StackShare",
+            "url": "https://stackshare.io/{}",
+            "type": "status",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      },
+      "code": {
+        "label": "IDE, песочницы, CI",
+        "count": 10,
+        "items": [
+          {
+            "name": "CodeSandbox",
+            "url": "https://codesandbox.io/u/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Gitpod.io",
+            "url": "https://gitpod.io/@{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Glitch",
+            "url": "https://glitch.com/@{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "JDoodle",
+            "url": "https://www.jdoodle.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "OneCompiler",
+            "url": "https://onecompiler.com/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "PlayCode",
+            "url": "https://playcode.io/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Railway",
+            "url": "https://railway.app/",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "StackBlitz",
+            "url": "https://stackblitz.com/@{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "Surge.sh",
+            "url": "https://surge.sh/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          },
+          {
+            "name": "TIO.run",
+            "url": "https://tio.run/{}",
+            "type": "none",
+            "marker": "",
+            "kind": "check"
+          }
+        ]
+      }
+    },
+    "Промпты / скрипты": {
+      "prompts": {
+        "label": "Готовые сценарии и промпты",
+        "count": 15,
+        "items": [
+          {
+            "name": "Blackbird — поиск аккаунтов",
+            "url": "https://github.com/p1ngul1n0/Blackbird",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "CloudFlair — соцсети по e-mail",
+            "url": "https://github.com/laramies/CloudFlare",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "Enumerator — перебор данных OSINT",
+            "url": "https://github.com/laramies/enumerator",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "Epieos — OSINT по e-mail и телефону",
+            "url": "https://epieos.com/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "GHunt — OSINT по Google",
+            "url": "https://github.com/GhostDrip/GHunt",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "GHunt — разведка по Google-аккаунтам",
+            "url": "https://github.com/opsecindustries/osint_tools",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "holehe — проверка e-mail по соцсетям",
+            "url": "https://github.com/laramies/holehe",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "Maigret — OSINT по никнейму",
+            "url": "https://github.com/laramies/theHarvester",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "Osintgram — разведка по Telegram",
+            "url": "https://github.com/Osintgram/Osintgram",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "PhoneInfoga",
+            "url": "https://github.com/sundowndev/phoneinfoga",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "Recon-ng — модульный OSINT",
+            "url": "https://github.com/web-breacher/soops",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "Sherlock — поиск по 400+ сайтам",
+            "url": "https://github.com/sherlock-project/sherlock",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "SpiderFoot — автоматизация OSINT",
+            "url": "https://www.spiderfoot.net/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "theHarvester — сбор данных по домену",
+            "url": "https://github.com/laramies/theHarvester",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "WhatsMyName — список платформ",
+            "url": "https://whatsmyname.me/",
+            "scope": "Мир",
+            "kind": "resource"
+          }
+        ]
+      },
+      "automation": {
+        "label": "Автоматизация сбора",
+        "count": 11,
+        "items": [
+          {
+            "name": "Common Crawl Index",
+            "url": "https://index.commoncrawl.org/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "GDELT — глобальная лента событий",
+            "url": "https://www.gdeltproject.org/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "Grep.app — поиск по коду",
+            "url": "https://grep.app/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "Internet Archive Wayback Machine API",
+            "url": "https://archive.org/help/wayback_api.php",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "Maltego — граф связей",
+            "url": "https://www.maltego.com/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "Media Cloud",
+            "url": "https://mediacloud.org/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "publicwww — исходники и e-mail в коде",
+            "url": "https://publicwww.com/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "Recon-ng",
+            "url": "https://github.com/web-breacher/soops",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "Sourcegraph — поиск по коду",
+            "url": "https://sourcegraph.com/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "SpiderFoot HX",
+            "url": "https://www.spiderfoot.net/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "TinEye",
+            "url": "https://tineye.com/",
+            "scope": "Мир",
+            "kind": "resource"
+          }
+        ]
+      }
+    },
+    "Дорки": {
+      "dorks": {
+        "label": "Поисковые шаблоны и списки",
+        "count": 8,
+        "items": [
+          {
+            "name": "Dork-Generator (robots.ity)",
+            "url": "https://www.robots.ity/dork.shtml",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "Exploit-DB",
+            "url": "https://www.exploit-db.com/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "Google Dork Generator (Netcraft)",
+            "url": "https://www.netcraft.com/?gallery=google-dorks",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "Google Hacking Database (GHDB)",
+            "url": "https://www.exploit-db.com/google-hacking-database/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "Hunter.how — dorks по e-mail",
+            "url": "https://hunter.how/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "OSINT-дорки по файлам (filetype:)",
+            "url": "https://www.exploit-db.com/google-hacking-database/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "PublicWWW",
+            "url": "https://publicwww.com/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "Промпты для OSINT-поиска",
+            "url": "https://www.reddit.com/r/OSINT/",
+            "scope": "Мир",
+            "kind": "resource"
+          }
+        ]
+      }
+    },
+    "Порты": {
+      "ports": {
+        "label": "Сервисы на открытых портах",
+        "count": 19,
+        "items": [
+          {
+            "name": "AlienVault OTX",
+            "url": "https://otx.alienvault.com/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "BinaryEdge",
+            "url": "https://app.binaryedge.io/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "Censys",
+            "url": "https://search.censys.io/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "Criminal IP",
+            "url": "https://www.criminalip.io/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "DNSlytics — DNS-история",
+            "url": "https://dnslytics.com/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "FOFA",
+            "url": "https://fofa.info/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "GreyNoise",
+            "url": "https://viz.greynoise.io/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "Hunter.how — Shodan-подобный поиск",
+            "url": "https://hunter.how/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "LeakIX",
+            "url": "https://leakix.net/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "Netlas",
+            "url": "https://app.netlas.io/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "Onyphe",
+            "url": "https://www.onyphe.io/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "OpenCTI",
+            "url": "https://www.opencti.io/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "PublicWWW — исходники сайтов",
+            "url": "https://publicwww.com/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "Shodan",
+            "url": "https://www.shodan.io/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "ThreatFox",
+            "url": "https://threatfox.abuse.ch/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "URLhaus",
+            "url": "https://urlhaus.abuse.ch/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "ViewDNS — IP-история",
+            "url": "https://viewdns.info/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "VirusTotal",
+            "url": "https://www.virustotal.com/",
+            "scope": "Мир",
+            "kind": "resource"
+          },
+          {
+            "name": "ZoomEye (Hunt.io)",
+            "url": "https://www.zoomeye.hk/",
+            "scope": "Китай",
+            "kind": "resource"
+          }
+        ]
+      }
+    }
+  }
+}

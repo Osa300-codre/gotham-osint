@@ -1,0 +1,26 @@
+<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8">
+<title>Граф связей — Gotham OSINT</title>
+<style>
+ body{margin:0;background:#05070b;color:#e8edf7;font-family:Inter,Segoe UI,Arial,sans-serif}
+ header{padding:14px 22px;border-bottom:1px solid #1e2a3f;display:flex;gap:22px;
+        align-items:center;flex-wrap:wrap}
+ h1{font-size:16px;margin:0;letter-spacing:.6px;text-transform:uppercase}
+ .lg{font-size:12px;color:#8494ad;display:inline-flex;align-items:center;gap:6px;margin-right:12px}
+ .lg i{width:11px;height:11px;border-radius:3px;display:inline-block}
+ .risk{font-size:12px;padding:4px 12px;border-radius:20px;background:#0d131f;
+       border:1px solid #2a3a56;color:#f5c542}
+ .wrap{display:grid;grid-template-columns:1fr 380px}
+ svg{display:block}
+ aside{padding:16px 18px;border-left:1px solid #1e2a3f;max-height:900px;overflow:auto}
+ h2{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#5a6a83;margin:16px 0 8px}
+ table{width:100%;border-collapse:collapse;font-size:11px}
+ td{padding:4px 6px;border-bottom:1px solid #111927;vertical-align:top}
+ ul{font-size:11px;line-height:1.6;color:#b9c2cc;padding-left:16px}
+</style></head><body>
+<header><h1>Граф связей · Gotham OSINT</h1>
+<span class="risk">Экспозиция: 47/100 — средний</span>
+<div><span class="lg"><i style="background:#e94560"></i>phone</span> <span class="lg"><i style="background:#0f9d58"></i>email</span> <span class="lg"><i style="background:#2aabee"></i>telegram</span> <span class="lg"><i style="background:#0077ff"></i>vk</span> <span class="lg"><i style="background:#f5a623"></i>username</span> <span class="lg"><i style="background:#9b59b6"></i>name</span> <span class="lg"><i style="background:#34495e"></i>profile</span></div></header>
+<div class="wrap"><div><svg viewBox="0 0 1700 900" width="100%" height="900" xmlns="http://www.w3.org/2000/svg"><line x1="220" y1="170" x2="55" y2="170" stroke="#7f8c8d" stroke-width="4.8" opacity="0.77"/><text x="138" y="170" font-size="10" fill="#9aa5b1" text-anchor="middle">0.95</text><line x1="515" y1="170" x2="680" y2="170" stroke="#7f8c8d" stroke-width="4.8" opacity="0.77"/><text x="598" y="170" font-size="10" fill="#9aa5b1" text-anchor="middle">0.95</text><g><rect x="1405" y="742" width="190" height="35" rx="8" fill="#111927" stroke="#0f9d58" stroke-width="1.5"/><text x="1500" y="758" font-size="11" fill="#e8edf7" text-anchor="middle" font-family="Inter,Arial">durov@telegram.org</text></g><g><rect x="125" y="152" width="190" height="35" rx="8" fill="#111927" stroke="#2aabee" stroke-width="1.5"/><text x="220" y="168" font-size="11" fill="#e8edf7" text-anchor="middle" font-family="Inter,Arial">durov</text></g><g><rect x="-40" y="153" width="190" height="35" rx="8" fill="#111927" stroke="#0077ff" stroke-width="1.5"/><text x="55" y="169" font-size="11" fill="#e8edf7" text-anchor="middle" font-family="Inter,Arial">durov</text></g><g><rect x="1405" y="742" width="190" height="35" rx="8" fill="#111927" stroke="#f5a623" stroke-width="1.5"/><text x="1500" y="758" font-size="11" fill="#e8edf7" text-anchor="middle" font-family="Inter,Arial">torvalds</text></g><g><rect x="585" y="146" width="190" height="48" rx="8" fill="#111927" stroke="#34495e" stroke-width="1.5"/><text x="680" y="162" font-size="11" fill="#e8edf7" text-anchor="middle" font-family="Inter,Arial">Telegram</text><text x="680" y="175" font-size="11" fill="#e8edf7" text-anchor="middle" font-family="Inter,Arial">Pavel Durov</text></g><g><rect x="420" y="146" width="190" height="48" rx="8" fill="#111927" stroke="#34495e" stroke-width="1.5"/><text x="515" y="162" font-size="11" fill="#e8edf7" text-anchor="middle" font-family="Inter,Arial">VK</text><text x="515" y="175" font-size="11" fill="#e8edf7" text-anchor="middle" font-family="Inter,Arial">Pavel Durov</text></g></svg></div><aside>
+<h2>Связи (2)</h2>
+<table><tr><td>telegram:durov</td><td>&rarr;</td><td>vk:durov</td><td>0.95</td><td>совпадает значение «durov» (telegram/vk)</td></tr><tr><td>VK:durov</td><td>&rarr;</td><td>Telegram:durov</td><td>0.95</td><td>прямая ссылка на профиль durov; совпадение имени «Pavel Durov» / «Pave</td></tr></table>
+<h2>Рекомендации</h2><ul><li>Смените пароли (e-mail, мессенджеры, банки) и включите 2FA везде.</li><li>Отключите публичный профиль Gravatar для основного e-mail.</li><li>Проверьте, не утекли ли прежние пароли — смените их повторно.</li><li>Уберите телефон, адрес и дату рождения из открытых профилей.</li><li>Telegram: включите «Скрыть номер телефона».</li><li>VK: проверьте приватность и запретите индексацию в поиске.</li><li>Заведите отдельный e-mail для регистраций.</li></ul></aside></div></body></html>

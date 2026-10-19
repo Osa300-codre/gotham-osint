@@ -1,0 +1,244 @@
+{
+  "generated_at": "2026-10-19T22:57:37.391877+00:00",
+  "tool": "Gotham OSINT — мультикоррелятор (correlator.py)",
+  "notice": "Инструмент показывает, что о человеке уже известно из открытых источников и из утечек. Применяйте к своим данным или к субъекту, на которого есть согласие/санкция. Доксинг и сталкинг запрещены (152-ФЗ, 137 УК РФ, GDPR).",
+  "identifiers": [
+    {
+      "type": "email",
+      "value": "durov@telegram.org",
+      "source": "input",
+      "key": "email:durov@telegram.org",
+      "meta": {}
+    },
+    {
+      "type": "telegram",
+      "value": "durov",
+      "source": "input",
+      "key": "telegram:durov",
+      "meta": {}
+    },
+    {
+      "type": "vk",
+      "value": "durov",
+      "source": "input",
+      "key": "vk:durov",
+      "meta": {}
+    },
+    {
+      "type": "username",
+      "value": "torvalds",
+      "source": "input",
+      "key": "username:torvalds",
+      "meta": {}
+    }
+  ],
+  "profiles": [
+    {
+      "platform": "Telegram",
+      "url": "https://t.me/durov",
+      "ident_type": "telegram",
+      "ident_value": "durov",
+      "name": "Pavel Durov",
+      "bio": "Founder of Telegram.",
+      "avatar": "https://cdn4.telesco.pe/file/UCehdg_VNm0dkqcb5zFHcXsO3caVMUhkhjQCyBF7dD1qCZCgMhZ9ZfCFR_r_X1-xIB4sZ7o6_MEGQfsIcCcBny3zVo92pf1Wo1AOXlOMciTKThCqBm2qXh7fSBeNjiOke3deJ2oO6bSbjncuJODHEsDlKZhhfAu1zRcbo0Ui6JlSRiiTar0dcneV_TXy6IN7PbTbSU7UV2jnNQXJng6vhBEPpjoEJdYu8-O76RKCkzKe5ee4CbrBPR-5OjUR6ICL2Lb4Umdb_udQi4lQJVpEDJ_KQcos9MBFT2B9RANxbW-VkOAl2UoAIIGZeThk9lWBJKPocv3YIFGahlAYeoFTiA.jpg",
+      "links": [],
+      "emails": [],
+      "phones": [],
+      "extra": {
+        "subscribers": "10 320 013 subscribers",
+        "page_title": "Pavel Durov"
+      }
+    },
+    {
+      "platform": "VK",
+      "url": "https://vk.com/durov",
+      "ident_type": "vk",
+      "ident_value": "durov",
+      "name": "Pavel Durov",
+      "bio": "Иногда говорят, что Telegram был заблокирован в России, так как “закон есть закон”. Однако Telegram заблокирован в России как раз вопреки главному закону страны – Конституции. Решения судов и законы, противоречащие Конституции, не имеют силы. А это значит, что и сама блокировка Telegram незаконна.",
+      "avatar": "https://sun9-81.userapi.com/s/v1/ig1/2GR_vzJCKZs-MYxN22VujC9ldMWNzEFV85GLUiCqtyQJB7cmrDxAofgPD5-fsrtjzhDOpkjSu4hhTw.jpg?quality=96&crop=514,119,337,337&blur=5,10&as=32x32,48x48,72x72,108x108,160x160,240x240&ava=1&u=6zicIh_ZpqL-m0bfrx3oQaK2aDKPAOT0z40MnNsH_H0&cs=200x200",
+      "links": [
+        "https://m.vk.com/durov?search=1",
+        "https://m.vk.com/durov",
+        "https://vk.ru/blog/verification",
+        "https://m.vk.com/wall1_2442097",
+        "https://m.vk.com/search/statuses?q=%23digitalresistance",
+        "https://m.vk.com/video1_456239033?from=post&list=b6751e4a53ef7bd286&post=1_2431591",
+        "https://m.vk.com/wall1_2431591",
+        "https://m.vk.com/photo1_456316241?from=post&list=6f68eec5fa8f61ded8",
+        "https://m.vk.com/wall1_2422169",
+        "https://m.vk.com/wall1_2418560",
+        "https://www.youtube.com/watch?v=D9dPg3ofmyQ",
+        "https://m.vk.com/video1_456239027?from=post&list=adcc1fa1c7c69bad50&post=1_2412029",
+        "https://m.vk.com/wall1_2412029",
+        "https://trk.mail.ru/c/xj9pr7",
+        "https://m.vk.com/join?from=aWQxMDQ3ODc1MzA1",
+        "https://m.vk.com/login?to=aWQxMDQ3ODc1MzA1"
+      ],
+      "emails": [],
+      "phones": [],
+      "extra": {
+        "screen_name": "durov",
+        "city": "Saint Petersburg",
+        "work": "Telegram",
+        "status": "Иногда говорят, что Telegram был заблокирован в России, так как “закон есть закон”. Однако Telegram заблокирован в России как раз вопреки главному закону страны – Конституции. Решения судов и законы, противоречащие Конституции, не имеют силы. А это значит, что и сама блокировка Telegram незаконна.",
+        "found": true,
+        "source": "https://m.vk.com/durov"
+      }
+    }
+  ],
+  "identity": {
+    "full_names": [
+      {
+        "value": "Pavel Durov",
+        "confidence": 0.7,
+        "sources": [
+          "Telegram",
+          "VK"
+        ],
+        "kind": "ФИО"
+      }
+    ],
+    "addresses": [],
+    "cities": [
+      {
+        "value": "Saint Petersburg",
+        "confidence": 0.6,
+        "sources": [
+          "VK"
+        ]
+      }
+    ],
+    "jobs": [
+      {
+        "value": "Telegram",
+        "confidence": 0.5,
+        "sources": [
+          "VK"
+        ]
+      }
+    ],
+    "social_links": [
+      {
+        "platform": "VK",
+        "url": "https://vk.com/durov",
+        "match": "встречается на странице"
+      },
+      {
+        "platform": "YouTube",
+        "url": "https://youtube.com/watch",
+        "match": "встречается на странице"
+      }
+    ],
+    "leak_exposure": {
+      "records": 3,
+      "fields": [
+        "города",
+        "идентификаторы",
+        "имена",
+        "индексы",
+        "источники регистрации",
+        "пароли",
+        "регионы",
+        "страны"
+      ],
+      "sources": [
+        "Apollo (2018-07)",
+        "Stealer Logs (не указана)",
+        "AlienStealerLogs",
+        "Apollo",
+        "Apollo",
+        "Adapt"
+      ]
+    },
+    "detail": {
+      "full_names": [],
+      "addresses": [],
+      "cities": [],
+      "social_links": [],
+      "leak_exposure": {}
+    }
+  },
+  "correlation": {
+    "edges": [
+      {
+        "a": "telegram:durov",
+        "b": "vk:durov",
+        "confidence": 0.95,
+        "reasons": [
+          "совпадает значение «durov» (telegram/vk)"
+        ],
+        "kb_confirmed": true,
+        "kb_sightings": 2
+      },
+      {
+        "a": "VK:durov",
+        "b": "Telegram:durov",
+        "confidence": 0.95,
+        "reasons": [
+          "прямая ссылка на профиль durov",
+          "совпадение имени «Pavel Durov» / «Pavel Durov»",
+          "совпадение имени «Pavel Durov» / «Pavel Durov»; одинаковый ник «durov» на разных площадках"
+        ],
+        "kb_confirmed": true,
+        "kb_sightings": 2
+      }
+    ],
+    "clusters": [
+      [
+        "telegram:durov",
+        "vk:durov"
+      ],
+      [
+        "Telegram:durov",
+        "VK:durov"
+      ]
+    ]
+  },
+  "username_scans": {},
+  "risk": {
+    "score": 47,
+    "level": "средний",
+    "reasons": [
+      "durov@telegram.org: 3 записей в утечках",
+      "имя публикуется в профилях",
+      "имя публикуется в профилях",
+      "идентификаторы засветились в утечках"
+    ]
+  },
+  "recommendations": [
+    "Смените пароли (e-mail, мессенджеры, банки) и включите 2FA везде.",
+    "Отключите публичный профиль Gravatar для основного e-mail.",
+    "Проверьте, не утекли ли прежние пароли — смените их повторно.",
+    "Уберите телефон, адрес и дату рождения из открытых профилей.",
+    "Telegram: включите «Скрыть номер телефона».",
+    "VK: проверьте приватность и запретите индексацию в поиске.",
+    "Заведите отдельный e-mail для регистраций."
+  ],
+  "knowledge": {
+    "nodes": 6,
+    "edges": 2,
+    "attributes": 38,
+    "sightings": 2,
+    "stats": {
+      "path": "C:\\Users\\user\\Documents\\gotham-osint\\osint_kb.sqlite",
+      "nodes": 6,
+      "edges": 2,
+      "attributes": 38,
+      "sightings": 4,
+      "nodes_by_kind": {
+        "profile": 2,
+        "email": 1,
+        "telegram": 1,
+        "username": 1,
+        "vk": 1
+      },
+      "edges_by_kind": {
+        "связь": 2
+      },
+      "clusters": 0,
+      "largest_cluster": 0
+    },
+    "note": "Результаты складываются в osint_kb.sqlite: с каждым запуском связи и атрибуты накапливаются, повторные подтверждения повышают уверенность."
+  }
+}

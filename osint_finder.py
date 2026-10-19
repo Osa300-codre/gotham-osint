@@ -312,6 +312,9 @@ def main():
                         help="Универсальный поиск (auto: Telegram / email / ВК / телефон)")
     parser.add_argument("--dossier", action="append", default=[],
                         help="Полное досье по email или телефону (ФИО, ДР, адрес, контакты)")
+    parser.add_argument("--deep", action="append", default=[],
+                        help="Глубокое исследование с графом связей (username/email/телефон/ФИО)")
+    parser.add_argument("--depth", type=int, default=2, help="Глубина обхода графа для --deep (1-3)")
     parser.add_argument("--set-key", action="append", default=[], metavar="NAME=VALUE",
                         help="Сохранить ключ (напр. HIBP_API_KEY=abc123)")
     parser.add_argument("--categories", default="", help="Категории через запятую (см. --list-cats)")
@@ -461,7 +464,21 @@ def main():
                       f"тел: {len(con['phones'])}, email: {len(con['emails'])}, "
                       f"логины: {len(con['usernames'])}")
 
-    if not any([args.email, args.username, args.ip, args.domain, args.phone, args.name, args.search, args.leaks]):
+    for dseed in args.deep:
+        import asyncio as _aio
+        from deep import deep_research
+        gr = _aio.run(deep_research(dseed.strip(), "auto", max_depth=max(1, min(args.depth, 3))))
+        report["results"].append({"type": "deep", "data": gr})
+        sm = gr.get("summary", {})
+        console.print(Panel(json.dumps(gr.get("layers", []), ensure_ascii=False, indent=2),
+                            title=f"Граф связей: {dseed}", border_style="cyan"))
+        console.print(f"  [bold {GOLD}]Узлов:[/bold {GOLD}] {sm.get('total_nodes', 0)} "
+                      f"[{DIMGOLD}]· связей: {sm.get('total_edges', 0)} · "
+                      f"слоёв: {len(gr.get('layers', []))}[/{DIMGOLD}]")
+        console.print(f"  [{DIMGOLD}]по типам: {json.dumps(sm.get('by_kind', {}), ensure_ascii=False)}[/{DIMGOLD}]")
+
+    if not any([args.email, args.username, args.ip, args.domain, args.phone, args.name,
+                args.search, args.leaks, args.deep, args.dossier]):
         console.print("[yellow]Не указаны данные. Используйте --help.[/yellow]")
         console.print("Пример: python osint_finder.py --username octocat --yes")
         console.print("Пример: python osint_finder.py --email test@example.com --yes")

@@ -300,6 +300,9 @@ def _parse_vk_markdown(md: str, screen_name: str) -> Dict[str, Any]:
                 continue
             if t2.startswith("@") and screen_name and t2[1:] == screen_name:
                 continue
+            # девиз/строка на иероглифах — это не город и не работа
+            if not re.search(r"[A-Za-zА-Яа-яЁё]{2}", t2):
+                continue
             plain_tail.append(t2)
 
         if plain_tail:
@@ -311,10 +314,18 @@ def _parse_vk_markdown(md: str, screen_name: str) -> Dict[str, Any]:
                 if any(_similar(t, u) or _is_translit(t, u) for u in uniq):
                     continue
                 uniq.append(t)
-            if uniq:
+            if uniq and "city" not in prof:
                 prof["city"] = uniq[0]
-            if len(uniq) > 1:
+            if len(uniq) > 1 and "work" not in prof:
                 prof["work"] = uniq[1]
+
+    # Город и работа — по служебным ссылкам ВК (надёжнее, чем порядок строк)
+    m = re.search(r"\[([^\]]{2,40})\]\([^)]*city_id=", md)
+    if m:
+        prof["city"] = m.group(1).strip()
+    m = re.search(r"\[([^\]]{2,40})\]\([^)]*company=", md)
+    if m:
+        prof["work"] = m.group(1).strip()
 
     # Статус — самый длинный текстовый абзац
     body = md.split("* * *", 1)[-1] if "* * *" in md else md
@@ -324,6 +335,19 @@ def _parse_vk_markdown(md: str, screen_name: str) -> Dict[str, Any]:
     paras = [p for p in paras if len(p) > 30 and not p.startswith(("Title:", "URL Source:"))]
     if paras:
         prof["status"] = paras[0][:300]
+
+    # Внешние ссылки из профиля (в т.ч. через vk.com/away.php?to=<urlencoded>)
+    links = []
+    for raw in re.findall(r"\]\((https?://[^)\s]+)\)", md):
+        u = raw
+        m = re.search(r"away\.php\?to=([^&\s]+)", raw)
+        if m:
+            from urllib.parse import unquote
+            u = unquote(m.group(1))
+        if u.startswith("http") and "vk.com/away" not in u and u not in links:
+            links.append(u)
+    if links:
+        prof["links"] = links[:40]
 
     return prof
 

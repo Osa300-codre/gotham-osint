@@ -309,7 +309,27 @@ HTML = """<!DOCTYPE html>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>__CSS__</style>
+<style>__CSS__
+/* ===== OSINT Catalog tree ===== */
+.catalog .cstats{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 18px}
+.catalog .branch{display:grid;grid-template-columns:250px 1fr;gap:18px;
+  padding:14px 0;border-bottom:1px solid var(--line)}
+.catalog .bname{font-family:var(--f-display);font-size:20px;letter-spacing:.6px;
+  color:var(--gold);text-transform:uppercase;display:flex;align-items:baseline;gap:8px}
+.catalog .bname .n{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.catalog .cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px}
+.catalog .cat{border:1px solid var(--line);border-radius:8px;background:var(--panel2);padding:8px 12px}
+.catalog .cat summary{cursor:pointer;font-size:13px;color:var(--text);display:flex;
+  justify-content:space-between;gap:10px;list-style:none}
+.catalog .cat summary::-webkit-details-marker{display:none}
+.catalog .cat summary .n{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.catalog .cat ul{list-style:none;margin:8px 0 4px;padding:0 0 0 10px;
+  max-height:260px;overflow:auto;border-left:1px solid var(--line)}
+.catalog .cat li{font-size:12px;padding:2px 0;color:var(--muted)}
+.catalog .cat li a{color:var(--text);text-decoration:none}
+.catalog .cat li a:hover{color:var(--gold)}
+.catalog .cat li.res a{color:var(--info)}
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -321,11 +341,11 @@ HTML = """<!DOCTYPE html>
     <div class="emblem">__EMBLEM__</div>
     <div>
       <h1>Gotham OSINT</h1>
-      <div class="subtitle">Поиск публичных данных &middot; 500+ источников</div>
+      <div class="subtitle">Поиск публичных данных &middot; 900+ источников</div>
     </div>
     <div class="hdr-right">
       СЕРВЕР: <b>127.0.0.1:8765</b><br>
-      САЙТОВ В КАТАЛОГЕ: <b>506</b><br>
+      САЙТОВ В КАТАЛОГЕ: <b>__NSITES__</b><br>
       АКТИВНЫХ КЛЮЧЕЙ: <b>__NKEYS__</b>
     </div>
   </div>
@@ -339,9 +359,14 @@ HTML = """<!DOCTYPE html>
 <div class="tabs" id="tabs">
   <div class="tab active" data-t="tab-scan">__ICO_SCAN__Сканирование</div>
   <div class="tab" data-t="tab-email">__ICO_MAIL__Email</div>
+  <div class="tab" data-t="tab-deep">__ICO_TARGET__Глубокое исследование</div>
   <div class="tab" data-t="tab-leaks">__ICO_LEAK__Утечки</div>
   <div class="tab" data-t="tab-exact">__ICO_TARGET__Точный поиск</div>
   <div class="tab" data-t="tab-dossier">__ICO_SHIELD__Досье</div>
+  <div class="tab" data-t="tab-correlate">__ICO_SHIELD__Коррелятор личности</div>
+  <div class="tab" data-t="tab-catalog">__ICO_GLOBE__Каталог OSINT</div>
+  <div class="tab" data-t="tab-kb">__ICO_SHIELD__База знаний</div>
+  <div class="tab" data-t="tab-catalog">__ICO_SHIELD__Каталог</div>
   <div class="tab" data-t="tab-web">__ICO_GLOBE__Веб-поиск</div>
   <div class="tab" data-t="tab-keys">__ICO_KEY__Ключи</div>
   <div class="tab" data-t="tab-other">__ICO_TARGET__IP / домен / тел.</div>
@@ -378,6 +403,44 @@ HTML = """<!DOCTYPE html>
 </div>
 
 <!-- ===== LEAKS ===== -->
+<div class="panel" id="tab-deep">
+  <div class="panel-title">Глубокое исследование</div>
+  <div class="panel-sub">Рекурсивный обход графа связей: по любому идентификатору находится профиль, из него извлекаются
+    новые идентификаторы (ники, email, телефон, ФИО, фото, ссылки) — и по ним поиск продолжается.</div>
+
+  <form method="post" action="/deep" id="deepform">
+    <div class="row">
+      <div>
+        <label>Точка входа: username, email, телефон, ФИО или ссылка</label>
+        <input name="seed" placeholder="durov или ivanov@example.com или +79991234567" required>
+      </div>
+      <div>
+        <label>Тип (авто)</label>
+        <select name="kind">
+          <option value="auto">Определить автоматически</option>
+          <option value="telegram">Telegram username</option>
+          <option value="username">Username / ник</option>
+          <option value="email">Email</option>
+          <option value="phone">Телефон</option>
+          <option value="vk">Ссылка ВКонтакте</option>
+          <option value="name">ФИО / имя</option>
+        </select>
+      </div>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <div>
+        <label>Глубина обхода: <span id="depthv">2</span></label>
+        <input type="range" id="depth" name="depth" min="1" max="3" value="2" oninput="document.getElementById('depthv').textContent=this.value">
+      </div>
+      <div style="display:flex;align-items:flex-end">
+        <button type="submit" style="width:100%">Запустить исследование</button>
+      </div>
+    </div>
+    <div class="hint">Глубина 1 — только прямые связи (30–60 сек). Глубина 2 — с ветвлением (1–3 мин). Глубина 3 — максимум (5–10 мин).</div>
+  </form>
+  <div id="deep-result"></div>
+</div>
+
 <div class="panel" id="tab-leaks">
   <div class="panel-title">Проверка утечек</div>
   <div class="panel-sub">Бесплатно, без ключей: LeakCheck + Hudson Rock (инфостилеры). HIBP подключается при наличии ключа.</div>
@@ -389,6 +452,63 @@ HTML = """<!DOCTYPE html>
     <button type="submit">Проверить утечки</button>
   </form>
   <div id="leaks-result"></div>
+</div>
+
+<!-- ===== CATALOG ===== -->
+<div class="panel" id="tab-catalog">
+  <div class="panel-title">OSINT Catalog</div>
+  <div class="panel-sub">Единая карта источников: 13 ветвей, 40+ категорий, 900+ площадок и ресурсов. Проверяемые по нику подключены к сканеру, справочные — к подсказкам по поиску.</div>
+  <form method="get" action="/catalog" id="catalogform">
+    <div class="row">
+      <div><label>Фильтр каталога</label><input name="q" id="catalogq" placeholder="название или домен площадки"></div>
+      <div style="display:flex;align-items:flex-end">
+        <button type="submit">Показать</button>
+      </div>
+    </div>
+  </form>
+  <div id="catalog-result"></div>
+</div>
+
+<!-- ===== KB ===== -->
+<div class="panel" id="tab-kb">
+  <div class="panel-title">База знаний OSINT</div>
+  <div class="panel-sub">Накопительный граф: узлы (идентификаторы и профили), связи «один человек», атрибуты (ФИО, адреса, города, места работы) и свидетельства. Каждый запуск коррелятора дополняет базу, повторные подтверждения повышают уверенность связей.</div>
+  <form method="get" action="/kb" id="kbform">
+    <div class="row">
+      <div><label>Поиск по базе</label><input name="q" id="kbq" placeholder="e-mail, телефон, ФИО, ник, домен"></div>
+      <div style="display:flex;align-items:flex-end">
+        <button type="submit">Найти</button>
+      </div>
+    </div>
+  </form>
+  <div id="kb-result"></div>
+</div>
+
+<!-- ===== CORRELATE ===== -->
+<div class="panel" id="tab-correlate">
+  <div class="panel-title">Коррелятор личности</div>
+  <div class="panel-sub">Несколько идентификаторов сразу (телефон, e-mail, Telegram, VK, username, ФИО) сводятся в одно досье: общие профили, ФИО, адреса, ссылки на соцсети, граф связей и оценка экспозиции.</div>
+  <form method="post" action="/correlate" id="correlateform">
+    <div class="row">
+      <div><label>Телефон</label><input name="phone" placeholder="+79991234567"></div>
+      <div><label>E-mail</label><input name="email" placeholder="ivan@example.com"></div>
+    </div>
+    <div class="row">
+      <div><label>Telegram</label><input name="telegram" placeholder="@username или https://t.me/username"></div>
+      <div><label>VK</label><input name="vk" placeholder="https://vk.com/id123456"></div>
+    </div>
+    <div class="row">
+      <div><label>Username</label><input name="username" placeholder="ivan_petrov"></div>
+      <div><label>ФИО</label><input name="name" placeholder="Иван Петров"></div>
+    </div>
+    <div class="btn-row">
+      <button type="submit">Собрать досье</button>
+      <label class="hint" style="display:inline;margin-left:10px">
+        <input type="checkbox" name="deep" value="1" style="width:auto;margin-right:6px">глубокий скан 500+ сайтов
+      </label>
+    </div>
+  </form>
+  <div id="correlate-result"></div>
 </div>
 
 <!-- ===== WEB ===== -->
@@ -449,6 +569,12 @@ HTML = """<!DOCTYPE html>
   <div id="dossier-result"></div>
 </div>
 
+<div class="panel" id="tab-catalog">
+  <div class="panel-title">Каталог OSINT-ресурсов</div>
+  <div class="panel-sub">14 категорий, __TOTALTOOLS__ инструментов — от поиска и мониторинга до дорок и портов.</div>
+  __CATALOG__
+</div>
+
 <div class="panel" id="tab-web">
   <div class="panel-title">Веб-поиск</div>
   <div class="panel-sub">Поиск точных фраз через Google (Serper.dev) с автоматическим откатом на DuckDuckGo.</div>
@@ -505,9 +631,19 @@ $$('.tab').forEach(t=>t.addEventListener('click',()=>{
   t.classList.add('active');
   document.getElementById(t.dataset.t).classList.add('active');
   history.replaceState(null,'','#'+t.dataset.t);
+  autoLoad(t.dataset.t);
 }));
+
+function autoLoad(id){
+  const map={'tab-catalog':'/catalog?frag=1','tab-kb':'/kb?frag=1'};
+  if(!map[id])return;
+  const box=document.getElementById(id.replace('tab-','')+'-result');
+  if(!box||box.innerHTML.trim())return;
+  fetch(map[id]).then(r=>r.text()).then(h=>{box.innerHTML=h;});
+}
 if(location.hash){const p=document.getElementById(location.hash.slice(1));
   if(p){const t=$$('.tab').find(x=>x.dataset.t===location.hash.slice(1)); if(t)t.click();}}
+setTimeout(()=>{const id=(location.hash||'').slice(1); if(id)autoLoad(id);},400);
 
 /* --- CHIPS --- */
 $$('#chips .chip').forEach(c=>c.addEventListener('click',()=>{
@@ -583,6 +719,7 @@ document.querySelector('#tab-email form').addEventListener('submit',()=>showLoad
 document.querySelector('#tab-leaks form').addEventListener('submit',()=>showLoading('leaks-result','Проверяем базы утечек...'));
 document.querySelector('#tab-exact form').addEventListener('submit',()=>showLoading('exact-result','Собираем досье...'));
 document.querySelector('#tab-dossier form').addEventListener('submit',()=>showLoading('dossier-result','Собираем полное досье... Это может занять до минуты...'));
+document.querySelector('#tab-deep form').addEventListener('submit',()=>showLoading('deep-result','Исследуем граф связей... Это может занять до нескольких минут'));
 document.querySelector('#tab-web form').addEventListener('submit',()=>showLoading('web-result','Ищем в Google...'));
 document.querySelector('#tab-other form').addEventListener('submit',()=>showLoading('other-result','Собираем данные...'));
 
@@ -676,7 +813,20 @@ def _keyinfo_html() -> str:
             f"<th>Цена</th><th></th></tr></thead><tbody>{rows}</tbody></table></div>")
 
 
+def _catalog_counts() -> Dict[str, int]:
+    try:
+        import catalog as CAT
+        st = CAT.stats()
+        return {"sites": st["total_sources"], "checkable": st["checkable"],
+                "resources": st["resources"], "categories": st["categories"],
+                "branches": len(st["branches"])}
+    except Exception:
+        return {"sites": 506, "checkable": 0, "resources": 0,
+                "categories": 21, "branches": 0}
+
+
 def _page(active: str = "tab-scan") -> str:
+    from catalog import total as _catalog_total
     nkeys = sum(1 for s in key_status() if s["active"])
     h = (HTML.replace("__CSS__", CSS)
             .replace("__SKYLINE__", SKYLINE)
@@ -686,7 +836,11 @@ def _page(active: str = "tab-scan") -> str:
             .replace("__KEYFIELDS__", _keyfields_html())
             .replace("__KEYTABLE__", _keytable_html())
             .replace("__KEYINFO__", _keyinfo_html())
+            .replace("__CATALOG__", _catalog_html())
+            .replace("__TOTALTOOLS__", str(_catalog_total()))
             .replace("__NKEYS__", str(nkeys)))
+    cc = _catalog_counts()
+    h = h.replace("__NSITES__", str(cc["sites"]))
     for k, v in ICONS.items():
         h = h.replace(f"__ICO_{k.upper()}__", v)
     # Активируем нужную вкладку
@@ -790,6 +944,22 @@ self.addEventListener('fetch',e=>{
                     headers={"Cache-Control": "no-cache"})
 
 
+def _catalog_html() -> str:
+    from catalog import CATEGORIES
+    blocks = []
+    for cat in CATEGORIES:
+        rows = "".join(
+            f"<tr><td><b>{_esc(n)}</b></td>"
+            f"<td><a href='{_esc(u)}' target='_blank'>{_esc(u)}</a></td>"
+            f"<td style='color:var(--muted)'>{_esc(d)}</td></tr>"
+            for n, u, d in cat["tools"])
+        blocks.append(
+            f"<h3>{cat['icon']} {_esc(cat['name'])} <span class='count'>{len(cat['tools'])}</span></h3>"
+            f"<div class='tablewrap'><table><thead><tr><th>Инструмент</th><th>Ссылка</th>"
+            f"<th>Для чего</th></tr></thead><tbody>{rows}</tbody></table></div>")
+    return "".join(blocks)
+
+
 @app.get("/", response_class=HTMLResponse)
 def index():
     return _page()
@@ -879,6 +1049,86 @@ def email_route(email: str = Form(...)):
     <tbody>{wrows or '<tr><td colspan="3" class="empty">Упоминаний не найдено</td></tr>'}</tbody></table></div>
     """
     return _page("tab-email").replace('<div id="email-result"></div>', f'<div id="email-result">{body}</div>')
+
+
+@app.post("/deep", response_class=HTMLResponse)
+async def deep_route(seed: str = Form(...), kind: str = Form("auto"),
+                     depth: str = Form("2")):
+    from deep import deep_research
+    try:
+        d = int(depth)
+    except Exception:
+        d = 2
+
+    try:
+        res = await deep_research(seed.strip(), kind, max_depth=max(1, min(d, 3)),
+                                  max_nodes=120)
+    except Exception as e:
+        return _page("tab-deep").replace(
+            '<div id="deep-result"></div>',
+            f'<p class="hint" style="color:var(--bad)">Ошибка: {_esc(str(e))}</p>')
+
+    sm = res.get("summary", {})
+    nodes = res.get("nodes", [])
+    edges = res.get("edges", [])
+
+    # сводка по типам
+    kind_rows = "".join(
+        f"<tr><td><span class='tag cat'>{_esc(k)}</span></td><td><b>{v}</b></td></tr>"
+        for k, v in sorted((sm.get("by_kind") or {}).items(), key=lambda kv: -kv[1]))
+
+    # узлы по типам
+    groups: dict = {}
+    for n in nodes:
+        groups.setdefault(n["kind"], []).append(n)
+
+    node_blocks = ""
+    for k, items in sorted(groups.items(), key=lambda kv: -len(kv[1])):
+        chips = "".join(
+            f"<span class='tag cat' style='margin:2px 3px 2px 0' title='{_esc(', '.join(n['sources'])[:120])}'>"
+            f"{_esc(n['value'][:46])}</span>" for n in items[:80])
+        node_blocks += (f"<h3>{_esc(k)} <span class='count'>{len(items)}</span></h3>"
+                        f"<p>{chips}</p>")
+
+    # связи (первые 120)
+    edge_rows = "".join(
+        f"<tr><td>{_esc(e['from'][:40])}</td><td style='color:var(--gold)'>{_esc(e['relation'])}</td>"
+        f"<td>{_esc(e['to'][:40])}</td></tr>" for e in edges[:120])
+
+    # слои
+    layer_rows = "".join(
+        f"<tr><td>{l['depth']}</td><td><span class='tag cat'>{_esc(l['kind'])}</span></td>"
+        f"<td>{_esc(str(l['query'])[:40])}</td><td><b>{l['new_nodes']}</b></td>"
+        f"<td>{_esc(', '.join(l.get('sources', []))[:80])}</td></tr>"
+        for l in res.get("layers", []))
+
+    body = f"""
+    <div class="stats">
+      <div class="stat ok"><b>{sm.get('total_nodes', 0)}</b><span>узлов графа</span></div>
+      <div class="stat"><b>{sm.get('total_edges', 0)}</b><span>связей</span></div>
+      <div class="stat"><b>{len(res.get('layers', []))}</b><span>источников опрошено</span></div>
+      <div class="stat warn"><b>{sm.get('depth_reached', 0)}</b><span>глубина</span></div>
+    </div>
+
+    <h3>Найденные узлы по типам</h3>
+    <div class="tablewrap"><table><tbody>{kind_rows}</tbody></table></div>
+
+    <h3>Узлы графа</h3>
+    {node_blocks}
+
+    <h3>Слои исследования</h3>
+    <div class="tablewrap"><table><thead><tr><th>Глубина</th><th>Тип</th><th>Запрос</th>
+    <th>Новых связей</th><th>Источники</th></tr></thead>
+    <tbody>{layer_rows}</tbody></table></div>
+
+    <h3>Связи <span class="count">{len(edges)}</span></h3>
+    <div class="tablewrap"><table><thead><tr><th>Откуда</th><th>Связь</th><th>Куда</th></tr></thead>
+    <tbody>{edge_rows or '<tr><td colspan="3" class="empty">Связей не найдено</td></tr>'}</tbody></table></div>
+
+    <details><summary>Полный граф (JSON)</summary>{_jblock(res)}</details>
+    """
+    return _page("tab-deep").replace('<div id="deep-result"></div>',
+                                      f'<div id="deep-result">{body}</div>')
 
 
 @app.post("/leaks", response_class=HTMLResponse)
@@ -1282,6 +1532,239 @@ def dossier_route(value: str = Form(...)):
     """
     return _page("tab-dossier").replace('<div id="dossier-result"></div>',
                                          f'<div id="dossier-result">{body}</div>')
+
+
+@app.get("/catalog", response_class=HTMLResponse)
+def catalog_route(q: str = "", request: Request = None):
+    """OSINT Catalog: дерево источников по ветвям таксономии."""
+    import catalog as CAT
+    try:
+        st = CAT.stats()
+        tree_html = CAT.render_tree_html(q)
+    except Exception as e:
+        return _page("tab-catalog").replace(
+            '<div id="catalog-result"></div>',
+            f'<div id="catalog-result"><p class="hint" style="color:var(--bad)">'
+            f'Каталог недоступен: {_esc(str(e))}</p></div>')
+
+    branches = "".join(
+        f"<tr><td><b>{_esc(b['branch'])}</b></td><td>{b['categories']}</td>"
+        f"<td>{b['sources']}</td></tr>"
+        for b in st.get("branches", []))
+    body = f"""
+    <div class="stats">
+      <div class="stat"><b>{st['total_sources']}</b><span>источников</span></div>
+      <div class="stat ok"><b>{st['checkable']}</b><span>проверяемых по нику</span></div>
+      <div class="stat"><b>{st['resources']}</b><span>ресурсов</span></div>
+      <div class="stat"><b>{st['categories']}</b><span>категорий</span></div>
+      <div class="stat warn"><b>{len(st['branches'])}</b><span>ветвей</span></div>
+    </div>
+    <h3>Ветви каталога</h3>
+    <div class="tablewrap"><table><thead><tr><th>Ветвь</th><th>Категорий</th><th>Источников</th></tr></thead>
+    <tbody>{branches}</tbody></table></div>
+    {tree_html}
+    """
+    frag = request is not None and request.query_params.get("frag") == "1"
+    if frag:
+        return HTMLResponse(body)
+    return _page("tab-catalog").replace('<div id="catalog-result"></div>',
+                                         f'<div id="catalog-result">{body}</div>')
+
+
+@app.get("/kb", response_class=HTMLResponse)
+def kb_route(q: str = "", request: Request = None):
+    """База знаний: статистика, кластеры, поиск по накопленному графу."""
+    from knowledge import KnowledgeBase
+    try:
+        kb = KnowledgeBase()
+    except Exception as e:
+        return _page("tab-kb").replace(
+            '<div id="kb-result"></div>',
+            f'<div id="kb-result"><p class="hint" style="color:var(--bad)">'
+            f'База недоступна: {_esc(str(e))}</p></div>')
+
+    st = kb.stats()
+    query = (q or "").strip()
+
+    stats_html = f"""
+    <div class="stats">
+      <div class="stat"><b>{st['nodes']}</b><span>узлов</span></div>
+      <div class="stat"><b>{st['edges']}</b><span>связей</span></div>
+      <div class="stat"><b>{st['attributes']}</b><span>атрибутов</span></div>
+      <div class="stat"><b>{st['sightings']}</b><span>свидетельств</span></div>
+      <div class="stat {'warn' if st['largest_cluster'] > 3 else 'ok'}">
+        <b>{st['largest_cluster']}</b><span>узлов в кластере</span></div>
+    </div>
+    """
+
+    kinds = "".join(f"<span class='tag cat' style='margin:2px 3px 2px 0'>"
+                    f"{_esc(k)}: {v}</span>" for k, v in (st.get("nodes_by_kind") or {}).items())
+    ekinds = "".join(f"<span class='tag ok' style='margin:2px 3px 2px 0'>"
+                     f"{_esc(k)}: {v}</span>" for k, v in (st.get("edges_by_kind") or {}).items())
+
+    body = stats_html
+    body += f"<h3>Узлы по типам</h3><div class='chips'>{kinds or '<span class=\'hint\'>пусто</span>'}</div>"
+    body += f"<h3>Связи по типам</h3><div class='chips'>{ekinds or '<span class=\'hint\'>пусто</span>'}</div>"
+    body += ("<p class='hint'>База: <code>" + _esc(st.get("path", "")) + "</code> · "
+             "<a href='/kb/graph' target='_blank'>открыть полный граф →</a></p>")
+
+    if query:
+        res = kb.search(query)
+        rows = "".join(
+            f"<tr><td><span class='tag cat'>{_esc(r['kind'])}</span></td>"
+            f"<td>{_esc(r['value'])}</td>"
+            f"<td>{_esc(r.get('source') or '')}</td>"
+            f"<td>{r.get('confidence', '')}</td></tr>" for r in res)
+        body += (f"<h3>Результаты поиска «{_esc(query)}» "
+                 f"<span class='count'>{len(res)}</span></h3>"
+                 f"<div class='tablewrap'><table><thead><tr><th>Тип</th><th>Значение</th>"
+                 f"<th>Источник</th><th>Уверенность</th></tr></thead>"
+                 f"<tbody>{rows or '<tr><td colspan=\'4\' class=\'empty\'>Ничего не найдено</td></tr>'}"
+                 f"</tbody></table></div>")
+
+    g = kb.graph()
+    if g["nodes"]:
+        cl_rows = ""
+        for cl in g["clusters"][:12]:
+            det = kb.cluster_detail(cl)
+            vals = ", ".join(f"{n['kind']}:{n['value']}" for n in det["nodes"][:10])
+            cl_rows += (f"<tr><td>{len(cl)}</td><td>{_esc(vals)}</td>"
+                        f"<td>{_esc(', '.join(sorted({a['key'] for a in det['attributes']})))}</td></tr>")
+        body += (f"<h3>Кластеры «вероятно один человек» <span class='count'>{len(g['clusters'])}</span></h3>"
+                 f"<div class='tablewrap'><table><thead><tr><th>Узлов</th><th>Состав</th>"
+                 f"<th>Атрибуты</th></tr></thead>"
+                 f"<tbody>{cl_rows or '<tr><td colspan=\'3\' class=\'empty\'>Пока нет</td></tr>'}"
+                 f"</tbody></table></div>")
+
+    kb.close()
+    frag = request is not None and request.query_params.get("frag") == "1"
+    if frag:
+        return HTMLResponse(body)
+    return _page("tab-kb").replace('<div id="kb-result"></div>',
+                                    f'<div id="kb-result">{body}</div>')
+
+
+@app.get("/kb/graph", response_class=HTMLResponse)
+def kb_graph_route():
+    """Полный накопленный граф базы знаний в виде HTML."""
+    from knowledge import KnowledgeBase
+    import correlator as C
+    kb = KnowledgeBase()
+    g = kb.graph()
+    rep = {
+        "risk": {"score": 0, "level": "—"},
+        "correlation": {
+            "edges": [{"a": f"n{e['a']}", "b": f"n{e['b']}",
+                       "confidence": e["confidence"],
+                       "reasons": [e.get("evidence") or e.get("kind", "")]}
+                      for e in g["edges"]],
+            "clusters": [[f"n{i}" for i in cl] for cl in g["clusters"]],
+        },
+        "identifiers": [{"key": f"n{n['id']}", "value": n["value"],
+                         "type": n["kind"]} for n in g["nodes"]],
+        "profiles": [{"platform": n["kind"], "ident_value": n["value"],
+                      "url": "", "name": n["value"]}
+                     for n in g["nodes"] if n["kind"] == "profile"],
+        "recommendations": [],
+    }
+    html = C.render_graph_html(rep)
+    kb.close()
+    return HTMLResponse(html)
+
+
+@app.post("/correlate", response_class=HTMLResponse)
+def correlate_route(phone: str = Form(""), email: str = Form(""), telegram: str = Form(""),
+                    vk: str = Form(""), username: str = Form(""), name: str = Form(""),
+                    deep: str = Form("")):
+    """Несколько идентификаторов -> одно досье: профили, ФИО, адреса, соцсети, граф."""
+    import correlator as C
+
+    def lst(v: str):
+        return [x.strip() for x in (v or "").replace(",", " ").split() if x.strip()]
+
+    if not any([phone, email, telegram, vk, username, name]):
+        return _page("tab-correlate").replace(
+            '<div id="correlate-result"></div>',
+            '<div id="correlate-result"><p class="hint">Заполните хотя бы одно поле.</p></div>')
+
+    try:
+        rep = C.correlate_all(phone=lst(phone), email=lst(email), telegram=lst(telegram),
+                              vk=lst(vk), username=lst(username), name=lst(name),
+                              deep=bool(deep), pages=18)
+    except Exception as e:
+        return _page("tab-correlate").replace(
+            '<div id="correlate-result"></div>',
+            f'<div id="correlate-result"><p class="hint" style="color:var(--bad)">'
+            f'Ошибка: {_esc(type(e).__name__)}: {_esc(str(e))}</p></div>')
+
+    ident = rep.get("identity") or {}
+    risk = rep.get("risk") or {}
+
+    def rows(items, cols, render):
+        return "".join(f"<tr>{render(it)}</tr>" for it in items)
+
+    name_rows = rows(ident.get("full_names") or [], 3, lambda n:
+                     f"<td><b>{_esc(n['value'])}</b></td><td>{n['confidence']:.2f}</td>"
+                     f"<td>{_esc(', '.join(n['sources']))}</td>")
+    addr_rows = rows(ident.get("addresses") or [], 3, lambda a:
+                     f"<td>{_esc(a['value'])}</td><td>{a['confidence']:.2f}</td>"
+                     f"<td>{_esc(', '.join(a['sources']))}</td>")
+    city_list = ", ".join(f"{_esc(c['value'])} ({c['confidence']:.2f})"
+                          for c in (ident.get("cities") or [])[:12])
+    job_list = ", ".join(f"{_esc(j['value'])} ({j['confidence']:.2f})"
+                         for j in (ident.get("jobs") or [])[:8])
+    social_rows = rows(ident.get("social_links") or [], 2, lambda s:
+                       f"<td><span class='tag cat'>{_esc(s['platform'])}</span></td>"
+                       f"<td><a href='{_esc(s['url'])}' target='_blank'>{_esc(s['url'])}</a></td>")
+    prof_rows = rows(rep.get("profiles") or [], 3, lambda p:
+                     f"<td><span class='tag cat'>{_esc(p['platform'])}</span></td>"
+                     f"<td>{_esc(p.get('name') or '—')}</td>"
+                     f"<td><a href='{_esc(p.get('url') or '')}' target='_blank'>"
+                     f"{_esc(p.get('url') or '')}</a></td>")
+    edge_rows = rows((rep.get("correlation") or {}).get("edges") or [], 4, lambda e:
+                     f"<td>{_esc(e['a'][:32])}</td><td>{_esc(e['b'][:32])}</td>"
+                     f"<td>{e['confidence']:.2f}</td><td>{_esc('; '.join(e['reasons']))}</td>")
+
+    lex = ident.get("leak_exposure") or {}
+    leak_block = ""
+    if lex.get("records") or lex.get("fields"):
+        leak_block = (f"<h3>Экспозиция в утечках</h3>"
+                      f"<p class='hint'>Записей: <b style='color:var(--bad)'>{lex.get('records')}</b> · "
+                      f"поля: {_esc(', '.join(lex.get('fields') or []) or '—')}</p>"
+                      f"<p class='hint'>Источники: {_esc('; '.join((lex.get('sources') or [])[:10]))}</p>")
+
+    body = f"""
+    <div class="stats">
+      <div class="stat {'bad' if risk.get('score',0)>=70 else 'warn' if risk.get('score',0)>=40 else 'ok'}">
+        <b>{risk.get('score',0)}</b><span>экспозиция ({_esc(risk.get('level',''))})</span></div>
+      <div class="stat"><b>{len(rep.get('profiles',[]))}</b><span>профилей</span></div>
+      <div class="stat"><b>{len((rep.get('correlation') or {}).get('edges') or [])}</b><span>связей</span></div>
+      <div class="stat"><b>{len(ident.get('full_names') or [])}</b><span>кандидатов ФИО</span></div>
+    </div>
+    {''.join(f"<p class='hint'>• {_esc(x)}</p>" for x in (risk.get('reasons') or []))}
+    {_toolbar(rep)}
+    <h3>Кандидаты ФИО <span class="count">{len(ident.get('full_names') or [])}</span></h3>
+    <div class="tablewrap"><table><thead><tr><th>ФИО</th><th>Уверенность</th><th>Источники</th></tr></thead>
+    <tbody>{name_rows or '<tr><td colspan="3" class="empty">Не найдено</td></tr>'}</tbody></table></div>
+    <h3>Адреса <span class="count">{len(ident.get('addresses') or [])}</span></h3>
+    <div class="tablewrap"><table><thead><tr><th>Значение</th><th>Уверенность</th><th>Источники</th></tr></thead>
+    <tbody>{addr_rows or '<tr><td colspan="3" class="empty">Не найдено</td></tr>'}</tbody></table></div>
+    {f'<p class="hint">Города/регионы: {city_list}</p>' if city_list else ''}
+    {f'<p class="hint">Места работы: {job_list}</p>' if job_list else ''}
+    {leak_block}
+    <h3>Ссылки на соцсети <span class="count">{len(ident.get('social_links') or [])}</span></h3>
+    <div class="tablewrap"><table><thead><tr><th>Площадка</th><th>Ссылка</th></tr></thead>
+    <tbody>{social_rows or '<tr><td colspan="2" class="empty">Не найдено</td></tr>'}</tbody></table></div>
+    <h3>Профили <span class="count">{len(rep.get('profiles',[]))}</span></h3>
+    <div class="tablewrap"><table><thead><tr><th>Площадка</th><th>Имя</th><th>Ссылка</th></tr></thead>
+    <tbody>{prof_rows or '<tr><td colspan="3" class="empty">Не найдено</td></tr>'}</tbody></table></div>
+    <h3>Граф связей</h3>
+    <div class="tablewrap"><table><thead><tr><th>Узел A</th><th>Узел B</th><th>Ув.</th><th>Основание</th></tr></thead>
+    <tbody>{edge_rows or '<tr><td colspan="4" class="empty">Связей не найдено</td></tr>'}</tbody></table></div>
+    <details><summary>Полный отчёт (JSON)</summary>{_jblock(rep)}</details>
+    """
+    return _page("tab-correlate").replace('<div id="correlate-result"></div>',
+                                          f'<div id="correlate-result">{body}</div>')
 
 
 @app.post("/web", response_class=HTMLResponse)
