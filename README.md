@@ -89,6 +89,46 @@ python osint_finder.py --username torvalds --json --yes
 
 ---
 
+## 🎯 Точный поиск (новое)
+
+Отдельный режим для конкретных идентификаторов — собирает полное досье:
+
+### Telegram
+```bash
+python osint_finder.py --telegram durov --yes
+```
+Имя, описание (bio), аватар, число подписчиков, проверка существования, утечки, упоминания в интернете.
+
+### Ссылка ВКонтакте
+```bash
+python osint_finder.py --vk https://vk.com/durov --yes
+```
+Принимает любую форму: `vk.com/durov`, `vk.ru/durov`, `m.vk.com/durov`, `vk.com/id123`, `vk.com/club123`.
+Достаёт имя, ник, город, место работы, статус, аватар, утечки, упоминания.
+*(Обычный HTML ВК содержит только оболочку страницы, поэтому профиль читается через текстовый рендер.)*
+
+### Email
+```bash
+python osint_finder.py --identify ivanov@example.com --yes
+```
+Профиль Gravatar (имя, фото, ссылки на соцсети), утечки, заражения инфостилерами, HIBP, упоминания в Google.
+
+### Номер телефона
+```bash
+python osint_finder.py --identify +79991234567 --yes
+```
+Нормализация в E.164, страна по коду, оператор и тип линии (Numverify), утечки по номеру, упоминания.
+
+### Универсальный режим
+```bash
+python osint_finder.py --identify "значение" --yes
+```
+Тип определяется автоматически: email / ВК-ссылка / Telegram / телефон.
+
+В веб-интерфейсе это вкладка **«Точный поиск»** — можно заполнить несколько полей сразу.
+
+---
+
 ## 💧 Проверка утечек (бесплатно, без ключей)
 
 | Источник | Что даёт |
@@ -183,6 +223,7 @@ gotham-osint/
 ├── websearch.py       # веб-поиск (DuckDuckGo)
 ├── leaks.py           # проверка утечек (LeakCheck, Hudson Rock, HIBP)
 ├── premium.py         # платные сервисы и управление ключами
+├── identify.py        # точный поиск: Telegram, email, ВК, телефон
 ├── export_static.py   # сборка статической PWA-версии для GitHub Pages
 ├── manifest.json      # PWA-манифест
 ├── icon.svg           # иконка приложения

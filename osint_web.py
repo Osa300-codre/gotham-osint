@@ -31,6 +31,10 @@ from premium import (
     key_status, save_keys, KEY_MAP, serper_search,
     hunter_domain_emails, dehashed_search,
 )
+from identify import (
+    identify, search_telegram, search_email_detailed,
+    search_vk, search_phone_deep,
+)
 
 app = FastAPI(title="Gotham OSINT")
 
@@ -334,6 +338,7 @@ HTML = """<!DOCTYPE html>
   <div class="tab active" data-t="tab-scan">__ICO_SCAN__Сканирование</div>
   <div class="tab" data-t="tab-email">__ICO_MAIL__Email</div>
   <div class="tab" data-t="tab-leaks">__ICO_LEAK__Утечки</div>
+  <div class="tab" data-t="tab-exact">__ICO_TARGET__Точный поиск</div>
   <div class="tab" data-t="tab-web">__ICO_GLOBE__Веб-поиск</div>
   <div class="tab" data-t="tab-keys">__ICO_KEY__Ключи</div>
   <div class="tab" data-t="tab-other">__ICO_TARGET__IP / домен / тел.</div>
@@ -384,6 +389,39 @@ HTML = """<!DOCTYPE html>
 </div>
 
 <!-- ===== WEB ===== -->
+<div class="panel" id="tab-exact">
+  <div class="panel-title">Точный поиск</div>
+  <div class="panel-sub">Досье по конкретному идентификатору: Telegram, email, ссылка ВК или номер телефона.</div>
+
+  <form method="post" action="/exact" id="exactform">
+    <div class="row3">
+      <div>
+        <label>Telegram username</label>
+        <input name="telegram" placeholder="durov">
+      </div>
+      <div>
+        <label>Email</label>
+        <input name="email" placeholder="ivanov@example.com">
+      </div>
+      <div>
+        <label>Ссылка ВК</label>
+        <input name="vk" placeholder="https://vk.com/durov">
+      </div>
+    </div>
+    <div class="row3" style="margin-top:14px">
+      <div>
+        <label>Телефон</label>
+        <input name="phone" placeholder="+79991234567">
+      </div>
+      <div style="grid-column: span 2; display:flex; align-items:flex-end">
+        <button type="submit" style="width:100%">Собрать досье</button>
+      </div>
+    </div>
+    <div class="hint">Заполните любое из полей — можно несколько сразу. Тип определяется автоматически.</div>
+  </form>
+  <div id="exact-result"></div>
+</div>
+
 <div class="panel" id="tab-web">
   <div class="panel-title">Веб-поиск</div>
   <div class="panel-sub">Поиск точных фраз через Google (Serper.dev) с автоматическим откатом на DuckDuckGo.</div>
@@ -516,6 +554,7 @@ $('#scanform').addEventListener('submit',e=>{
 });
 document.querySelector('#tab-email form').addEventListener('submit',()=>showLoading('email-result','Анализируем email...'));
 document.querySelector('#tab-leaks form').addEventListener('submit',()=>showLoading('leaks-result','Проверяем базы утечек...'));
+document.querySelector('#tab-exact form').addEventListener('submit',()=>showLoading('exact-result','Собираем досье...'));
 document.querySelector('#tab-web form').addEventListener('submit',()=>showLoading('web-result','Ищем в Google...'));
 document.querySelector('#tab-other form').addEventListener('submit',()=>showLoading('other-result','Собираем данные...'));
 
@@ -850,6 +889,131 @@ def leaks_route(value: str = Form(...), hibp_key: str = Form("")):
     {_jblock(res)}
     """
     return _page("tab-leaks").replace('<div id="leaks-result"></div>', f'<div id="leaks-result">{body}</div>')
+
+
+@app.post("/exact", response_class=HTMLResponse)
+def exact_route(telegram: str = Form(""), email: str = Form(""),
+                vk: str = Form(""), phone: str = Form("")):
+    blocks = []
+
+    if telegram.strip():
+        r = search_telegram(telegram.strip())
+        p = r.get("profile", {})
+        lk = r.get("leaks", {}) or {}
+        avatar = (f"<img src='{_esc(p.get('avatar'))}' style='width:64px;height:64px;"
+                  f"border-radius:8px;border:1px solid var(--line2)'>") if p.get("avatar") else ""
+        meta_rows = "".join(
+            f"<tr><td style='width:150px;color:var(--muted)'>{_esc(k)}</td><td><b>{_esc(v)}</b></td></tr>"
+            for k, v in [("Имя", p.get("name")), ("Описание", p.get("bio")),
+                         ("Подписчики", p.get("subscribers")),
+                         ("Ссылка", p.get("profile_url"))] if v)
+        blocks.append(
+            f"<h3>Telegram <span class='count'>@{_esc(r.get('username'))}</span></h3>"
+            f"<div style='display:flex;gap:16px;align-items:flex-start'>"
+            f"<div>{avatar}</div><div style='flex:1'><table><tbody>{meta_rows}</tbody></table></div></div>"
+            f"{_leaks_block(lk)}"
+            f"{_mentions_block(r.get('mentions') or [])}"
+            f"<details><summary>Полный отчёт</summary>{_jblock(r)}</details>")
+
+    if email.strip():
+        r = search_email_detailed(email.strip())
+        g = r.get("gravatar", {}) or {}
+        lk = r.get("leaks", {}) or {}
+        gv = g.get("found")
+        meta_rows = "".join(
+            f"<tr><td style='width:150px;color:var(--muted)'>{_esc(k)}</td><td><b>{_esc(v)}</b></td></tr>"
+            for k, v in [("Профиль Gravatar", g.get("profile_url") or ("не найден" if not gv else "")),
+                         ("Имя", g.get("name")), ("Описание", g.get("about")),
+                         ("Локация", g.get("location")),
+                         ("Домен", r.get("domain"))] if v)
+        accounts = ""
+        if g.get("accounts"):
+            links = "".join(f"<li><a href='{_esc(a.get('url'))}' target='_blank'>{_esc(a.get('name'))}</a></li>"
+                            for a in g["accounts"] if a.get("url"))
+            accounts = f"<tr><td style='width:150px;color:var(--muted'>Связи</td><td><ul style='margin-left:16px'>{links}</ul></td></tr>"
+        blocks.append(
+            f"<h3>Email <span class='count'>{_esc(r.get('email'))}</span></h3>"
+            f"<table><tbody>{meta_rows}{accounts}</tbody></table>"
+            f"{_leaks_block(lk)}"
+            f"{_mentions_block(r.get('mentions') or [])}"
+            f"<details><summary>Полный отчёт</summary>{_jblock(r)}</details>")
+
+    if vk.strip():
+        r = search_vk(vk.strip())
+        p = r.get("profile", {}) or {}
+        lk = r.get("leaks", {}) or {}
+        avatar = (f"<img src='{_esc(p.get('avatar'))}' style='width:64px;height:64px;"
+                  f"border-radius:8px;border:1px solid var(--line2)'>") if p.get("avatar") else ""
+        meta_rows = "".join(
+            f"<tr><td style='width:150px;color:var(--muted)'>{_esc(k)}</td><td><b>{_esc(v)}</b></td></tr>"
+            for k, v in [("Имя", p.get("name")), ("Ник", p.get("screen_name")),
+                         ("Город", p.get("city")), ("Работа", p.get("work")),
+                         ("Статус", (p.get("status") or "")[:200]),
+                         ("Ссылка", r.get("profile_url"))] if v)
+        blocks.append(
+            f"<h3>ВКонтакте <span class='count'>{_esc(r.get('profile_url') or '')}</span></h3>"
+            f"<div style='display:flex;gap:16px;align-items:flex-start'>"
+            f"<div>{avatar}</div><div style='flex:1'><table><tbody>{meta_rows}</tbody></table></div></div>"
+            f"{_leaks_block(lk)}"
+            f"{_mentions_block(r.get('mentions') or [])}"
+            f"<details><summary>Полный отчёт</summary>{_jblock(r)}</details>")
+
+    if phone.strip():
+        r = search_phone_deep(phone.strip())
+        n = r.get("normalized", {}) or {}
+        op = r.get("operator", {}) or {}
+        lk = r.get("leaks", {}) or {}
+        meta_rows = "".join(
+            f"<tr><td style='width:150px;color:var(--muted)'>{_esc(k)}</td><td><b>{_esc(v)}</b></td></tr>"
+            for k, v in [("Нормализован", n.get("e164")), ("Страна", n.get("country")),
+                         ("Оператор", op.get("carrier")), ("Тип линии", op.get("line_type")),
+                         ("Локация", op.get("location"))] if v)
+        blocks.append(
+            f"<h3>Телефон <span class='count'>{_esc(r.get('input'))}</span></h3>"
+            f"<table><tbody>{meta_rows}</tbody></table>"
+            f"{_leaks_block(lk)}"
+            f"{_mentions_block(r.get('mentions') or [])}"
+            f"<details><summary>Полный отчёт</summary>{_jblock(r)}</details>")
+
+    if not blocks:
+        blocks.append('<p class="hint">Заполните хотя бы одно поле.</p>')
+
+    body = "".join(blocks)
+    return _page("tab-exact").replace('<div id="exact-result"></div>', f'<div id="exact-result">{body}</div>')
+
+
+def _leaks_block(lk: Dict[str, Any]) -> str:
+    """Блок с данными об утечках."""
+    if not lk:
+        return ""
+    found = lk.get("found")
+    if found in (None, 0):
+        return ('<div class="stats"><div class="stat ok"><b>0</b>'
+                '<span>утечек не найдено</span></div></div>')
+    srcs = lk.get("sources") or []
+    rows = "".join(f"<tr><td><b>{_esc(s.get('name'))}</b></td><td>{_esc(s.get('date'))}</td></tr>"
+                   for s in srcs[:60])
+    fields = lk.get("fields") or lk.get("leaked_field_labels") or []
+    fld = f'<p class="hint">Утекли данные: <b style="color:var(--bad)">{_esc(", ".join(fields))}</b></p>' if fields else ""
+    return (f'<div class="stats"><div class="stat bad"><b>{found}</b><span>записей в утечках</span></div>'
+            f'<div class="stat warn"><b>{lk.get("source_count", len(srcs))}</b><span>источников</span></div></div>'
+            f'{fld}'
+            f'<details><summary>Источники утечек ({len(srcs)})</summary>'
+            f'<div class="tablewrap"><table><thead><tr><th>Сервис</th><th>Дата</th></tr></thead>'
+            f'<tbody>{rows}</tbody></table></div></details>')
+
+
+def _mentions_block(mentions: List[Dict[str, Any]]) -> str:
+    """Блок с упоминаниями в интернете."""
+    if not mentions:
+        return ""
+    rows = "".join(
+        f"<tr><td><a href='{_esc(m.get('url'))}' target='_blank'>{_esc(m.get('title'))}</a></td>"
+        f"<td>{_esc(m.get('domain'))}</td><td>{_esc((m.get('snippet') or '')[:150])}</td></tr>"
+        for m in mentions if m.get("url"))
+    return (f'<h3>Упоминания в интернете <span class="count">{len(mentions)}</span></h3>'
+            f'<div class="tablewrap"><table><thead><tr><th>Заголовок</th><th>Домен</th>'
+            f'<th>Фрагмент</th></tr></thead><tbody>{rows}</tbody></table></div>')
 
 
 @app.post("/web", response_class=HTMLResponse)

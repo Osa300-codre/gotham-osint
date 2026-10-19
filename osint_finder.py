@@ -29,6 +29,10 @@ from site_checks import all_categories
 from websearch import web_search
 from leaks import full_leak_check, check_leakcheck
 from premium import key_status, run_all, save_keys, KEY_MAP
+from identify import (
+    identify, search_telegram, search_email_detailed,
+    search_vk, search_phone_deep,
+)
 
 console = Console()
 
@@ -301,6 +305,10 @@ def main():
     parser.add_argument("--premium", action="append", default=[],
                         help="Запуск всех подключённых платных сервисов (email/телефон/логин)")
     parser.add_argument("--keys", action="store_true", help="Показать статус платных ключей")
+    parser.add_argument("--telegram", action="append", default=[], help="Досье по Telegram-аккаунту")
+    parser.add_argument("--vk", action="append", default=[], help="Досье по ссылке ВК (vk.com/...)")
+    parser.add_argument("--identify", action="append", default=[],
+                        help="Универсальный поиск (auto: Telegram / email / ВК / телефон)")
     parser.add_argument("--set-key", action="append", default=[], metavar="NAME=VALUE",
                         help="Сохранить ключ (напр. HIBP_API_KEY=abc123)")
     parser.add_argument("--categories", default="", help="Категории через запятую (см. --list-cats)")
@@ -400,6 +408,39 @@ def main():
         report["results"].append({"type": "premium", "data": r})
         console.print(Panel(json.dumps(r, ensure_ascii=False, indent=2),
                             title=f"Премиум-сервисы: {pv}", border_style="yellow"))
+
+    for tg in args.telegram:
+        r = search_telegram(tg.strip())
+        report["results"].append({"type": "telegram", "data": r})
+        p = r.get("profile", {})
+        console.print(Panel(json.dumps(r, ensure_ascii=False, indent=2),
+                            title=f"Telegram: {r.get('username')}", border_style="cyan"))
+        if r.get("exists"):
+            console.print(f"  [bold {GOLD}]{p.get('name', '—')}[/bold {GOLD}]"
+                          f"{('  |  ' + p['bio']) if p.get('bio') else ''}"
+                          f"{('  |  ' + p['subscribers']) if p.get('subscribers') else ''}")
+        else:
+            console.print("  [red]Аккаунт не найден[/red]")
+
+    for vk in args.vk:
+        r = search_vk(vk.strip())
+        report["results"].append({"type": "vk", "data": r})
+        p = r.get("profile", {})
+        console.print(Panel(json.dumps(r, ensure_ascii=False, indent=2),
+                            title=f"ВКонтакте: {vk}", border_style="magenta"))
+        if p:
+            console.print(f"  [bold {GOLD}]{p.get('name', '—')}[/bold {GOLD}]"
+                          f"{('  |  ' + p['city']) if p.get('city') else ''}"
+                          f"{('  |  ' + p['work']) if p.get('work') else ''}")
+        lk = r.get("leaks") or {}
+        if lk.get("found"):
+            console.print(f"  [red]Утечек: {lk.get('found')}[/red]")
+
+    for idv in args.identify:
+        r = identify(idv.strip())
+        report["results"].append({"type": "identify", "data": r})
+        console.print(Panel(json.dumps(r, ensure_ascii=False, indent=2),
+                            title=f"Точный поиск: {idv} ({r.get('kind')})", border_style="cyan"))
 
     if not any([args.email, args.username, args.ip, args.domain, args.phone, args.name, args.search, args.leaks]):
         console.print("[yellow]Не указаны данные. Используйте --help.[/yellow]")
