@@ -132,6 +132,42 @@ python osint_finder.py --premium ivanov@example.com --yes
 2. Нажмите иконку установки в адресной строке (или «Установить приложение» в меню)
 3. Появится отдельное окно приложения с иконкой — работает как обычная программа
 
+Также встроенная кнопка **«Установить как приложение»** на главной вкладке.
+
+---
+
+## ☁️ Развёртывание
+
+### GitHub Pages (статическая PWA-версия)
+
+```bash
+python export_static.py      # собирает папку site/
+```
+
+Веб-версия на Pages работает в браузере без сервера: сканирование по открытым API
+(GitHub, GitLab, Chess.com, Keybase, PyPI, NPM, crates.io, Docker Hub) + PWA-установка.
+Деплой настроен через `.github/workflows/deploy.yml` — push в `main` публикует сайт автоматически.
+
+### Облако (полная версия с 500+ сайтами)
+
+`Dockerfile` и `render.yaml` в комплекте:
+
+```bash
+docker build -t gotham-osint .
+docker run -p 8765:8765 gotham-osint
+```
+
+Или подключите репозиторий в Render.com / Railway / Fly.io — деплой в один клик.
+Ключи задаются через переменные окружения: `HIBP_API_KEY`, `SERPER_API_KEY`,
+`HUNTER_API_KEY`, `DEHASHED_API_KEY`, `NUMVERIFY_API_KEY`, `EPIEOS_API_KEY`.
+
+### Свой сервер
+
+```bash
+python osint_web.py
+# или: HOST=0.0.0.0 PORT=8765 python osint_web.py
+```
+
 ---
 
 ## 📁 Структура проекта
@@ -145,8 +181,14 @@ gotham-osint/
 ├── websearch.py       # веб-поиск (DuckDuckGo)
 ├── leaks.py           # проверка утечек (LeakCheck, Hudson Rock, HIBP)
 ├── premium.py         # платные сервисы и управление ключами
+├── export_static.py   # сборка статической PWA-версии для GitHub Pages
 ├── manifest.json      # PWA-манифест
+├── icon.svg           # иконка приложения
+├── Dockerfile         # деплой в облако
+├── render.yaml        # конфиг Render.com
+├── .github/workflows/deploy.yml
 ├── requirements.txt
+├── LICENSE
 └── README.md
 ```
 
