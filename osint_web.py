@@ -1052,17 +1052,23 @@ def email_route(email: str = Form(...)):
 
 
 @app.post("/deep", response_class=HTMLResponse)
-async def deep_route(seed: str = Form(...), kind: str = Form("auto"),
-                     depth: str = Form("2")):
+def deep_route(seed: str = Form(...), kind: str = Form("auto"),
+               depth: str = Form("2")):
+    import asyncio as _aio
     from deep import deep_research
     try:
         d = int(depth)
     except Exception:
         d = 2
 
+    async def _run():
+        return await _aio.wait_for(
+            deep_research(seed.strip(), kind, max_depth=max(1, min(d, 3)), max_nodes=120),
+            timeout=600)
+
     try:
-        res = await deep_research(seed.strip(), kind, max_depth=max(1, min(d, 3)),
-                                  max_nodes=120)
+        # выполняем в отдельном потоке, чтобы не блокировать event loop
+        res = _aio.run(_run())
     except Exception as e:
         return _page("tab-deep").replace(
             '<div id="deep-result"></div>',

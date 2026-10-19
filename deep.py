@@ -545,4 +545,16 @@ class DeepResearch:
 
 async def deep_research(seed: str, kind: str = "auto", max_depth: int = 2,
                         max_nodes: int = 80) -> Dict[str, Any]:
-    return await DeepResearch(seed, kind, max_depth, max_nodes).run()
+    """Точка входа. Результаты кэшируются, чтобы не тратить лимиты."""
+    key = (seed.strip().lower(), kind, max_depth, max_nodes)
+    cached = _CACHE.get(key)
+    if cached is not None:
+        out = dict(cached)
+        out["cached"] = True
+        return out
+    res = await DeepResearch(seed, kind, max_depth, max_nodes).run()
+    _CACHE[key] = res
+    return res
+
+
+_CACHE: Dict[Any, Dict[str, Any]] = {}
