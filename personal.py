@@ -300,22 +300,21 @@ def personal_dorks(value: str, kind: str = "phone") -> Dict[str, Any]:
                     "query": _q,
                 })
 
-    # --- проход 1: общий поиск по всем вариантам записи (параллельно) ---
-    queries1 = [f'"{v}"' for v in variants]
+    # --- проход 1: точечные запросы по конкретным полям (дают ФИО, ДР, адрес) ---
+    templates = DORKS_PHONE if kind == "phone" else DORKS_EMAIL
+    queries1 = []
+    for v in variants[:3]:
+        for tpl in templates:
+            queries1.append(tpl.format(v=v))
     out["queries"].extend(queries1)
     with ThreadPoolExecutor(max_workers=3) as ex:
         collect(list(ex.map(run, queries1)))
 
-    # --- проход 2: точечные уточнения по конкретным полям ---
-    if len(out["results"]) < 20:
-        templates = DORKS_PHONE if kind == "phone" else DORKS_EMAIL
-        queries2 = []
-        for v in variants[:4]:
-            for tpl in templates:
-                queries2.append(tpl.format(v=v))
-        out["queries"].extend(queries2)
-        with ThreadPoolExecutor(max_workers=3) as ex:
-            collect(list(ex.map(run, queries2)))
+    # --- проход 2: общий поиск по всем вариантам записи номера ---
+    queries2 = [f'"{v}"' for v in variants]
+    out["queries"].extend(queries2)
+    with ThreadPoolExecutor(max_workers=3) as ex:
+        collect(list(ex.map(run, queries2)))
 
     return out
 
@@ -362,6 +361,13 @@ _NAME_STOP = {
     "Сервис", "Центр", "Группа", "Отдел", "Филиал", "Офис", "Салон", "Студия",
     "Работа", "Вакансия", "Резюме", "Профиль", "Аккаунт", "Кабинет", "Личный",
     "Вопрос", "Ответ", "Помощь", "Поддержка", "Обратная", "Связь", "Заказать",
+    # служебные слова из форм и интерфейсов
+    "Указанный", "Перечень", "Маркетолог", "Выберите", "Заполнение", "Согласия",
+    "Максимальная", "Длина", "Символа", "Контакта", "Указан", "Заполн", "Пожалуйста",
+    "Введите", "Данные", "Параметр", "Значение", "Поле", "Требуется", "Обязательно",
+    "Правила", "Условия", "Политика", "Согласие", "Проверка", "Список", "Выбор",
+    "Название", "Описание", "Комментарий", "Пример", "Формат", "Схема", "Код",
+    "Подпись", "Заявителя", "Заявитель", "Получатель", "ПодписьЗаявителя", "Электронная",
 }
 
 
@@ -379,7 +385,13 @@ def extract_personal(text: str) -> Dict[str, List[str]]:
         return out
 
     def add(bucket, val):
-        val = (val or "").strip(" .,:;\"'«»\n\t")
+        val = (val or "").strip()
+        if bucket == "names":
+            val = _valid_name(val)
+            if not val:
+                return
+        else:
+            val = val.strip(" .,:;\"'«»\n\t")
         if val and val not in out[bucket]:
             out[bucket].append(val)
 
@@ -407,11 +419,18 @@ def extract_personal(text: str) -> Dict[str, List[str]]:
         for m in _FIO_FREE.finditer(text):
             v = m.group(1).strip()
             parts = v.split()
-            if len(parts) < 2:
+            if len(parts) < 2 or len(parts) > 3 or len(v) > 40:
+                continue
+            # каждое слово — короткое «имя», а не часть предложения
+            if any(len(p) > 16 or not p[:1].isupper() for p in parts):
+                continue
+            if any(not all(ch.isalpha() for ch in p) for p in parts):
                 continue
             if parts[0] in _NAME_STOP or parts[1] in _NAME_STOP:
                 continue
             if v in _NAME_STOP or any(v.startswith(s) for s in _NAME_STOP):
+                continue
+            if any(p in _NAME_STOP for p in parts):
                 continue
             add("names", v)
             break
@@ -469,6 +488,38 @@ def extract_personal(text: str) -> Dict[str, List[str]]:
         break
 
     return out
+
+
+def _valid_name(value: str) -> Optional[str]:
+    """Проверяет, что строка похожа на ФИО, и нормализует её.
+
+    Отсекает мусор из интерфейсов и форм: «контакта. Максимальная длина —
+    1024 символа», «получателя · Иванов получателя», «Подпись Заявителя».
+    """
+    v = (value or "").strip()
+    if not v or len(v) > 34:
+        return None
+    parts = v.split()
+    if not (1 <= len(parts) <= 3):
+        return None
+    for p in parts:
+        core = p.rstrip(".")
+        is_initial = len(core) == 1 and core.isalpha() and core.isupper()
+        if is_initial:
+            continue
+        if len(core) < 2 or len(core) > 16:
+            return None
+        if not all(ch.isalpha() for ch in core):
+            return None
+        if not core[0].isupper():
+            return None
+        if core in _NAME_STOP:
+            return None
+    # «Зима С. Н» — инициалы оставляем, одиночную фамилию без имени — нет
+    if len(parts) == 1 and len(parts[0]) > 2 and parts[0] not in _NAME_STOP:
+        # одиночное слово допускаем только если это явно метка поля
+        return None
+    return v
 
 
 def _clean_address(value: str) -> str:
