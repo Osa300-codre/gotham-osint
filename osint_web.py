@@ -933,4 +933,8 @@ async def api_scan(value: str, cats: str = ""):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8765)
+    import os as _os
+    port = int(_os.environ.get("PORT", "8765"))
+    host = _os.environ.get("HOST", "127.0.0.1")
+    print(f"[Gotham OSINT] http://{host}:{port}")
+    uvicorn.run(app, host=host, port=port)

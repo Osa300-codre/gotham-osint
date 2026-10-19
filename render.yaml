@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: gotham-osint
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /manifest.json
+    envVars:
+      - key: PORT
+        value: "8765"
+      - key: HIBP_API_KEY
+        sync: false
+      - key: SERPER_API_KEY
+        sync: false
+      - key: HUNTER_API_KEY
+        sync: false
+      - key: DEHASHED_API_KEY
+        sync: false
+      - key: NUMVERIFY_API_KEY
+        sync: false
