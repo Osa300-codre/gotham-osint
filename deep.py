@@ -394,23 +394,32 @@ class DeepResearch:
                 from scanner import scan as _scan
                 cands = [value] if kind == "username" else []
                 if kind == "telegram":
-                    cands = [value.lstrip("@")]
-                for un in cands[:2]:
+                    cands = [value.lstrip("@")] + self.nickname_variants(value.lstrip("@"))[:3]
+                all_found: List[Dict[str, Any]] = []
+                for un in cands[:3]:
                     sc = await _scan(un, self.scan_categories)
                     if sc.get("found_count"):
                         details.setdefault("profiles", []).extend(
                             [{"site": f["site"], "url": f["url"]} for f in sc["found"]])
                         sources.append("сканер 800+ сайтов")
-                        # тянем контакты с найденных страниц
-                        for page in await self._collect_contacts(sc["found"]):
-                            ids = self.extract_ids(page.get("text", "") + " " +
-                                                 page.get("desc", "") + " " +
-                                                 page.get("title", ""))
-                            add("email", ids["email"], f"в профиле {page['site']}")
-                            add("phone", ids["phone"], f"в профиле {page['site']}")
-                            add("username", ids["username"], f"в профиле {page['site']}")
-                            add("name", ids["name"], f"в профиле {page['site']}")
-                            add("url", ids["url"], f"в профиле {page['site']}")
+                        all_found.extend(sc["found"])
+                if all_found:
+                    # тянем контакты и ищем совпадения по фото/имени
+                    pages = await self._collect_contacts(all_found)
+                    for link in self.correlate(pages):
+                        a = self.add_node("profile", link["from"], "корреляция")
+                        b = self.add_node("profile", link["to"], "корреляция")
+                        self.add_edge(a, b, link["relation"])
+                        details.setdefault("correlations", []).append(link)
+                    for page in pages:
+                        ids = self.extract_ids(page.get("text", "") + " " +
+                                             page.get("desc", "") + " " +
+                                             page.get("title", ""))
+                        add("email", ids["email"], f"в профиле {page['site']}")
+                        add("phone", ids["phone"], f"в профиле {page['site']}")
+                        add("username", ids["username"], f"в профиле {page['site']}")
+                        add("name", ids["name"], f"в профиле {page['site']}")
+                        add("url", ids["url"], f"в профиле {page['site']}")
             except Exception:
                 pass
 
@@ -450,6 +459,71 @@ class DeepResearch:
             if res:
                 out.append(res)
         return out
+
+    # ---------- связывание аккаунтов по фото и имени ----------
+    def correlate(self, pages: List[Dict[str, Any]]) -> List[Dict[str, str]]:
+        """Ищет одинаковые фотографии и совпадающие имена у разных профилей.
+
+        Используется perceptual hash (dhash) — устойчивый к сжатию и ресайзу.
+        """
+        links: List[Dict[str, str]] = []
+        try:
+            from linker import avatar_match, name_similarity
+        except Exception:
+            return links
+
+        # --- по фото ---
+        photos = []
+        for p in pages:
+            m = re.search(r'<meta[^>]+property="og:image"[^>]*content="([^"]+)"', p.get("text", ""), re.I)
+            if not m:
+                continue
+            u = m.group(1)
+            if u.startswith("//"):
+                u = "https:" + u
+            photos.append((p, u))
+        for i in range(len(photos)):
+            for j in range(i + 1, len(photos)):
+                try:
+                    score, verdict = avatar_match(photos[i][1], photos[j][1])
+                except Exception:
+                    continue
+                if score is not None and score >= 0.88:
+                    links.append({
+                        "from": photos[i][0]["url"], "to": photos[j][0]["url"],
+                        "relation": f"одинаковое фото ({verdict}, {score:.2f})",
+                        "kind": "photo",
+                    })
+
+        # --- по имени ---
+        names = []
+        for p in pages:
+            t = (p.get("title") or "").strip()
+            if 4 <= len(t) <= 60:
+                names.append((p, t))
+        for i in range(len(names)):
+            for j in range(i + 1, len(names)):
+                if names[i][0]["url"] == names[j][0]["url"]:
+                    continue
+                try:
+                    sim = name_similarity(names[i][1], names[j][1])
+                except Exception:
+                    continue
+                if sim is not None and sim >= 0.87:
+                    links.append({
+                        "from": names[i][0]["url"], "to": names[j][0]["url"],
+                        "relation": f"совпадает имя ({sim:.2f})",
+                        "kind": "name",
+                    })
+        return links
+
+    # ---------- варианты ника ----------
+    def nickname_variants(self, base: str) -> List[str]:
+        try:
+            from correlator import username_variants
+            return username_variants(base)[:8]
+        except Exception:
+            return []
 
     def _report(self) -> Dict[str, Any]:
         by_kind: Dict[str, int] = {}

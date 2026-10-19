@@ -44,3 +44,6 @@ desktop.ini
 
 # Ядро Windows
 *.sys
+osint_kb.sqlite
+correlation_report.json
+correlation_graph.html
