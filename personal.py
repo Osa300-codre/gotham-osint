@@ -227,9 +227,9 @@ def phone_variants(phone: str) -> List[str]:
         if len(digits) == 11 and digits.startswith("7"):
             add(digits[1:])                 # без кода страны
             add(digits[2:])                 # последние 9
-        add(digits[-10:])                   # последние 10
-        if len(digits) == 11 and digits.startswith("7"):
             add(digits[3:])                 # последние 8
+        add(digits[-10:])                   # последние 10
+        add(digits[-7:])                    # последние 7
         # форматированные варианты
         if len(digits) == 11 and digits.startswith("7"):
             rest = digits[1:]
@@ -239,7 +239,7 @@ def phone_variants(phone: str) -> List[str]:
             add(f"8-{rest[0:3]}-{rest[3:6]}-{rest[6:8]}-{rest[8:10]}")
     if raw:
         add(raw)
-    return variants[:8]
+    return variants[:10]
 
 
 def personal_dorks(value: str, kind: str = "phone") -> Dict[str, Any]:
@@ -272,7 +272,7 @@ def personal_dorks(value: str, kind: str = "phone") -> Dict[str, Any]:
 
     def run(q):
         try:
-            return q, serper_search(q, limit=8) or {}
+            return q, serper_search(q, limit=10) or {}
         except Exception:
             return q, {}
 
