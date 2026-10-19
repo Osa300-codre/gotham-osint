@@ -1,8 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Веб-интерфейс OSINT-помощника — стиль Gotham."""
+"""
+Gotham OSINT — веб-интерфейс.
 
-import html
+Разделы:
+  1. Сканирование      — проверка username по всем площадкам каталога
+  2. Досье             — полные данные о человеке (email / телефон / ФИО / ВК / Telegram)
+  3. Глубокое исслед.  — граф связей с рекурсивным обходом
+  4. Источники         — карта нитей, каталог ресурсов, база знаний
+  5. Инструменты       — утечки, веб-поиск, IP/домен, корреляция
+  6. Ключи             — управление API-ключами
+"""
+
+import io
 import json
 import os
 import sys
@@ -15,13 +25,8 @@ from fastapi.responses import HTMLResponse, JSONResponse
 import uvicorn
 
 from osint_finder import (
-    search_email,
-    search_username_basic,
-    search_ip,
-    search_domain,
-    search_phone,
-    search_name,
-    DISCLAIMER,
+    search_email, search_username_basic, search_ip, search_domain,
+    search_phone, search_name, DISCLAIMER,
 )
 from scanner import scan
 from site_checks import all_categories
@@ -30,1827 +35,895 @@ from leaks import full_leak_check, check_xposedornot
 import safesurf_ru
 from premium import (
     key_status, save_keys, KEY_MAP, serper_search,
-    hunter_domain_emails, dehashed_search,
+    hunter_domain_emails, dehashed_search, numverify_phone,
 )
 from identify import (
     identify, search_telegram, search_email_detailed,
     search_vk, search_phone_deep,
 )
 from dossier import build_dossier
+from deep import deep_research
+from threads_map import build_branches, render_svg, render_detail
 
 app = FastAPI(title="Gotham OSINT")
 
-CATS = all_categories()
+SECTIONS = [
+    ("scan", "Сканирование", "Проверка username по всем площадкам"),
+    ("dossier", "Досье", "Данные о человеке по любому идентификатору"),
+    ("deep", "Глубокое исследование", "Граф связей с рекурсивным обходом"),
+    ("sources", "Источники", "Карта нитей, каталог ресурсов, база знаний"),
+    ("tools", "Инструменты", "Утечки, веб-поиск, IP и домен, корреляция"),
+    ("keys", "Ключи", "Подключение платных API-сервисов"),
+]
 
-# --------------------------------------------------------------------------
-# CSS — стиль Gotham: тёмный, угловатый, золото + чёрное
-# --------------------------------------------------------------------------
+# ==========================================================================
+#  CSS
+# ==========================================================================
 CSS = """
 :root{
-  --bg:#05070b; --bg2:#0a0e16; --panel:#0d131f; --panel2:#111927;
-  --line:#1e2a3f; --line2:#2a3a56;
-  --gold:#f5c542; --gold2:#ffd979; --gold-dim:#8a6f1e;
-  --text:#e8edf7; --muted:#8494ad; --dim:#5a6a83;
-  --ok:#3ddc84; --warn:#f5a623; --bad:#ff5c5c; --info:#4aa8ff;
-  --glow:0 0 0 1px rgba(245,197,66,.18), 0 8px 40px rgba(0,0,0,.6);
-  --f-display:'Bebas Neue','Oswald','Impact','Arial Narrow',sans-serif;
-  --f-body:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;
-  --f-mono:'JetBrains Mono','Cascadia Code','Consolas',monospace;
-  --clip:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));
+  --bg:#0a0d13; --bg-2:#0e131c; --panel:#111823; --panel-2:#151d2a;
+  --line:#1e2735; --line-2:#2a3646;
+  --text:#dde5f1; --text-2:#9aa7ba; --text-3:#6b7789;
+  --accent:#e8b23a; --accent-2:#f2c55c; --accent-dim:rgba(232,178,58,.10);
+  --ok:#3ecf8e; --warn:#e8a13a; --bad:#ef5b5b; --info:#4a9fe8;
+  --r:6px; --r-s:4px;
+  --mono:'JetBrains Mono','Cascadia Code',Consolas,monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
 body{
-  font-family:var(--f-body); background:var(--bg); color:var(--text);
-  min-height:100vh; overflow-x:hidden; position:relative;
-  background-image:
-    radial-gradient(1200px 600px at 50% -10%, rgba(245,197,66,.07), transparent 60%),
-    radial-gradient(800px 500px at 100% 0%, rgba(74,168,255,.05), transparent 60%),
-    linear-gradient(180deg,#05070b 0%,#070b12 40%,#05070b 100%);
+  font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;
+  background:var(--bg); color:var(--text); font-size:14px; line-height:1.55;
+  -webkit-font-smoothing:antialiased;
 }
-body::before{
-  content:''; position:fixed; inset:0; pointer-events:none; z-index:1;
-  background:repeating-linear-gradient(0deg,rgba(255,255,255,.014) 0 1px,transparent 1px 3px);
-  mix-blend-mode:overlay;
-}
-body::after{
-  content:''; position:fixed; inset:0; pointer-events:none; z-index:1;
-  background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.75) 100%);
-}
-.wrap{max-width:1280px;margin:0 auto;padding:0 20px 60px;position:relative;z-index:2}
+a{color:var(--info);text-decoration:none}
+a:hover{text-decoration:underline}
+code,.mono{font-family:var(--mono)}
 
-/* ---------- HEADER ---------- */
-header{
-  position:relative; padding:34px 0 26px; margin-bottom:24px;
-  border-bottom:1px solid var(--line); overflow:hidden;
+/* ---- каркас ---- */
+.app{display:flex;min-height:100vh}
+.side{
+  width:252px;flex:0 0 252px;background:var(--bg-2);
+  border-right:1px solid var(--line);display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;
 }
-header::after{
-  content:''; position:absolute; left:0; right:0; bottom:-1px; height:2px;
-  background:linear-gradient(90deg,transparent,var(--gold),transparent);
-  opacity:.55;
+.brand{padding:20px 20px 16px;border-bottom:1px solid var(--line)}
+.brand h1{font-size:17px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--text)}
+.brand .mark{display:inline-block;width:9px;height:9px;background:var(--accent);
+  transform:rotate(45deg);margin-right:9px;vertical-align:1px}
+.brand .ver{font-size:11px;color:var(--text-3);margin-top:5px;letter-spacing:.04em}
+.nav{padding:12px 10px;flex:1;overflow-y:auto}
+.nav a{
+  display:flex;flex-direction:column;gap:1px;padding:9px 12px;border-radius:var(--r);
+  color:var(--text-2);text-decoration:none;margin-bottom:2px;border-left:2px solid transparent;
 }
-.bat-signal{
-  position:absolute; top:-140px; left:50%; transform:translateX(-50%);
-  width:520px; height:520px; pointer-events:none; opacity:.14;
-  background:radial-gradient(circle,var(--gold) 0%,rgba(245,197,66,.16) 32%,transparent 66%);
-  animation:signal 6s ease-in-out infinite;
-}
-@keyframes signal{0%,100%{opacity:.08;transform:translateX(-50%) scale(.9)}50%{opacity:.2;transform:translateX(-50%) scale(1.06)}}
-.brand{display:flex;align-items:center;gap:20px;position:relative;z-index:3}
-.emblem{
-  width:74px;height:74px;flex:0 0 74px;display:grid;place-items:center;
-  background:radial-gradient(circle at 50% 42%,#ffd979 0%,var(--gold) 42%,#8a6f1e 100%);
-  clip-path:polygon(50% 0%,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);
-  box-shadow:0 0 34px rgba(245,197,66,.45);
-}
-.emblem svg{width:56px;height:34px;fill:#05070b}
-h1{
-  font-family:var(--f-display); font-size:46px; line-height:.95; letter-spacing:3px;
-  text-transform:uppercase; color:var(--gold2);
-  text-shadow:0 0 26px rgba(245,197,66,.35);
-}
-.brand .subtitle{
-  font-size:12px; letter-spacing:3.5px; text-transform:uppercase;
-  color:var(--muted); margin-top:6px; font-weight:600;
-  display:inline-block; padding-bottom:2px;
-  border-bottom:1px solid var(--line2);
-}
-.hdr-right{margin-left:auto;text-align:right;font-family:var(--f-mono);font-size:11.5px;color:var(--dim);line-height:1.8}
-.hdr-right b{color:var(--gold);font-weight:600}
-.skyline{position:absolute;left:0;right:0;bottom:0;height:90px;opacity:.16;pointer-events:none;z-index:2}
+.nav a:hover{background:var(--panel);color:var(--text);text-decoration:none}
+.nav a.on{background:var(--panel-2);color:var(--text);border-left-color:var(--accent)}
+.nav a .t{font-size:13.5px;font-weight:600}
+.nav a .d{font-size:11px;color:var(--text-3)}
+.nav a.on .d{color:var(--text-2)}
+.side-foot{padding:14px 20px;border-top:1px solid var(--line);font-size:11px;color:var(--text-3);
+  font-family:var(--mono);line-height:1.8}
+.side-foot b{color:var(--accent);font-weight:600}
 
-/* ---------- ALERT ---------- */
-.alert{
-  display:flex;gap:12px;align-items:flex-start;padding:13px 16px;margin-bottom:22px;
-  background:linear-gradient(90deg,rgba(245,166,35,.10),rgba(245,166,35,.02));
-  border:1px solid rgba(245,166,35,.28);border-left:3px solid var(--warn);
-  font-size:13px;color:#f0d9a8;clip-path:var(--clip);
-}
-.alert svg{flex:0 0 18px;margin-top:1px}
+.main{flex:1;min-width:0;padding:26px 30px 70px;max-width:1400px}
+.head{margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.head h2{font-size:21px;font-weight:700;letter-spacing:.01em}
+.head p{color:var(--text-2);font-size:13px;margin-top:3px}
+.crumb{font-size:11px;color:var(--text-3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
 
-/* ---------- TABS ---------- */
-.tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:18px;background:var(--panel);
-  padding:5px;clip-path:var(--clip);border:1px solid var(--line)}
-.tab{
-  padding:11px 16px;border:1px solid transparent;cursor:pointer;font-size:12.5px;
-  font-weight:600;letter-spacing:.3px;color:var(--muted);text-transform:uppercase;
-  transition:.18s;position:relative;user-select:none;display:flex;align-items:center;gap:7px;
-  white-space:nowrap;
-}
-.tab svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8}
-.tab:hover{color:var(--text);background:rgba(245,197,66,.06)}
-.tab.active{
-  color:#05070b;background:linear-gradient(180deg,var(--gold2),var(--gold));
-  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));
-  box-shadow:0 0 22px rgba(245,197,66,.3);
-}
+/* ---- карточки/статистика ---- */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:16px 0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.card b{display:block;font-size:24px;font-weight:700;line-height:1.2}
+.card span{font-size:10.5px;color:var(--text-3);text-transform:uppercase;letter-spacing:.07em}
+.card.ok b{color:var(--ok)} .card.warn b{color:var(--warn)} .card.bad b{color:var(--bad)}
+.card.acc b{color:var(--accent)}
 
-/* ---------- PANEL ---------- */
-.panel{display:none;background:linear-gradient(180deg,var(--panel),var(--bg2));
-  border:1px solid var(--line);padding:24px;clip-path:var(--clip);box-shadow:var(--glow)}
-.panel.active{display:block;animation:fade .28s ease}
-@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.panel-title{font-family:var(--f-display);font-size:26px;letter-spacing:2px;color:var(--gold);
-  text-transform:uppercase;margin-bottom:4px}
-.panel-sub{font-size:13px;color:var(--muted);margin-bottom:22px}
-
-/* ---------- FORM ---------- */
-label{display:block;font-size:11px;letter-spacing:1.6px;text-transform:uppercase;
-  color:var(--muted);margin:16px 0 7px;font-weight:700}
+/* ---- формы ---- */
+.box{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;margin-bottom:18px}
+label{display:block;font-size:11px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--text-3);margin:12px 0 5px;font-weight:600}
+label:first-child{margin-top:0}
 input,select,textarea{
-  width:100%;padding:13px 15px;border-radius:0;font-size:14.5px;
-  background:rgba(0,0,0,.42);border:1px solid var(--line2);color:var(--text);
-  font-family:var(--f-mono);transition:.18s;
+  width:100%;padding:9px 11px;background:var(--bg);border:1px solid var(--line-2);
+  border-radius:var(--r-s);color:var(--text);font-size:13.5px;font-family:var(--mono);
 }
-input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold);
-  box-shadow:0 0 0 3px rgba(245,197,66,.12);background:rgba(0,0,0,.6)}
-input::placeholder{color:var(--dim)}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
-.hint{font-size:12px;color:var(--dim);margin-top:7px;line-height:1.6}
-button{
-  margin-top:20px;padding:14px 26px;border:none;cursor:pointer;font-size:14px;
-  font-weight:800;letter-spacing:1.6px;text-transform:uppercase;font-family:var(--f-body);
-  background:linear-gradient(180deg,var(--gold2),var(--gold));color:#05070b;
-  clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px));
-  transition:.18s;position:relative;overflow:hidden;
+input:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-dim)}
+input::placeholder{color:var(--text-3)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.hint{font-size:12px;color:var(--text-3);margin-top:7px;line-height:1.6}
+button,.btn{
+  display:inline-block;padding:9px 18px;background:var(--accent);color:#12161d;border:none;
+  border-radius:var(--r-s);font-size:12.5px;font-weight:700;letter-spacing:.05em;
+  text-transform:uppercase;cursor:pointer;font-family:inherit;transition:.15s;
 }
-button:hover{filter:brightness(1.12);box-shadow:0 0 30px rgba(245,197,66,.4)}
-button:active{transform:translateY(1px)}
-button.ghost{background:transparent;color:var(--gold);border:1px solid var(--gold-dim)}
-button.ghost:hover{background:rgba(245,197,66,.1);box-shadow:none}
-button.mini{margin:0;padding:7px 12px;font-size:11px;letter-spacing:.8px}
-.btn-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+button:hover{background:var(--accent-2)}
+button.ghost,.btn.ghost{background:transparent;color:var(--text-2);border:1px solid var(--line-2)}
+button.ghost:hover,.btn.ghost:hover{background:var(--panel);color:var(--text)}
+button:disabled{opacity:.5;cursor:default}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 
-/* ---------- CHIPS ---------- */
-.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
-.chip{
-  background:rgba(0,0,0,.4);border:1px solid var(--line2);padding:6px 13px;
-  font-size:12px;cursor:pointer;color:var(--muted);transition:.16s;user-select:none;
-  clip-path:polygon(0 0,calc(100% - 7px) 0,100% 7px,100% 100%,7px 100%,0 calc(100% - 7px));
-}
-.chip:hover{border-color:var(--gold-dim);color:var(--text)}
-.chip.on{background:rgba(245,197,66,.16);border-color:var(--gold);color:var(--gold2);font-weight:600}
+/* ---- таблицы ---- */
+.tbl{width:100%;border-collapse:collapse;font-size:13px;border:1px solid var(--line);
+  border-radius:var(--r);overflow:hidden}
+.tbl th{background:var(--panel-2);color:var(--text-2);text-align:left;padding:9px 12px;
+  font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;
+  border-bottom:1px solid var(--line)}
+.tbl td{padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(232,178,58,.035)}
+.wrap{overflow-x:auto}
 
-/* ---------- STATS ---------- */
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin:20px 0}
-.stat{background:linear-gradient(180deg,rgba(245,197,66,.07),rgba(0,0,0,.25));
-  border:1px solid var(--line);padding:15px 17px;position:relative;overflow:hidden;
-  clip-path:polygon(0 0,calc(100% - 11px) 0,100% 11px,100% 100%,11px 100%,0 calc(100% - 11px))}
-.stat::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--gold);opacity:.65}
-.stat b{display:block;font-family:var(--f-display);font-size:36px;line-height:1;color:var(--gold2)}
-.stat span{font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);margin-top:5px;display:block}
-.stat.ok b{color:var(--ok)} .stat.ok::before{background:var(--ok)}
-.stat.bad b{color:var(--bad)} .stat.bad::before{background:var(--bad)}
-.stat.warn b{color:var(--warn)} .stat.warn::before{background:var(--warn)}
+/* ---- теги ---- */
+.tag{display:inline-block;padding:2px 8px;border-radius:3px;font-size:10.5px;font-weight:600;
+  letter-spacing:.04em;text-transform:uppercase;border:1px solid}
+.tag.acc{color:var(--accent);border-color:rgba(232,178,58,.35);background:var(--accent-dim)}
+.tag.ok{color:var(--ok);border-color:rgba(62,207,142,.35);background:rgba(62,207,142,.08)}
+.tag.bad{color:var(--bad);border-color:rgba(239,91,91,.35);background:rgba(239,91,91,.08)}
+.tag.dim{color:var(--text-3);border-color:var(--line-2)}
+.tags{display:flex;flex-wrap:wrap;gap:5px}
 
-/* ---------- TABLE ---------- */
-h3{font-family:var(--f-display);font-size:19px;letter-spacing:2px;color:var(--gold);
-  text-transform:uppercase;margin:28px 0 12px;padding-bottom:9px;
-  border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
-h3 .count{font-family:var(--f-mono);font-size:12px;color:var(--muted);
-  background:rgba(245,197,66,.1);padding:2px 9px;border:1px solid var(--line2)}
-.tablewrap{border:1px solid var(--line);overflow-x:auto;background:rgba(0,0,0,.25)}
-table{width:100%;border-collapse:collapse;font-size:13.5px}
-th{background:rgba(245,197,66,.08);color:var(--gold);text-align:left;padding:11px 14px;
-  font-size:10.5px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;
-  border-bottom:1px solid var(--line2);white-space:nowrap}
-td{padding:10px 14px;border-bottom:1px solid rgba(30,42,63,.6);vertical-align:top}
-tr:hover td{background:rgba(245,197,66,.045)}
-tr:last-child td{border-bottom:none}
-a{color:var(--info);text-decoration:none;word-break:break-all}
-a:hover{color:var(--gold2);text-decoration:underline}
-.tag{display:inline-block;padding:3px 9px;font-size:10.5px;font-weight:700;letter-spacing:.6px;
-  text-transform:uppercase;border:1px solid;white-space:nowrap}
-.tag.cat{color:var(--gold);border-color:var(--gold-dim);background:rgba(245,197,66,.08)}
-.tag.ok{color:var(--ok);border-color:rgba(61,220,132,.45);background:rgba(61,220,132,.1)}
-.tag.warn{color:var(--warn);border-color:rgba(245,166,35,.45);background:rgba(245,166,35,.1)}
-.tag.bad{color:var(--bad);border-color:rgba(255,92,92,.45);background:rgba(255,92,92,.1)}
-.tag.dim{color:var(--muted);border-color:var(--line2);background:rgba(0,0,0,.3)}
-
-/* ---------- MISC ---------- */
-pre{background:#03050a;border:1px solid var(--line);padding:16px;overflow-x:auto;
-  font-family:var(--f-mono);font-size:12px;line-height:1.65;color:#8fe3a8;margin:0;
-  max-height:520px;overflow-y:auto}
-pre::-webkit-scrollbar{width:9px;height:9px}
-pre::-webkit-scrollbar-thumb{background:var(--line2)}
-pre::-webkit-scrollbar-track{background:#03050a}
-details{margin-top:14px;border:1px solid var(--line);background:rgba(0,0,0,.22)}
-summary{cursor:pointer;padding:12px 15px;font-size:13px;color:var(--muted);user-select:none;
-  list-style:none;display:flex;align-items:center;gap:9px}
-summary::-webkit-details-marker{display:none}
-summary::before{content:'▸';color:var(--gold);transition:.2s;font-size:15px}
-details[open] summary::before{transform:rotate(90deg)}
+/* ---- блоки результатов ---- */
+.kv{width:100%;border-collapse:collapse;font-size:13px}
+.kv td{padding:7px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.kv td:first-child{width:210px;color:var(--text-3);font-size:12px}
+.kv tr:last-child td{border-bottom:none}
+.kv b{font-weight:600;color:var(--text);word-break:break-word}
+.panel{border:1px solid var(--line);border-radius:var(--r);background:var(--panel);
+  padding:14px 16px;margin:12px 0}
+.panel h4{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-2);
+  margin-bottom:9px;display:flex;align-items:center;gap:9px}
+details{border:1px solid var(--line);border-radius:var(--r);background:var(--panel);margin:8px 0}
+details summary{cursor:pointer;padding:10px 14px;font-size:13px;color:var(--text-2);
+  list-style:none;display:flex;align-items:center;gap:8px}
+details summary::-webkit-details-marker{display:none}
+details summary::before{content:'+';color:var(--accent);font-family:var(--mono)}
+details[open] summary::before{content:'−'}
 details[open] summary{border-bottom:1px solid var(--line);color:var(--text)}
-details ul{margin:0;padding:14px 20px 14px 40px;font-size:12.5px;color:var(--muted);max-height:340px;overflow-y:auto}
-details li{margin-bottom:5px;line-height:1.5}
-/* карта нитей */
-.threadmap{background:radial-gradient(900px 500px at 22% 50%,rgba(245,197,66,.05),transparent 70%);
-  border:1px solid var(--line);padding:10px 6px;margin:6px 0 18px;overflow:hidden}
-.threadmap svg{display:block;margin:0 auto}
-.threadmap .branch text{transition:.18s;cursor:pointer}
-.threadmap .branch:hover text{fill:#f5c542}
-.branch-detail{border:1px solid var(--line);margin:8px 0;background:rgba(0,0,0,.22)}
-.branch-detail summary:hover{color:var(--gold)}
-.branch-detail .count{margin-left:auto}
-.branch-detail[open]{background:rgba(245,197,66,.03)}
-.loading{text-align:center;padding:52px 20px;color:var(--muted);font-size:14px}
-.bat-loader{
-  width:46px;height:46px;margin:0 auto 18px;background:var(--gold);
-  clip-path:polygon(50% 0%,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);
-  animation:pulse 1.1s ease-in-out infinite;
-}
-@keyframes pulse{0%,100%{transform:scale(.82) rotate(-4deg);opacity:.55}50%{transform:scale(1.06) rotate(4deg);opacity:1}}
-.empty{text-align:center;padding:38px;color:var(--dim);font-size:13.5px}
-.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:16px 0}
-.toolbar input{max-width:300px;margin:0}
-.spacer{flex:1}
-.kbd{font-family:var(--f-mono);font-size:11px;background:rgba(245,197,66,.12);
-  border:1px solid var(--gold-dim);padding:1px 6px;color:var(--gold)}
-::-webkit-scrollbar{width:9px;height:9px}
-::-webkit-scrollbar-track{background:#03050a}
-::-webkit-scrollbar-thumb{background:var(--line2)}
-::-webkit-scrollbar-thumb:hover{background:var(--gold-dim)}
-.toast{position:fixed;bottom:24px;right:24px;background:var(--gold);color:#05070b;
-  padding:12px 20px;font-weight:700;font-size:13px;z-index:100;
-  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));
-  box-shadow:0 8px 34px rgba(0,0,0,.6);animation:slide .25s ease}
-@keyframes slide{from{transform:translateX(120%);opacity:0}to{transform:none;opacity:1}}
-@media(max-width:820px){
-  .row,.row3{grid-template-columns:1fr}
-  h1{font-size:32px} .brand{gap:14px} .emblem{width:56px;height:56px;flex:0 0 56px}
-  .hdr-right{display:none} .panel{padding:18px}
+pre{background:var(--bg);border:1px solid var(--line);border-radius:var(--r-s);padding:13px;
+  overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.6;color:#a9d6b5;max-height:520px}
+.alert{display:flex;gap:10px;padding:11px 14px;border-radius:var(--r);margin-bottom:16px;
+  background:rgba(232,161,58,.07);border:1px solid rgba(232,161,58,.28);font-size:12.5px;color:#e7cd9d}
+.alert svg{flex:0 0 16px;margin-top:2px}
+.empty{padding:26px;text-align:center;color:var(--text-3);font-size:13px}
+.busy{display:flex;align-items:center;gap:10px;padding:30px;justify-content:center;color:var(--text-2);font-size:13px}
+.spin{width:14px;height:14px;border:2px solid var(--line-2);border-top-color:var(--accent);
+  border-radius:50%;animation:sp .8s linear infinite;display:inline-block}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ---- под-разделы инструментов ---- */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:16px;flex-wrap:wrap}
+.tabs a{padding:8px 15px;font-size:12.5px;color:var(--text-3);text-decoration:none;
+  border-bottom:2px solid transparent;font-weight:600}
+.tabs a:hover{color:var(--text);text-decoration:none}
+.tabs a.on{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* ---- карта нитей ---- */
+.mapwrap{border:1px solid var(--line);border-radius:var(--r);background:var(--panel);
+  padding:14px;margin:12px 0}
+.mapwrap svg{display:block;margin:0 auto;width:100%;height:auto}
+.mapwrap .branch text{cursor:pointer;transition:.15s}
+.mapwrap .branch:hover text{fill:var(--accent)}
+.bdetail{border:1px solid var(--line);border-radius:var(--r);background:var(--panel);margin:6px 0}
+.bdetail summary{cursor:pointer;padding:9px 13px;font-size:13px;display:flex;align-items:center;gap:8px}
+.bdetail summary::-webkit-details-marker{display:none}
+.bdetail summary .count{margin-left:auto}
+
+@media(max-width:900px){
+  .app{flex-direction:column}
+  .side{width:100%;flex:none;height:auto;position:static;border-right:none;border-bottom:1px solid var(--line)}
+  .nav{display:flex;flex-wrap:wrap;gap:4px}
+  .nav a{border-left:none;border-bottom:2px solid transparent;flex:1 1 150px}
+  .nav a.on{border-left:none;border-bottom-color:var(--accent)}
+  .main{padding:18px 16px 50px}
+  .row2,.row3{grid-template-columns:1fr}
 }
 """
 
-# --------------------------------------------------------------------------
-# HTML
-# --------------------------------------------------------------------------
-ICONS = {
-    "scan": '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>',
-    "mail": '<svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16"/><path d="M2 6l10 7 10-7"/></svg>',
-    "leak": '<svg viewBox="0 0 24 24"><path d="M12 2s7 7.5 7 13a7 7 0 01-14 0c0-5.5 7-13 7-13z"/></svg>',
-    "key": '<svg viewBox="0 0 24 24"><circle cx="8" cy="12" r="4"/><path d="M12 12h9M18 12v3M21 12v2"/></svg>',
-    "globe": '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 010 18a15 15 0 010-18z"/></svg>',
-    "shield": '<svg viewBox="0 0 24 24"><path d="M12 2l8 3v7c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V5z"/></svg>',
-    "target": '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1"/></svg>',
-}
-
-BAT_EMBLEM = '''<svg viewBox="0 0 100 60"><path d="M50 6c-5 6-12 8-20 7-6-1-12-5-18-9-2 8-4 14-10 20 6 0 10 2 13 5 4-1 8-1 12 1 4-1 8-1 12 1 4-2 8-2 12-1 4-2 8-2 12 1 3-3 7-5 13-5-6-6-8-12-10-20-6 4-12 8-18 9-8 1-15-1-20-7z"/></svg>'''
-
-SKYLINE = '''<svg class="skyline" viewBox="0 0 1440 90" preserveAspectRatio="none">
-<path fill="#0a0e16" d="M0 90V62h24V38h18v52h14V48h26v42h18V28h22v62h16V54h30v36h12V20h16v70h20V44h26v46h14V34h20v56h18V50h28v40h16V24h24v66h20V46h22v44h16V36h26v54h20V56h24v34h14V30h18v60h22V42h24v48h16V52h26v38h18V36h22v54h16V26h20v64h24V48h22v42h14V34h26v56h18V50h24v40h16V44h28v46h20V30h18v60h24V52h26v38h14V40h22v50h20V56h26v34h18V34h20v56h22V46h24v44h16V38h28v52h20V58h24v32h16V44h22v46h20V30h18v60h26V50h22v40h20V40h20v50h24V56h24v34h18V46h26v44h20V36h18v54h24V54h22v36h20V44h24v46h20V38h16v52h24V60h20v30h24V50h22v40h26V42h20v48h16V56h24v34h20V46h22v44h18V38h20v52h26V54h20v36h22V60h18v30h26V48h20v42h22V56h24v34h18V42h20v48h22V52h20v38h24V60h26v30h20V48h22v42h18V56h26v34h22V44h20v46h24V58h18v32h30V62h20v28h40V90z"/>
-</svg>'''
-
+# ==========================================================================
+#  HTML
+# ==========================================================================
 HTML = """<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GOTHAM OSINT &mdash; поиск публичных данных</title>
+<title>Gotham OSINT</title>
 <link rel="icon" href="/favicon.ico" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/icon.svg">
 <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#f5c542">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Gotham OSINT">
-<meta name="description" content="Поиск публичной информации по username, email, телефону, IP и домену. 813 сайтов, проверка утечек, веб-поиск, граф связей.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>__CSS__
-/* ===== OSINT Catalog tree ===== */
-.catalog .cstats{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 18px}
-.catalog .branch{display:grid;grid-template-columns:250px 1fr;gap:18px;
-  padding:14px 0;border-bottom:1px solid var(--line)}
-.catalog .bname{font-family:var(--f-display);font-size:20px;letter-spacing:.6px;
-  color:var(--gold);text-transform:uppercase;display:flex;align-items:baseline;gap:8px}
-.catalog .bname .n{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
-.catalog .cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px}
-.catalog .cat{border:1px solid var(--line);border-radius:8px;background:var(--panel2);padding:8px 12px}
-.catalog .cat summary{cursor:pointer;font-size:13px;color:var(--text);display:flex;
-  justify-content:space-between;gap:10px;list-style:none}
-.catalog .cat summary::-webkit-details-marker{display:none}
-.catalog .cat summary .n{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
-.catalog .cat ul{list-style:none;margin:8px 0 4px;padding:0 0 0 10px;
-  max-height:260px;overflow:auto;border-left:1px solid var(--line)}
-.catalog .cat li{font-size:12px;padding:2px 0;color:var(--muted)}
-.catalog .cat li a{color:var(--text);text-decoration:none}
-.catalog .cat li a:hover{color:var(--gold)}
-.catalog .cat li.res a{color:var(--info)}
-</style>
+<meta name="theme-color" content="#0a0d13">
+<meta name="description" content="Поиск публичной информации по username, email, телефону и домену.">
+<style>__CSS__</style>
 </head>
 <body>
-<div class="wrap">
-
-<header>
-  <div class="bat-signal"></div>
-  __SKYLINE__
-  <div class="brand">
-    <div class="emblem">__EMBLEM__</div>
-    <div>
-      <h1>Gotham OSINT</h1>
-      <div class="subtitle">Поиск публичных данных &middot; 900+ источников</div>
+<div class="app">
+  <aside class="side">
+    <div class="brand">
+      <h1><span class="mark"></span>Gotham OSINT</h1>
+      <div class="ver">v1.0 &middot; __NSITES__ источников</div>
     </div>
-    <div class="hdr-right">
-      СЕРВЕР: <b>127.0.0.1:8765</b><br>
-      САЙТОВ В КАТАЛОГЕ: <b>__NSITES__</b><br>
-      АКТИВНЫХ КЛЮЧЕЙ: <b>__NKEYS__</b>
+    <nav class="nav">__NAV__</nav>
+    <div class="side-foot">
+      СЕРВЕР <b>127.0.0.1:8765</b><br>
+      ИСТОЧНИКОВ <b>__NSITES__</b> &middot; КЛЮЧЕЙ <b>__NKEYS__</b>
     </div>
-  </div>
-</header>
-
-<div class="alert">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>
-  <div><b>Этическое предупреждение.</b> __DISCLAIMER__</div>
-</div>
-
-<div class="tabs" id="tabs">
-  <div class="tab active" data-t="tab-scan">__ICO_SCAN__Сканирование</div>
-  <div class="tab" data-t="tab-email">__ICO_MAIL__Email</div>
-  <div class="tab" data-t="tab-deep">__ICO_TARGET__Глубокое исследование</div>
-  <div class="tab" data-t="tab-leaks">__ICO_LEAK__Утечки</div>
-  <div class="tab" data-t="tab-exact">__ICO_TARGET__Точный поиск</div>
-  <div class="tab" data-t="tab-dossier">__ICO_SHIELD__Досье</div>
-  <div class="tab" data-t="tab-correlate">__ICO_SHIELD__Коррелятор личности</div>
-  <div class="tab" data-t="tab-catalog">__ICO_GLOBE__Каталог OSINT</div>
-  <div class="tab" data-t="tab-kb">__ICO_SHIELD__База знаний</div>
-  <div class="tab" data-t="tab-threads">__ICO_TARGET__Карта нитей</div>
-  <div class="tab" data-t="tab-catalog">__ICO_SHIELD__Каталог</div>
-  <div class="tab" data-t="tab-web">__ICO_GLOBE__Веб-поиск</div>
-  <div class="tab" data-t="tab-keys">__ICO_KEY__Ключи</div>
-  <div class="tab" data-t="tab-other">__ICO_TARGET__IP / домен / тел.</div>
-</div>
-
-<!-- ===== SCAN ===== -->
-<div class="panel active" id="tab-scan">
-  <div class="panel-title">Сканирование профилей</div>
-  <div class="panel-sub">Проверка username по 813 сайтам в 33 категориях. Занимает 10&ndash;30 секунд.</div>
-  <form method="post" action="/scan" id="scanform">
-    <label>Username / идентификатор</label>
-    <input name="value" id="scanvalue" placeholder="octocat" required>
-    <label>Категории сайтов <span class="hint" style="display:inline">(пусто &mdash; все)</span></label>
-    <div class="chips" id="chips">__CATS__</div>
-    <input type="hidden" name="cats" id="cats" value="">
-    <div class="btn-row">
-      <button type="submit">Начать сканирование</button>
-      <button type="button" class="ghost" id="randscan">Случайный пример</button>
+  </aside>
+  <main class="main">
+    <div class="head">
+      <div class="crumb">__CRUMB__</div>
+      <h2>__TITLE__</h2>
+      <p>__DESC__</p>
     </div>
-  </form>
-  <div id="scan-result"></div>
+    __BODY__
+  </main>
 </div>
-
-<!-- ===== EMAIL ===== -->
-<div class="panel" id="tab-email">
-  <div class="panel-title">Разбор email</div>
-  <div class="panel-sub">Gravatar-профиль, домен, утечки, упоминания в Google, сотрудники компании (Hunter.io).</div>
-  <form method="post" action="/email">
-    <label>Email</label>
-    <input name="email" placeholder="ivanov@example.com" required>
-    <button type="submit">Исследовать email</button>
-  </form>
-  <div id="email-result"></div>
-</div>
-
-<!-- ===== LEAKS ===== -->
-<div class="panel" id="tab-deep">
-  <div class="panel-title">Глубокое исследование</div>
-  <div class="panel-sub">Рекурсивный обход графа связей: по любому идентификатору находится профиль, из него извлекаются
-    новые идентификаторы (ники, email, телефон, ФИО, фото, ссылки) — и по ним поиск продолжается.</div>
-
-  <form method="post" action="/deep" id="deepform">
-    <div class="row">
-      <div>
-        <label>Точка входа: username, email, телефон, ФИО или ссылка</label>
-        <input name="seed" placeholder="durov или ivanov@example.com или +79991234567" required>
-      </div>
-      <div>
-        <label>Тип (авто)</label>
-        <select name="kind">
-          <option value="auto">Определить автоматически</option>
-          <option value="telegram">Telegram username</option>
-          <option value="username">Username / ник</option>
-          <option value="email">Email</option>
-          <option value="phone">Телефон</option>
-          <option value="vk">Ссылка ВКонтакте</option>
-          <option value="name">ФИО / имя</option>
-        </select>
-      </div>
-    </div>
-    <div class="row" style="margin-top:12px">
-      <div>
-        <label>Глубина обхода: <span id="depthv">2</span></label>
-        <input type="range" id="depth" name="depth" min="1" max="3" value="2" oninput="document.getElementById('depthv').textContent=this.value">
-      </div>
-      <div style="display:flex;align-items:flex-end">
-        <button type="submit" style="width:100%">Запустить исследование</button>
-      </div>
-    </div>
-    <div class="hint">Глубина 1 — только прямые связи (30–60 сек). Глубина 2 — с ветвлением (1–3 мин). Глубина 3 — максимум (5–10 мин).</div>
-  </form>
-  <div id="deep-result"></div>
-</div>
-
-<div class="panel" id="tab-leaks">
-  <div class="panel-title">Проверка утечек</div>
-  <div class="panel-sub">Бесплатно, без ключей: LeakCheck + Hudson Rock (инфостилеры). HIBP подключается при наличии ключа.</div>
-  <form method="post" action="/leaks">
-    <label>Email, телефон, логин или IP</label>
-    <input name="value" placeholder="ivanov@example.com" required>
-    <label>HIBP API-ключ <span class="hint" style="display:inline">(необязательно)</span></label>
-    <input name="hibp_key" placeholder="оставьте пустым &mdash; LeakCheck работает бесплатно">
-    <button type="submit">Проверить утечки</button>
-  </form>
-  <div id="leaks-result"></div>
-</div>
-
-<!-- ===== CATALOG ===== -->
-<div class="panel" id="tab-catalog">
-  <div class="panel-title">OSINT Catalog</div>
-  <div class="panel-sub">Единая карта источников: 13 ветвей, 40+ категорий, 900+ площадок и ресурсов. Проверяемые по нику подключены к сканеру, справочные — к подсказкам по поиску.</div>
-  <form method="get" action="/catalog" id="catalogform">
-    <div class="row">
-      <div><label>Фильтр каталога</label><input name="q" id="catalogq" placeholder="название или домен площадки"></div>
-      <div style="display:flex;align-items:flex-end">
-        <button type="submit">Показать</button>
-      </div>
-    </div>
-  </form>
-  <div id="catalog-result"></div>
-</div>
-
-<!-- ===== KB ===== -->
-<div class="panel" id="tab-kb">
-  <div class="panel-title">База знаний OSINT</div>
-  <div class="panel-sub">Накопительный граф: узлы (идентификаторы и профили), связи «один человек», атрибуты (ФИО, адреса, города, места работы) и свидетельства. Каждый запуск коррелятора дополняет базу, повторные подтверждения повышают уверенность связей.</div>
-  <form method="get" action="/kb" id="kbform">
-    <div class="row">
-      <div><label>Поиск по базе</label><input name="q" id="kbq" placeholder="e-mail, телефон, ФИО, ник, домен"></div>
-      <div style="display:flex;align-items:flex-end">
-        <button type="submit">Найти</button>
-      </div>
-    </div>
-  </form>
-  <div id="kb-result"></div>
-</div>
-
-<!-- ===== CORRELATE ===== -->
-<div class="panel" id="tab-correlate">
-  <div class="panel-title">Коррелятор личности</div>
-  <div class="panel-sub">Несколько идентификаторов сразу (телефон, e-mail, Telegram, VK, username, ФИО) сводятся в одно досье: общие профили, ФИО, адреса, ссылки на соцсети, граф связей и оценка экспозиции.</div>
-  <form method="post" action="/correlate" id="correlateform">
-    <div class="row">
-      <div><label>Телефон</label><input name="phone" placeholder="+79991234567"></div>
-      <div><label>E-mail</label><input name="email" placeholder="ivan@example.com"></div>
-    </div>
-    <div class="row">
-      <div><label>Telegram</label><input name="telegram" placeholder="@username или https://t.me/username"></div>
-      <div><label>VK</label><input name="vk" placeholder="https://vk.com/id123456"></div>
-    </div>
-    <div class="row">
-      <div><label>Username</label><input name="username" placeholder="ivan_petrov"></div>
-      <div><label>ФИО</label><input name="name" placeholder="Иван Петров"></div>
-    </div>
-    <div class="btn-row">
-      <button type="submit">Собрать досье</button>
-      <label class="hint" style="display:inline;margin-left:10px">
-        <input type="checkbox" name="deep" value="1" style="width:auto;margin-right:6px">глубокий скан 500+ сайтов
-      </label>
-    </div>
-  </form>
-  <div id="correlate-result"></div>
-</div>
-
-<!-- ===== WEB ===== -->
-<div class="panel" id="tab-exact">
-  <div class="panel-title">Точный поиск</div>
-  <div class="panel-sub">Досье по конкретному идентификатору: Telegram, email, ссылка ВК или номер телефона.</div>
-
-  <form method="post" action="/exact" id="exactform">
-    <div class="row3">
-      <div>
-        <label>Telegram username</label>
-        <input name="telegram" placeholder="durov">
-      </div>
-      <div>
-        <label>Email</label>
-        <input name="email" placeholder="ivanov@example.com">
-      </div>
-      <div>
-        <label>Ссылка ВК</label>
-        <input name="vk" placeholder="https://vk.com/durov">
-      </div>
-    </div>
-    <div class="row3" style="margin-top:14px">
-      <div>
-        <label>Телефон</label>
-        <input name="phone" placeholder="+79991234567">
-      </div>
-      <div style="grid-column: span 2; display:flex; align-items:flex-end">
-        <button type="submit" style="width:100%">Собрать досье</button>
-      </div>
-    </div>
-    <div class="hint">Заполните любое из полей — можно несколько сразу. Тип определяется автоматически.</div>
-  </form>
-  <div id="exact-result"></div>
-</div>
-
-<div class="panel" id="tab-dossier">
-  <div class="panel-title">Досье</div>
-  <div class="panel-sub">Максимум доступных публичных данных по email или телефону: ФИО, дата рождения, адрес, контакты, утечки, связанные аккаунты.</div>
-
-  <form method="post" action="/dossier" id="dossierform">
-    <div class="row">
-      <div>
-        <label>Email или номер телефона</label>
-        <input name="value" placeholder="ivanov@example.com или +7 999 123-45-67" required>
-      </div>
-      <div style="display:flex;align-items:flex-end">
-        <button type="submit" style="width:100%">Собрать досье</button>
-      </div>
-    </div>
-    <div class="hint">
-      Номер можно вводить в <b>любом формате</b> — <b>+79991234567</b>, <b>8 999 123-45-67</b>,
-      <b>89991234567</b>: программа сама подберёт все варианты записи и найдёт объявления.
-      Проверяются базы утечек (LeakCheck, XposedOrNot, НКЦКИ), ФИО и адрес с открытых страниц,
-      владелец номера и все профили в 506 соцсетях. Сбор занимает 20–40 секунд.
-    </div>
-  </form>
-  <div id="dossier-result"></div>
-</div>
-
-<div class="panel" id="tab-threads">
-  <div class="panel-title">Карта нитей</div>
-  <div class="panel-sub">Каждая нить — группа источников. Клик по названию раскрывает состав ветви.</div>
-  __THREADS__
-</div>
-
-<div class="panel" id="tab-catalog">
-  <div class="panel-title">Каталог OSINT-ресурсов</div>
-  <div class="panel-sub">14 категорий, __TOTALTOOLS__ инструментов — от поиска и мониторинга до дорок и портов.</div>
-  __CATALOG__
-</div>
-
-<div class="panel" id="tab-web">
-  <div class="panel-title">Веб-поиск</div>
-  <div class="panel-sub">Поиск точных фраз через Google (Serper.dev) с автоматическим откатом на DuckDuckGo.</div>
-  <form method="post" action="/web">
-    <label>Точная фраза</label>
-    <input name="query" placeholder="&quot;ivanov@example.com&quot;" required>
-    <button type="submit">Искать</button>
-  </form>
-  <div id="web-result"></div>
-</div>
-
-<!-- ===== KEYS ===== -->
-<div class="panel" id="tab-keys">
-  <div class="panel-title">Ключи и премиум</div>
-  <div class="panel-sub">Вставьте ключи &mdash; они сохранятся в <b>osint_keys.json</b> и подхватятся автоматически.</div>
-  <form method="post" action="/keys" id="keysform">
-    __KEYFIELDS__
-    <button type="submit">Сохранить ключи</button>
-  </form>
-  <div id="keys-result"></div>
-  <h3>Статус сервисов</h3>
-  __KEYTABLE__
-  <h3>Возможности и цены</h3>
-  __KEYINFO__
-</div>
-
-<!-- ===== OTHER ===== -->
-<div class="panel" id="tab-other">
-  <div class="panel-title">IP, домен, телефон, имя</div>
-  <div class="panel-sub">Геолокация и провайдер по IP, DNS и WHOIS по домену, страна и тип линии по телефону.</div>
-  <form method="post" action="/other">
-    <div class="row">
-      <div><label>IP-адрес</label><input name="ip" placeholder="8.8.8.8"></div>
-      <div><label>Домен</label><input name="domain" placeholder="example.com"></div>
-    </div>
-    <div class="row">
-      <div><label>Телефон</label><input name="phone" placeholder="+79991234567"></div>
-      <div><label>Имя</label><input name="name" placeholder="Иван Иванов"></div>
-    </div>
-    <button type="submit">Исследовать</button>
-  </form>
-  <div id="other-result"></div>
-</div>
-
-</div>
-
-<script>
-const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-
-/* --- TABS --- */
-$$('.tab').forEach(t=>t.addEventListener('click',()=>{
-  $$('.tab').forEach(x=>x.classList.remove('active'));
-  $$('.panel').forEach(x=>x.classList.remove('active'));
-  t.classList.add('active');
-  document.getElementById(t.dataset.t).classList.add('active');
-  history.replaceState(null,'','#'+t.dataset.t);
-  autoLoad(t.dataset.t);
-}));
-
-function autoLoad(id){
-  const map={'tab-catalog':'/catalog?frag=1','tab-kb':'/kb?frag=1'};
-  if(!map[id])return;
-  const box=document.getElementById(id.replace('tab-','')+'-result');
-  if(!box||box.innerHTML.trim())return;
-  fetch(map[id]).then(r=>r.text()).then(h=>{box.innerHTML=h;});
-}
-if(location.hash){const p=document.getElementById(location.hash.slice(1));
-  if(p){const t=$$('.tab').find(x=>x.dataset.t===location.hash.slice(1)); if(t)t.click();}}
-setTimeout(()=>{const id=(location.hash||'').slice(1); if(id)autoLoad(id);},400);
-
-/* --- CHIPS --- */
-$$('#chips .chip').forEach(c=>c.addEventListener('click',()=>{
-  c.classList.toggle('on');
-  $('#cats').value=$$('#chips .chip.on').map(e=>e.dataset.c).join(',');
-}));
-
-/* --- TOAST --- */
-function toast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;
-  document.body.appendChild(t);setTimeout(()=>t.remove(),2200);}
-
-/* --- карта нитей: клик по ветке раскрывает состав --- */
-document.addEventListener('click',e=>{
-  const g = e.target.closest && e.target.closest('.branch');
-  if(g){
-    const cat = g.getAttribute('data-cat');
-    const det = document.querySelector(".branch-detail[data-cat='"+CSS.escape(cat)+"']");
-    if(det){ det.open = true; det.scrollIntoView({behavior:'smooth', block:'center'}); }
-    return;
-  }
-  const c = e.target.closest('[data-copy]');
-  if(c){navigator.clipboard.writeText(c.dataset.copy).then(()=>toast('Скопировано в буфер'));return;}
-  const d = e.target.closest('[data-download]');
-  if(d){
-    const blob=new Blob([d.dataset.download],{type:'application/json'});
-    const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-    a.download='osint-report.json';a.click();toast('Отчёт сохранён');return;}
-  const v=e.target.closest('[data-csv]');
-  if(v){downloadCsv();return;}
-});
-
-/* --- CSV EXPORT (из видимой таблицы) --- */
-function downloadCsv(){
-  const tbl=document.querySelector('#scan-result table');
-  if(!tbl){toast('Сначала выполните сканирование');return;}
-  const rows=[['категория','сайт','ссылка']];
-  tbl.querySelectorAll('tbody tr').forEach(r=>{
-    const td=r.querySelectorAll('td');
-    if(td.length>=3)rows.push([td[0].innerText.trim(),td[1].innerText.trim(),td[2].innerText.trim()]);
-  });
-  const csv=rows.map(r=>r.map(c=>'"'+c.replace(/"/g,'""')+'"').join(';')).join('\\n');
-  const blob=new Blob(['\\ufeff'+csv],{type:'text/csv;charset=utf-8'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-  a.download='osint-profiles.csv';a.click();toast('CSV сохранён');
-}
-
-/* --- FILTER TABLE --- */
-function initFilter(root){
-  root.querySelectorAll('.tablewrap table').forEach(tbl=>{
-    const wrap=tbl.closest('.tablewrap');
-    if(wrap.dataset.filtered)return;
-    wrap.dataset.filtered='1';
-    if(tbl.querySelectorAll('tbody tr').length<6)return;
-    const bar=document.createElement('div');bar.className='toolbar';
-    bar.innerHTML='<input placeholder="&#128269; Фильтр по названию или домену..."><span class="spacer"></span>';
-    wrap.parentNode.insertBefore(bar,wrap);
-    const inp=bar.querySelector('input');
-    inp.addEventListener('input',()=>{
-      const q=inp.value.toLowerCase();
-      let n=0;const rows=tbl.querySelectorAll('tbody tr');
-      rows.forEach(r=>{const ok=!q||r.textContent.toLowerCase().includes(q);r.style.display=ok?'':'none';if(ok)n++;});
-      bar.querySelector('.spacer').textContent=q?(n+' / '+rows.length+' строк'):'';
-    });
-  });
-}
-
-/* --- LOADING --- */
-function showLoading(target,text){
-  document.getElementById(target).innerHTML=
-    '<div class="loading"><div class="bat-loader"></div>'+text+'</div>';
-}
-
-/* --- FORMS --- */
-$('#scanform').addEventListener('submit',()=>showLoading('scan-result','Перепроверяем 813 сайтов &mdash; это займёт 10&ndash;30 секунд'));
-$('#scanform').addEventListener('submit',e=>{
-  const v=$('#scanvalue').value.trim();
-  if(!v){e.preventDefault();toast('Введите username');}
-});
-document.querySelector('#tab-email form').addEventListener('submit',()=>showLoading('email-result','Анализируем email...'));
-document.querySelector('#tab-leaks form').addEventListener('submit',()=>showLoading('leaks-result','Проверяем базы утечек...'));
-document.querySelector('#tab-exact form').addEventListener('submit',()=>showLoading('exact-result','Собираем досье...'));
-document.querySelector('#tab-dossier form').addEventListener('submit',()=>showLoading('dossier-result','Собираем полное досье... Это может занять до минуты...'));
-document.querySelector('#tab-deep form').addEventListener('submit',()=>showLoading('deep-result','Исследуем граф связей... Это может занять до нескольких минут'));
-document.querySelector('#tab-web form').addEventListener('submit',()=>showLoading('web-result','Ищем в Google...'));
-document.querySelector('#tab-other form').addEventListener('submit',()=>showLoading('other-result','Собираем данные...'));
-
-/* --- RANDOM EXAMPLES --- */
-$('#randscan').addEventListener('click',()=>{
-  const ex=['torvalds','durov','spez','gaben','hikaru','ph_piter','trainwreckstv','flickr','chris','twitch','satyam','destufft'];
-  const v=ex[Math.floor(Math.random()*ex.length)];
-  $('#scanvalue').value=v;toast('Пример: '+v);
-});
-
-/* --- INIT FILTERS AFTER CONTENT LOAD --- */
-function refreshFilters(){initFilter(document);}
-window.addEventListener('load',refreshFilters);
-new MutationObserver(()=>refreshFilters()).observe(document.body,{childList:true,subtree:true});
-
-/* --- KEYBOARD --- */
-document.addEventListener('keydown',e=>{
-  if(e.key==='/'&&document.activeElement.tagName!=='INPUT'){e.preventDefault();$('#scanvalue').focus();}
-  if(e.key>='1'&&e.key<='6'&&document.activeElement.tagName!=='INPUT'){
-    const t=$$('.tab')[+e.key-1]; if(t)t.click();
-  }
-});
-
-/* --- PWA: регистрация service worker + install prompt --- */
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('/sw.js').catch(()=>{});
-}
-let deferredPrompt=null;
-window.addEventListener('beforeinstallprompt',e=>{
-  e.preventDefault(); deferredPrompt=e;
-  const btn=document.createElement('button');
-  btn.className='ghost'; btn.style.cssText='margin:14px 0 0;width:auto;display:block';
-  btn.textContent='Установить как приложение';
-  btn.onclick=async()=>{deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;btn.remove();};
-  document.querySelector('#tab-scan .btn-row').appendChild(btn);
-});
-window.addEventListener('appinstalled',()=>console.log('Gotham OSINT установлен'));
-</script>
+<script>__JS__</script>
 </body>
 </html>
 """
 
+JS = """
+document.querySelectorAll('.tabs a, .nav a').forEach(function(a){
+  a.addEventListener('click', function(e){
+    if (a.getAttribute('href') && a.getAttribute('href').startsWith('#')) {
+      e.preventDefault();
+      var t = document.querySelector(a.getAttribute('href'));
+      if (t) t.scrollIntoView({behavior:'smooth'});
+    }
+  });
+});
+function busy(id, text){
+  var el = document.getElementById(id);
+  if (el) el.innerHTML = '<div class="busy"><span class="spin"></span>' + (text||'Обработка...') + '</div>';
+}
+document.querySelectorAll('form[data-busy]').forEach(function(f){
+  f.addEventListener('submit', function(){
+    var t = f.getAttribute('data-busy');
+    busy(t, f.getAttribute('data-msg') || 'Обработка...');
+  });
+});
+document.addEventListener('click', function(e){
+  var c = e.target.closest('[data-copy]');
+  if (c) { navigator.clipboard.writeText(c.dataset.copy).then(function(){ toast('Скопировано'); }); return; }
+  var d = e.target.closest('[data-download]');
+  if (d) {
+    var b = new Blob([d.dataset.download], {type:'application/json'});
+    var a = document.createElement('a'); a.href = URL.createObjectURL(b);
+    a.download = 'osint-report.json'; a.click(); toast('Файл сохранён'); return;
+  }
+  var g = e.target.closest('.branch');
+  if (g) {
+    var cat = g.getAttribute('data-cat');
+    var det = document.querySelector(".bdetail[data-cat='" + cat.replace(/'/g,"\\\\'") + "']");
+    if (det) { det.open = true; det.scrollIntoView({behavior:'smooth', block:'center'}); }
+  }
+});
+function toast(msg){
+  var t = document.createElement('div');
+  t.textContent = msg;
+  t.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#e8b23a;color:#12161d;'+
+    'padding:9px 16px;border-radius:4px;font-size:12.5px;font-weight:700;z-index:99';
+  document.body.appendChild(t); setTimeout(function(){ t.remove(); }, 1900);
+}
+"""
 
-def _esc(s) -> str:
-    return html.escape(str(s), quote=True)
+
+def _esc(v) -> str:
+    import html as _h
+    return _h.escape(str(v), quote=True)
 
 
-def _cats_html() -> str:
-    return "\n".join(f'<span class="chip" data-c="{c}">{c}</span>' for c in CATS)
+def _nav(active: str) -> str:
+    out = []
+    for key, title, desc in SECTIONS:
+        cls = " class=\"on\"" if key == active else ""
+        out.append(f'<a href="/?s={key}"{cls}><span class="t">{_esc(title)}</span>'
+                   f'<span class="d">{_esc(desc)}</span></a>')
+    return "\n".join(out)
 
 
-def _keyfields_html() -> str:
-    rows = []
-    current = {s["env"]: s for s in key_status()}
-    for name, meta in KEY_MAP.items():
-        badge = " <span class='tag ok'>free tier</span>" if meta["free"] else ""
-        st = current.get(name, {})
-        if st.get("active"):
-            val = f"<input name='{name}' value='{_esc(st['masked'])}' autocomplete='off'>"
-            hint = (f"<div class='hint'><span class='tag ok'>подключён</span> "
-                    f"{_esc(meta['what'])}</div>")
+def _stats(items) -> str:
+    cells = []
+    for value, label, kind in items:
+        c = f"card {kind}" if kind else "card"
+        cells.append(f'<div class="{c}"><b>{_esc(value)}</b><span>{_esc(label)}</span></div>')
+    return '<div class="grid">' + "".join(cells) + "</div>"
+
+
+def _table(headers, rows) -> str:
+    if not rows:
+        return '<div class="empty">Ничего не найдено</div>'
+    th = "".join(f"<th>{_esc(h)}</th>" for h in headers)
+    tr = "".join("<tr>" + "".join(f"<td>{c}</td>" for c in r) + "</tr>" for r in rows)
+    return f'<div class="wrap"><table class="tbl"><thead><tr>{th}</tr></thead><tbody>{tr}</tbody></table></div>'
+
+
+def _kv(rows) -> str:
+    trs = []
+    for label, value in rows:
+        if value is None or value == "" or value == []:
+            continue
+        if isinstance(value, list):
+            body = "".join(f'<span class="tag acc" style="margin:1px 4px 1px 0">{_esc(v)}</span>' for v in value[:40])
+            if not body:
+                continue
         else:
-            val = f"<input name='{name}' placeholder='{_esc(meta['price'])}' autocomplete='off'>"
-            hint = f"<div class='hint'>{_esc(meta['what'])}</div>"
-        rows.append(
-            f"<label>{meta['service']} &mdash; <span style='text-transform:none;color:var(--gold)'>{name}</span>{badge}</label>"
-            f"{val}{hint}")
-    return "\n".join(rows)
+            body = f"<b>{_esc(value)}</b>"
+        trs.append(f"<tr><td>{_esc(label)}</td><td>{body}</td></tr>")
+    if not trs:
+        return '<div class="empty">Данных не найдено</div>'
+    return '<table class="kv">' + "".join(trs) + "</table>"
 
 
-def _keytable_html() -> str:
-    rows = ""
-    for s in key_status():
-        badge = "<span class='tag ok'>подключён</span>" if s["active"] else "<span class='tag dim'>не задан</span>"
-        key = _esc(s["masked"]) if s["active"] else "&mdash;"
-        rows += (f"<tr><td><b>{_esc(s['service'])}</b><br><span class='hint'>{_esc(s['env'])}</span></td>"
-                 f"<td>{badge}</td><td><code>{key}</code></td>"
-                 f"<td><a href='{_esc(s['url'])}' target='_blank'>купить</a><br>"
-                 f"<span class='hint'>{_esc(s['price'])}</span></td></tr>")
-    return (f"<div class='tablewrap'><table><thead><tr><th>Сервис</th><th>Статус</th>"
-            f"<th>Ключ</th><th>Цена / ссылка</th></tr></thead><tbody>{rows}</tbody></table></div>")
-
-
-def _keyinfo_html() -> str:
-    rows = ""
-    for name, meta in KEY_MAP.items():
-        rows += (f"<tr><td><b>{_esc(meta['service'])}</b></td><td>{_esc(meta['what'])}</td>"
-                 f"<td>{_esc(meta['price'])}</td>"
-                 f"<td><a href='{_esc(meta['url'])}' target='_blank'>купить</a></td></tr>")
-    return (f"<div class='tablewrap'><table><thead><tr><th>Сервис</th><th>Возможности</th>"
-            f"<th>Цена</th><th></th></tr></thead><tbody>{rows}</tbody></table></div>")
-
-
-def _catalog_counts() -> Dict[str, int]:
-    """Реальные счётчики: сколько сайтов в каталоге, категорий и ресурсов."""
-    sites = cats = 0
-    try:
-        import site_checks as SC
-        sites = len(SC.SITES) + len(SC.API_SITES)
-        cats = len(SC.all_categories())
-    except Exception:
-        pass
-    resources = branches = 0
-    try:
-        import catalog as CAT
-        resources = CAT.total()
-        branches = len(CAT.CATEGORIES)
-    except Exception:
-        pass
-    return {"sites": sites or 506, "checkable": sites, "resources": resources,
-            "categories": cats or 21, "branches": branches}
-
-
-def _page(active: str = "tab-scan") -> str:
-    from catalog import total as _catalog_total
+def _page(section: str = "scan", body: str = "", title: str = "", desc: str = "",
+          crumb: str = "") -> str:
+    meta = {k: (t, d) for k, t, d in SECTIONS}
+    t, d = meta.get(section, ("Gotham OSINT", ""))
     nkeys = sum(1 for s in key_status() if s["active"])
-    h = (HTML.replace("__CSS__", CSS)
-            .replace("__SKYLINE__", SKYLINE)
-            .replace("__EMBLEM__", BAT_EMBLEM)
-            .replace("__DISCLAIMER__", DISCLAIMER)
-            .replace("__CATS__", _cats_html())
-            .replace("__KEYFIELDS__", _keyfields_html())
-            .replace("__KEYTABLE__", _keytable_html())
-            .replace("__KEYINFO__", _keyinfo_html())
-            .replace("__CATALOG__", _catalog_html())
-            .replace("__THREADS__", _threads_html())
-            .replace("__TOTALTOOLS__", str(_catalog_total()))
-            .replace("__NKEYS__", str(nkeys)))
-    cc = _catalog_counts()
-    h = h.replace("__NSITES__", str(cc["sites"]))
-    for k, v in ICONS.items():
-        h = h.replace(f"__ICO_{k.upper()}__", v)
-    # Активируем нужную вкладку
-    h = h.replace('class="tab active" data-t="tab-scan"', 'class="tab" data-t="tab-scan"')
-    h = h.replace('class="panel active" id="tab-scan"', 'class="panel" id="tab-scan"')
-    h = h.replace(f'class="tab" data-t="{active}"', f'class="tab active" data-t="{active}"')
-    h = h.replace(f'class="panel" id="{active}"', f'class="panel active" id="{active}"')
-    return h
+    try:
+        from threads_map import build_branches
+        nsites = sum(b["count"] for b in build_branches())
+    except Exception:
+        nsites = 0
+    if not nsites:
+        try:
+            import site_checks as SC
+            nsites = len(SC.SITES) + len(SC.API_SITES)
+        except Exception:
+            nsites = 0
+    return (HTML.replace("__CSS__", CSS)
+                .replace("__JS__", JS)
+                .replace("__NAV__", _nav(section))
+                .replace("__NSITES__", str(nsites))
+                .replace("__NKEYS__", str(nkeys))
+                .replace("__CRUMB__", _esc(crumb or t))
+                .replace("__TITLE__", _esc(title or t))
+                .replace("__DESC__", _esc(desc or d))
+                .replace("__BODY__", body))
 
 
-def _jblock(data) -> str:
-    return f"<pre>{_esc(json.dumps(data, ensure_ascii=False, indent=2))}</pre>"
+# ==========================================================================
+#  Раздел: Сканирование
+# ==========================================================================
+CHIP_CSS = """
+.chip{padding:4px 10px;border:1px solid var(--line-2);border-radius:3px;font-size:11.5px;
+  color:var(--text-3);cursor:pointer;user-select:none;margin:2px 3px 2px 0;display:inline-block}
+.chip:hover{border-color:var(--accent);color:var(--text)}
+.chip.on{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
+"""
+
+CHIP_JS = """
+document.querySelectorAll('.chip').forEach(function(c){c.addEventListener('click',function(){
+  c.classList.toggle('on');
+  var sel=[];document.querySelectorAll('.chip.on').forEach(function(x){sel.push(x.dataset.c)});
+  document.getElementById('cats-val').value=sel.join(',');
+});});
+"""
 
 
-def _toolbar(payload, name="osint-report.json") -> str:
-    return (f"<div class='toolbar'>"
-            f"<button class='mini ghost' data-copy=\"{_esc(json.dumps(payload, ensure_ascii=False, indent=2))}\">Копировать JSON</button>"
-            f"<button class='mini ghost' data-download=\"{_esc(json.dumps(payload, ensure_ascii=False, indent=2))}\">Скачать отчёт</button>"
-            f"<button class='mini ghost' data-csv=\"1\">Скачать CSV</button>"
-            f"<span class='spacer'></span></div>")
+def _scan_section(value: str = "", cats: List[str] = None) -> str:
+    chips = "".join(
+        f'<span class="chip" data-c="{_esc(c)}">{_esc(c)}</span>'
+        for c in all_categories())
+    val = _esc(value)
+    return (
+        '<div class="box">'
+        '<form method="post" action="/scan" data-busy="scan-out" '
+        'data-msg="Проверяем площадки каталога...">'
+        '<label>Username / ник</label>'
+        f'<input name="value" value="{val}" placeholder="octocat" required>'
+        '<label>Категории площадок (пусто — все)</label>'
+        f'<div class="tags" id="cats">{chips}</div>'
+        '<input type="hidden" name="cats" id="cats-val" value="">'
+        '<div class="actions">'
+        '<button type="submit">Запустить проверку</button>'
+        '<a class="btn ghost" href="/?s=sources">Карта источников</a>'
+        '</div>'
+        '<div class="hint">Проверяется наличие профиля на всех площадках каталога. '
+        'Займёт 10–30 секунд.</div>'
+        '</form></div>'
+        f'<div id="scan-out">{_scan_out(value, cats)}</div>'
+        f'<style>{CHIP_CSS}</style>'
+        f'<script>{CHIP_JS}</script>'
+    )
 
 
-def _csv_rows(res: Dict) -> str:
-    """Формирует CSV по найденным профилям."""
-    import csv
-    import io as _io
-    buf = _io.StringIO()
-    w = csv.writer(buf, delimiter=";")
-    w.writerow(["категория", "сайт", "ссылка", "статус"])
+def _scan_out(value: str, cats: Optional[List[str]]) -> str:
+    if not value:
+        return ""
+    res = scan_sync_safe(value, cats)
+    rows = []
     for cat, items in (res.get("by_category") or {}).items():
         for it in items:
-            w.writerow([cat, it.get("site", ""), it.get("url", ""), "найден"])
-    for e in (res.get("errors") or []):
-        w.writerow(["", e.get("site", ""), "", f"не подтверждено: {e.get('note','')}"])
-    return buf.getvalue()
+            rows.append([f'<span class="tag acc">{_esc(cat)}</span>', f"<b>{_esc(it['site'])}</b>",
+                         f"<a href='{_esc(it['url'])}' target='_blank'>{_esc(it['url'])}</a>"])
+    body = _stats([
+        (res.get("found_count", 0), "профилей найдено", "ok"),
+        (res.get("total_checked", 0), "сайтов проверено", ""),
+        (res.get("not_found_count", 0), "не найдено", "bad"),
+        (res.get("unknown_count", 0), "не подтверждено", "warn"),
+    ])
+    body += '<div class="panel"><h4>Найденные профили</h4>' + _table(
+        ["Категория", "Площадка", "Ссылка"], rows) + "</div>"
+    body += "<details><summary>Полный отчёт (JSON)</summary><pre>" + _esc(
+        json.dumps(res, ensure_ascii=False, indent=2)) + "</pre></details>"
+    return body
 
 
-# --------------------------------------------------------------------------
-# Routes
-# --------------------------------------------------------------------------
-@app.get("/favicon.ico")
-def favicon():
-    from fastapi.responses import Response
-    svg = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">'
-           '<polygon points="50,2 88,25 88,75 50,98 12,75 12,25" fill="#f5c542"/>'
-           '<path d="M50 26c-4 5-9 6-15 5-5-1-9-4-14-7-1 6-3 10-7 14 4 0 7 1 9 4 3-1 6-1 9 1 3-1 6-1 9 1 3-2 6-2 9-1 3-2 6-2 9 1 2-3 5-4 9-4-4-4-6-8-7-14-5 3-9 6-14 7-6 1-11 0-15-5z" '
-           'fill="#05070b"/></svg>')
-    return Response(svg, media_type="image/svg+xml")
+def scan_sync_safe(value: str, cats: Optional[List[str]]) -> Dict[str, Any]:
+    import asyncio
+    from scanner import scan as _scan
+    return asyncio.run(_scan(value, cats))
 
 
-def _static_file(name: str, media_type: str):
-    from fastapi.responses import Response
-    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), name)
-    try:
-        with open(path, "rb") as f:
-            data = f.read()
-    except Exception:
-        return Response("", media_type=media_type, status_code=404)
-    return Response(data, media_type=media_type)
-
-
-@app.get("/manifest.json")
-def manifest():
-    return _static_file("manifest.json", "application/manifest+json")
-
-
-@app.get("/icon.svg")
-def icon():
-    return _static_file("icon.svg", "image/svg+xml")
-
-
-@app.get("/sw.js")
-def service_worker():
-    from fastapi.responses import Response
-    sw = """
-const CACHE='gotham-osint-v1';
-const CORE=['/','/manifest.json','/icon.svg','/favicon.ico'];
-self.addEventListener('install',e=>{
-  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting()));
-});
-self.addEventListener('activate',e=>{
-  e.waitUntil(caches.keys().then(k=>Promise.all(
-    k.filter(x=>x!==CACHE).map(x=>caches.delete(x))
-  )).then(()=>self.clients.claim()));
-});
-self.addEventListener('fetch',e=>{
-  if(e.request.method!=='GET')return;
-  const url=new URL(e.request.url);
-  if(url.origin!==location.origin)return;
-  if(url.pathname.startsWith('/api/'))return;
-  e.respondWith(
-    fetch(e.request).then(r=>{
-      const cp=r.clone();
-      caches.open(CACHE).then(c=>c.put(e.request,cp)).catch(()=>{});
-      return r;
-    }).catch(()=>caches.match(e.request).then(r=>r||caches.match('/')))
-  );
-});
+# ==========================================================================
+#  Раздел: Досье
+# ==========================================================================
+def _dossier_section() -> str:
+    return """
+<div class="box">
+  <form method="post" action="/dossier" data-busy="dos-out" data-msg="Собираем досье, это займёт до минуты...">
+    <div class="row2">
+      <div>
+        <label>Идентификатор</label>
+        <input name="value" placeholder="ivanov@example.com / +79991234567 / durov / https://vk.com/durov" required>
+      </div>
+      <div>
+        <label>Тип данных</label>
+        <select name="kind">
+          <option value="auto">Определить автоматически</option>
+          <option value="email">Email</option>
+          <option value="phone">Номер телефона</option>
+          <option value="telegram">Telegram username</option>
+          <option value="vk">Ссылка ВКонтакте</option>
+          <option value="name">ФИО или имя</option>
+          <option value="username">Username</option>
+        </select>
+      </div>
+    </div>
+    <div class="actions"><button type="submit">Собрать досье</button></div>
+    <div class="hint">
+      Проверяются: базы утечек (LeakCheck, XposedOrNot, НКЦКИ), профиль Gravatar,
+      коммиты GitHub (настоящее ФИО), владелец номера, ФИО и адрес из открытых страниц,
+      все профили на площадках каталога по найденным никам.
+    </div>
+  </form>
+</div>
+<div id="dos-out"></div>
 """
-    return Response(sw, media_type="application/javascript",
-                    headers={"Cache-Control": "no-cache"})
 
 
-def _threads_html() -> str:
-    """Карта нитей: SVG-дерево + раскрывающиеся составы ветвей."""
-    from threads_map import build_branches, render_svg, render_detail
+def _dossier_out(value: str, kind: str) -> str:
+    if not value:
+        return ""
+    if kind == "auto":
+        kind = identify(value).get("kind", "auto")
+    if kind == "phone":
+        kind = "phone"
+    if kind in ("email", "phone"):
+        d = build_dossier(value, kind)
+        p = d.get("personal") or {}
+        idn, loc, con = d["identity"], d["locations"], d["contacts"]
+        body = _stats([
+            (d["breaches"].get("count", 0), "записей в утечках", "bad"),
+            (len(d["breaches"].get("sources") or []), "источников утечек", ""),
+            (len(p.get("names") or []), "имён найдено", "ok"),
+            (len(p.get("addresses") or []), "адресов", "acc"),
+        ])
+        rows = []
+        for k, v in (d.get("checked") or {}).get("counts", {}).items():
+            rows.append([_esc(k), f"<b>{_esc(v)}</b>"])
+        body += ('<div class="panel"><h4>Установленные сведения</h4>' + _kv([
+            ("ФИО / имя", idn.get("full_name")),
+            ("Дата рождения", idn.get("birth_date")),
+            ("Пол", idn.get("gender")),
+            ("Адрес проживания", loc.get("address")),
+            ("Город", loc.get("city")),
+            ("Регион", loc.get("region")),
+            ("Район", loc.get("district")),
+            ("Индекс", loc.get("zip")),
+            ("Страна", loc.get("country")),
+            ("Телефоны", con.get("phones")),
+            ("Email", con.get("emails")),
+            ("Логины", con.get("usernames")),
+        ]) + "</div>")
+        body += ('<div class="panel"><h4>Что было проверено</h4>' +
+                 _table(["Источник", "Результат"], rows) + "</div>")
+        ev = []
+        for e in (p.get("evidence") or [])[:40]:
+            ex = e.get("extracted") or {}
+            tags = "".join(f'<span class="tag dim" style="margin:1px 3px 1px 0">{_esc(k)}: {_esc(v)}</span>'
+                           for k, v in ex.items())
+            link = (f"<a href='{_esc(e.get('url'))}' target='_blank'>{_esc(e.get('source'))}</a>"
+                    if e.get("url") else _esc(e.get("source")))
+            ev.append([link, _esc((e.get("detail") or "")[:220]), tags])
+        body += ('<details"><summary>Доказательства — откуда взяты данные</summary>' +
+                 _table(["Источник", "Фрагмент", "Извлечено"], ev) + "</details>")
+        body += "<details><summary>Полный отчёт (JSON)</summary><pre>" + _esc(
+            json.dumps(d, ensure_ascii=False, indent=2)) + "</pre></details>"
+        return body
+
+    # профили: Telegram / ВК / ФИО / username
+    if kind == "telegram":
+        r = search_telegram(value)
+        pr = r.get("profile") or {}
+        body = _stats([(1 if r.get("exists") else 0, "аккаунт найден", "ok"),
+                        (len(pr.get("subscribers") or ""), "подписчиков", ""),
+                        (r.get("leaks", {}).get("found", 0), "в утечках", "bad")])
+        body += ('<div class="panel"><h4>Профиль Telegram</h4>' + _kv([
+            ("Имя", pr.get("name")), ("Описание", pr.get("bio")),
+            ("Подписчики", pr.get("subscribers")), ("Ссылка", r.get("profile_url")),
+        ]) + "</div>")
+        srcs = [(s.get("name"), s.get("date")) for s in (r.get("leaks") or {}).get("sources", [])]
+        body += ('<details"><summary>Источники утечек (' + str(len(srcs)) + ")</summary>" +
+                 _table(["Сервис", "Дата"], srcs) + "</details>")
+        ment = [(f"<a href='{_esc(m.get('url'))}' target='_blank'>{_esc(m.get('title'))}</a>",
+                 _esc(m.get("domain")), _esc((m.get("snippet") or "")[:160]))
+                for m in (r.get("mentions") or [])[:30]]
+        body += ('<details"><summary>Упоминания в интернете (' + str(len(ment)) + ")</summary>" +
+                 _table(["Заголовок", "Домен", "Фрагмент"], ment) + "</details>")
+        body += "<details><summary>Полный отчёт (JSON)</summary><pre>" + _esc(
+            json.dumps(r, ensure_ascii=False, indent=2)) + "</pre></details>"
+        return body
+
+    if kind == "vk":
+        r = search_vk(value)
+        pr = r.get("profile") or {}
+        body = _stats([(1 if pr else 0, "профиль получен", "ok"),
+                        (len(r.get("mentions") or []), "упоминаний", ""),
+                        ((r.get("leaks") or {}).get("found", 0), "в утечках", "bad")])
+        body += ('<div class="panel"><h4>Профиль ВКонтакте</h4>' + _kv([
+            ("Имя", pr.get("name")), ("Ник", pr.get("screen_name")),
+            ("Город", pr.get("city")), ("Работа", pr.get("work")),
+            ("Статус", pr.get("status")), ("Ссылка", r.get("profile_url")),
+        ]) + "</div>")
+        body += "<details><summary>Полный отчёт (JSON)</summary><pre>" + _esc(
+            json.dumps(r, ensure_ascii=False, indent=2)) + "</pre></details>"
+        return body
+
+    # ФИО / username — сканер + веб
+    res = scan_sync_safe(value, ["social", "messenger", "dev", "professional",
+                                 "workplace", "creative", "media", "market"])
+    rows = []
+    for cat, items in (res.get("by_category") or {}).items():
+        for it in items:
+            rows.append([f'<span class="tag acc">{_esc(cat)}</span>',
+                         f"<b>{_esc(it['site'])}</b>",
+                         f"<a href='{_esc(it['url'])}' target='_blank'>{_esc(it['url'])}</a>"])
+    body = _stats([(res.get("found_count", 0), "профилей найдено", "ok"),
+                    (res.get("total_checked", 0), "сайтов проверено", "")])
+    body += '<div class="panel"><h4>Найденные профили</h4>' + _table(
+        ["Категория", "Площадка", "Ссылка"], rows) + "</div>"
+    body += "<details><summary>Полный отчёт (JSON)</summary><pre>" + _esc(
+        json.dumps(res, ensure_ascii=False, indent=2)) + "</pre></details>"
+    return body
+
+
+# ==========================================================================
+#  Раздел: Глубокое исследование
+# ==========================================================================
+def _deep_section() -> str:
+    return """
+<div class="box">
+  <form method="post" action="/deep" data-busy="deep-out" data-msg="Исследуем граф связей, это займёт до нескольких минут...">
+    <div class="row2">
+      <div>
+        <label>Точка входа</label>
+        <input name="seed" placeholder="durov / ivanov@example.com / +79991234567" required>
+      </div>
+      <div>
+        <label>Тип</label>
+        <select name="kind">
+          <option value="auto">Определить автоматически</option>
+          <option value="telegram">Telegram</option>
+          <option value="username">Username</option>
+          <option value="email">Email</option>
+          <option value="phone">Телефон</option>
+          <option value="vk">ВКонтакте</option>
+          <option value="name">ФИО</option>
+        </select>
+      </div>
+    </div>
+    <label>Глубина обхода: <span id="dv">2</span></label>
+    <input type="range" id="depth" name="depth" min="1" max="3" value="2"
+           oninput="document.getElementById('dv').textContent=this.value">
+    <div class="actions"><button type="submit">Запустить исследование</button></div>
+    <div class="hint">
+      Глубина 1 — прямые связи (30–60 сек), 2 — с ветвлением (1–3 мин), 3 — максимум (5–10 мин).
+      Из каждого профиля извлекаются ники, email, телефоны, ФИО, фото и ссылки — и поиск продолжается.
+    </div>
+  </form>
+</div>
+<div id="deep-out"></div>
+"""
+
+
+def _deep_out(seed: str, kind: str, depth: int) -> str:
+    import asyncio
+    res = asyncio.run(asyncio.wait_for(
+        deep_research(seed, kind, max_depth=depth, max_nodes=120), timeout=900))
+    sm = res.get("summary", {})
+    body = _stats([
+        (sm.get("total_nodes", 0), "узлов графа", "ok"),
+        (sm.get("total_edges", 0), "связей", ""),
+        (len(res.get("layers", [])), "источников опрошено", "acc"),
+        (sm.get("depth_reached", 0), "глубина", ""),
+    ])
+    groups: Dict[str, List[Dict[str, Any]]] = {}
+    for n in res.get("nodes", []):
+        groups.setdefault(n["kind"], []).append(n)
+    blocks = []
+    for k, items in sorted(groups.items(), key=lambda kv: -len(kv[1])):
+        tags = "".join(
+            f'<span class="tag dim" style="margin:1px 3px 1px 0" '
+            f'title="{_esc(", ".join(n["sources"])[:120])}">{_esc(n["value"][:46])}</span>'
+            for n in items[:80])
+        blocks.append(f'<div class="panel"><h4>{_esc(k)} <span class="tag acc">{len(items)}</span></h4>'
+                      f'<div class="tags">{tags}</div></div>')
+    body += "".join(blocks)
+    lrows = [[l["depth"], f'<span class="tag acc">{_esc(l["kind"])}</span>',
+               _esc(str(l["query"])[:40]), f"<b>{l['new_nodes']}</b>",
+               _esc(", ".join(l.get("sources", []))[:90])] for l in res.get("layers", [])]
+    body += ('<div class="panel"><h4>Слои исследования</h4>' +
+             _table(["Глубина", "Тип", "Запрос", "Новых связей", "Источники"], lrows) + "</div>")
+    erows = [[_esc(e["from"][:44]), _esc(e["relation"]), _esc(e["to"][:44])]
+             for e in res.get("edges", [])[:150]]
+    body += ('<details"><summary>Связи (' + str(len(res.get("edges", []))) + ")</summary>" +
+             _table(["Откуда", "Связь", "Куда"], erows) + "</details>")
+    body += "<details><summary>Полный граф (JSON)</summary><pre>" + _esc(
+        json.dumps(res, ensure_ascii=False, indent=2)) + "</pre></details>"
+    return body
+
+
+# ==========================================================================
+#  Раздел: Источники
+# ==========================================================================
+def _sources_section() -> str:
     branches = build_branches()
     total = sum(b["count"] for b in branches)
-    return (f'<div class="stats">'
-            f'<div class="stat ok"><b>{total}</b><span>источников</span></div>'
-            f'<div class="stat"><b>{len(branches)}</b><span>нитей</span></div>'
-            f'</div>'
-            f'<div class="threadmap">{render_svg(branches)}</div>'
-            f'{render_detail(branches)}')
+    map_html = (f'<div class="mapwrap">{render_svg(branches)}</div>')
+    details = render_detail(branches)
+    return f"""
+<div class="grid">
+  <div class="card acc"><b>{total}</b><span>источников</span></div>
+  <div class="card"><b>{len(branches)}</b><span>нитей</span></div>
+  <div class="card"><b>{len(all_categories())}</b><span>категорий</span></div>
+</div>
+{map_html}
+{details}
+"""
 
 
-def _catalog_html() -> str:
-    from catalog import CATEGORIES
-    blocks = []
-    for cat in CATEGORIES:
-        rows = "".join(
-            f"<tr><td><b>{_esc(n)}</b></td>"
-            f"<td><a href='{_esc(u)}' target='_blank'>{_esc(u)}</a></td>"
-            f"<td style='color:var(--muted)'>{_esc(d)}</td></tr>"
-            for n, u, d in cat["tools"])
-        blocks.append(
-            f"<h3>{cat['icon']} {_esc(cat['name'])} <span class='count'>{len(cat['tools'])}</span></h3>"
-            f"<div class='tablewrap'><table><thead><tr><th>Инструмент</th><th>Ссылка</th>"
-            f"<th>Для чего</th></tr></thead><tbody>{rows}</tbody></table></div>")
-    return "".join(blocks)
+# ==========================================================================
+#  Раздел: Инструменты
+# ==========================================================================
+TOOL_TABS = [("leaks", "Утечки"), ("web", "Веб-поиск"),
+             ("net", "IP и домен"), ("corr", "Корреляция")]
 
 
+def _tools_section(tab: str = "leaks") -> str:
+    tabs = "".join(
+        f'<a href="/?s=tools&t={k}" class="{"on" if k == tab else ""}">{_esc(t)}</a>'
+        for k, t in TOOL_TABS)
+    head = f'<div class="tabs">{tabs}</div>'
+    if tab == "leaks":
+        return head + """
+<div class="box">
+  <form method="post" action="/tools-leaks" data-busy="tool-out" data-msg="Проверяем базы утечек...">
+    <label>Email, телефон или логин</label>
+    <input name="value" placeholder="ivanov@example.com" required>
+    <div class="actions"><button type="submit">Проверить</button></div>
+    <div class="hint">LeakCheck, XposedOrNot (11.6 млрд записей) и Safe Surf / НКЦКИ — бесплатно, без ключей.</div>
+  </form>
+</div>
+<div id="tool-out"></div>
+"""
+    if tab == "web":
+        return head + """
+<div class="box">
+  <form method="post" action="/tools-web" data-busy="tool-out" data-msg="Ищем в Google...">
+    <label>Точная фраза</label>
+    <input name="query" placeholder="&quot;ivanov@example.com&quot;" required>
+    <div class="actions"><button type="submit">Искать</button></div>
+    <div class="hint">Через Serper.dev (Google). При наличии ключа — точнее и быстрее.</div>
+  </form>
+</div>
+<div id="tool-out"></div>
+"""
+    if tab == "net":
+        return head + """
+<div class="box">
+  <form method="post" action="/tools-net" data-busy="tool-out" data-msg="Собираем данные...">
+    <div class="row2">
+      <div><label>IP-адрес</label><input name="ip" placeholder="8.8.8.8"></div>
+      <div><label>Домен</label><input name="domain" placeholder="example.com"></div>
+    </div>
+    <div class="row2">
+      <div><label>Телефон</label><input name="phone" placeholder="+79991234567"></div>
+      <div><label>ФИО</label><input name="name" placeholder="Иван Иванов"></div>
+    </div>
+    <div class="actions"><button type="submit">Проверить</button></div>
+  </form>
+</div>
+<div id="tool-out"></div>
+"""
+    return head + """
+<div class="box">
+  <form method="post" action="/tools-corr" data-busy="tool-out" data-msg="Сопоставляем профили...">
+    <label>Имя или ник для корреляции</label>
+    <input name="value" placeholder="Pavel Durov" required>
+    <div class="actions"><button type="submit">Сопоставить</button></div>
+    <div class="hint">Сопоставление аккаунтов по имени, нику и фото (perceptual hash).</div>
+  </form>
+</div>
+<div id="tool-out"></div>
+"""
+
+
+# ==========================================================================
+#  Раздел: Ключи
+# ==========================================================================
+def _keys_section() -> str:
+    rows = []
+    for s in key_status():
+        state = ('<span class="tag ok">подключён</span>' if s["active"]
+                 else '<span class="tag dim">не задан</span>')
+        key = _esc(s["masked"]) if s["active"] else "—"
+        rows.append([f"<b>{_esc(s['service'])}</b><br><span class='hint'>{_esc(s['env'])}</span>",
+                     state, f"<code>{key}</code>",
+                     f"<a href='{_esc(s['url'])}' target='_blank'>{_esc(s['url'])}</a><br>"
+                     f"<span class='hint'>{_esc(s['price'])}</span>"])
+    fields = []
+    for name, meta in KEY_MAP.items():
+        badge = ('<span class="tag ok">free tier</span>' if meta["free"] else "")
+        fields.append(
+            f'<label>{_esc(meta["service"])} — <code>{_esc(name)}</code> {badge}</label>'
+            f'<input name="{_esc(name)}" placeholder="{_esc(meta["price"])}" autocomplete="off">'
+            f'<div class="hint">{_esc(meta["what"])}</div>')
+    return f"""
+<div class="box">
+  <form method="post" action="/keys">
+    {"".join(fields)}
+    <div class="actions"><button type="submit">Сохранить ключи</button></div>
+    <div class="hint">Ключи сохраняются в osint_keys.json рядом с программой и подхватываются автоматически.</div>
+  </form>
+</div>
+<div class="panel"><h4>Статус сервисов</h4>{_table(["Сервис", "Статус", "Ключ", "Тариф"], rows)}</div>
+"""
+
+
+# ==========================================================================
+#  Роуты
+# ==========================================================================
 @app.get("/", response_class=HTMLResponse)
-def index():
-    return _page()
+def index(s: str = "scan", t: str = "leaks"):
+    if s == "scan":
+        body = _scan_section()
+    elif s == "dossier":
+        body = _dossier_section()
+    elif s == "deep":
+        body = _deep_section()
+    elif s == "sources":
+        body = _sources_section()
+    elif s == "tools":
+        body = _tools_section(t)
+    elif s == "keys":
+        body = _keys_section()
+    else:
+        body = _scan_section()
+    return _page(s, body)
 
 
 @app.post("/scan", response_class=HTMLResponse)
-async def scan_route(value: str = Form(...), cats: str = Form("")):
+def scan_route(value: str = Form(...), cats: str = Form("")):
     sel = [c.strip() for c in cats.split(",") if c.strip()] or None
-    res = await scan(value.strip(), sel)
-
-    rows = ""
-    for cat, items in res.get("by_category", {}).items():
-        for it in items:
-            rows += (f"<tr><td><span class='tag cat'>{_esc(cat)}</span></td>"
-                     f"<td><b>{_esc(it['site'])}</b></td>"
-                     f"<td><a href='{_esc(it['url'])}' target='_blank'>{_esc(it['url'])}</a></td></tr>")
-
-    unknown = ""
-    if res.get("errors"):
-        items = "".join(f"<li><b>{_esc(e['site'])}</b> &mdash; {_esc(e.get('note',''))}</li>"
-                        for e in res["errors"])
-        unknown = ("<details><summary>Не подтверждено автоматически "
-                   f"({len(res['errors'])} шт.) &mdash; откройте список</summary><ul>{items}</ul></details>")
-
-    cat_summary = "".join(
-        f"<span class='chip on' style='cursor:default'>{_esc(cat)}: {len(items)}</span>"
-        for cat, items in (res.get("by_category") or {}).items())
-
-    body = f"""
-    <div class="stats">
-      <div class="stat ok"><b>{res['found_count']}</b><span>профилей найдено</span></div>
-      <div class="stat"><b>{res['total_checked']}</b><span>сайтов проверено</span></div>
-      <div class="stat bad"><b>{res['not_found_count']}</b><span>не найдено</span></div>
-      <div class="stat warn"><b>{res['unknown_count']}</b><span>не подтверждено</span></div>
-    </div>
-    {_toolbar(res)}
-    <h3>Найденные профили <span class="count">{res['found_count']}</span></h3>
-    <div class="tablewrap"><table><thead><tr><th>Категория</th><th>Сайт</th><th>Ссылка</th></tr></thead>
-    <tbody>{rows or '<tr><td colspan="3" class="empty">Профилей не найдено</td></tr>'}</tbody></table></div>
-    {unknown}
-    <h3>Сводка по категориям</h3>
-    <div class="chips">{cat_summary}</div>
-    <h3>Полный отчёт</h3>
-    {_jblock(res)}
-    """
-    return _page("tab-scan").replace('<div id="scan-result"></div>', f'<div id="scan-result">{body}</div>')
-
-
-@app.post("/email", response_class=HTMLResponse)
-def email_route(email: str = Form(...)):
-    em = email.strip()
-    res = search_email(em)
-    web = web_search(em, limit=20)
-    wrows = "".join(
-        f"<tr><td><a href='{_esc(r['url'])}' target='_blank'>{_esc(r['title'])}</a></td>"
-        f"<td>{_esc(r['domain'])}</td><td>{_esc(r['snippet'])}</td></tr>" for r in web.get("results", []))
-
-    prem = ""
-    domain = em.split("@")[-1] if "@" in em else ""
-    h = hunter_domain_emails(domain) if domain else {"active": False, "emails": []}
-    if h.get("active"):
-        hrows = "".join(
-            f"<tr><td><b>{_esc(e.get('name') or '-')}</b></td><td>{_esc(e.get('email'))}</td>"
-            f"<td>{_esc(e.get('position') or '')}</td><td>{_esc(e.get('department') or '')}</td></tr>"
-            for e in h.get("emails", []))
-        prem += (f"<h3>Hunter.io &mdash; сотрудники домена {domain} "
-                 f"<span class='count'>{len(h.get('emails', []))}</span></h3>"
-                 f"<div class='tablewrap'><table><thead><tr><th>Имя</th><th>Email</th>"
-                 f"<th>Должность</th><th>Отдел</th></tr></thead><tbody>{hrows}</tbody></table></div>")
-
-    d = dehashed_search(f"email:{em}")
-    if d.get("active") and d.get("results"):
-        drows = "".join(
-            f"<tr><td>{_esc((e.get('_source') or {}).get('name','-'))}</td>"
-            f"<td>{_esc(((e.get('_source') or {}).get('date') or ['-'])[0] if (e.get('_source') or {}).get('date') else '-')}</td>"
-            f"<td>{_esc(', '.join(sorted(e.keys())[:8]))}</td></tr>" for e in d["results"][:40])
-        prem += (f"<h3>DeHashed &mdash; записи утечек <span class='count'>{d.get('total', 0)}</span></h3>"
-                 f"<div class='tablewrap'><table><thead><tr><th>Источник</th><th>Дата</th>"
-                 f"<th>Поля</th></tr></thead><tbody>{drows}</tbody></table></div>")
-
-    body = f"""
-    <h3>Досье по email</h3>
-    {_jblock(res)}
-    {prem}
-    <h3>Упоминания в интернете <span class="count">{web.get('count', 0)}</span></h3>
-    <div class="tablewrap"><table><thead><tr><th>Заголовок</th><th>Домен</th><th>Фрагмент</th></tr></thead>
-    <tbody>{wrows or '<tr><td colspan="3" class="empty">Упоминаний не найдено</td></tr>'}</tbody></table></div>
-    """
-    return _page("tab-email").replace('<div id="email-result"></div>', f'<div id="email-result">{body}</div>')
-
-
-@app.post("/deep", response_class=HTMLResponse)
-def deep_route(seed: str = Form(...), kind: str = Form("auto"),
-               depth: str = Form("2")):
-    import asyncio as _aio
-    from deep import deep_research
-    try:
-        d = int(depth)
-    except Exception:
-        d = 2
-
-    async def _run():
-        return await _aio.wait_for(
-            deep_research(seed.strip(), kind, max_depth=max(1, min(d, 3)), max_nodes=120),
-            timeout=600)
-
-    try:
-        # выполняем в отдельном потоке, чтобы не блокировать event loop
-        res = _aio.run(_run())
-    except Exception as e:
-        return _page("tab-deep").replace(
-            '<div id="deep-result"></div>',
-            f'<p class="hint" style="color:var(--bad)">Ошибка: {_esc(str(e))}</p>')
-
-    sm = res.get("summary", {})
-    nodes = res.get("nodes", [])
-    edges = res.get("edges", [])
-
-    # сводка по типам
-    kind_rows = "".join(
-        f"<tr><td><span class='tag cat'>{_esc(k)}</span></td><td><b>{v}</b></td></tr>"
-        for k, v in sorted((sm.get("by_kind") or {}).items(), key=lambda kv: -kv[1]))
-
-    # узлы по типам
-    groups: dict = {}
-    for n in nodes:
-        groups.setdefault(n["kind"], []).append(n)
-
-    node_blocks = ""
-    for k, items in sorted(groups.items(), key=lambda kv: -len(kv[1])):
-        chips = "".join(
-            f"<span class='tag cat' style='margin:2px 3px 2px 0' title='{_esc(', '.join(n['sources'])[:120])}'>"
-            f"{_esc(n['value'][:46])}</span>" for n in items[:80])
-        node_blocks += (f"<h3>{_esc(k)} <span class='count'>{len(items)}</span></h3>"
-                        f"<p>{chips}</p>")
-
-    # связи (первые 120)
-    edge_rows = "".join(
-        f"<tr><td>{_esc(e['from'][:40])}</td><td style='color:var(--gold)'>{_esc(e['relation'])}</td>"
-        f"<td>{_esc(e['to'][:40])}</td></tr>" for e in edges[:120])
-
-    # слои
-    layer_rows = "".join(
-        f"<tr><td>{l['depth']}</td><td><span class='tag cat'>{_esc(l['kind'])}</span></td>"
-        f"<td>{_esc(str(l['query'])[:40])}</td><td><b>{l['new_nodes']}</b></td>"
-        f"<td>{_esc(', '.join(l.get('sources', []))[:80])}</td></tr>"
-        for l in res.get("layers", []))
-
-    body = f"""
-    <div class="stats">
-      <div class="stat ok"><b>{sm.get('total_nodes', 0)}</b><span>узлов графа</span></div>
-      <div class="stat"><b>{sm.get('total_edges', 0)}</b><span>связей</span></div>
-      <div class="stat"><b>{len(res.get('layers', []))}</b><span>источников опрошено</span></div>
-      <div class="stat warn"><b>{sm.get('depth_reached', 0)}</b><span>глубина</span></div>
-    </div>
-
-    <h3>Найденные узлы по типам</h3>
-    <div class="tablewrap"><table><tbody>{kind_rows}</tbody></table></div>
-
-    <h3>Узлы графа</h3>
-    {node_blocks}
-
-    <h3>Слои исследования</h3>
-    <div class="tablewrap"><table><thead><tr><th>Глубина</th><th>Тип</th><th>Запрос</th>
-    <th>Новых связей</th><th>Источники</th></tr></thead>
-    <tbody>{layer_rows}</tbody></table></div>
-
-    <h3>Связи <span class="count">{len(edges)}</span></h3>
-    <div class="tablewrap"><table><thead><tr><th>Откуда</th><th>Связь</th><th>Куда</th></tr></thead>
-    <tbody>{edge_rows or '<tr><td colspan="3" class="empty">Связей не найдено</td></tr>'}</tbody></table></div>
-
-    <details><summary>Полный граф (JSON)</summary>{_jblock(res)}</details>
-    """
-    return _page("tab-deep").replace('<div id="deep-result"></div>',
-                                      f'<div id="deep-result">{body}</div>')
-
-
-@app.post("/leaks", response_class=HTMLResponse)
-def leaks_route(value: str = Form(...), hibp_key: str = Form("")):
-    import os as _os
-    if hibp_key.strip():
-        _os.environ["HIBP_API_KEY"] = hibp_key.strip()
-    v = value.strip()
-    res = full_leak_check(v, is_email=("@" in v))
-    lc = res.get("leakcheck", {})
-    found = lc.get("found")
-
-    # XposedOrNot — бесплатный источник (11.6 млрд записей, без ключа)
-    xon = None
-    if "@" in v:
-        try:
-            xon = check_xposedornot(v)
-        except Exception:
-            xon = None
-
-    # Safe Surf (НКЦКИ, РФ) — российский сервис, бесплатно
-    ss = None
-    try:
-        ss = safesurf_ru.check(v)
-    except Exception:
-        ss = None
-
-    ss_block = ""
-    if ss and ss.get("matches") is not None:
-        ok = ss["matches"] > 0
-        ss_block = (
-            f"<div class='stats'>"
-            f"<div class='stat {'bad' if ok else 'ok'}'><b>{ss['matches']}</b>"
-            f"<span>совпадений в базе НКЦКИ</span></div></div>"
-            f"<h3>Safe Surf / НКЦКИ (РФ)</h3>"
-            f"<p class='hint'>{_esc(ss.get('summary', ''))} &mdash; "
-            f"тип поиска: {_esc(ss.get('entity', ''))}</p>")
-
-    srows = "".join(
-        f"<tr><td><b>{_esc(s.get('name'))}</b></td><td>{_esc(s.get('date'))}</td></tr>"
-        for s in (lc.get("sources") or []))
-    fl = lc.get("leaked_field_labels") or []
-
-    xon_block = ""
-    if xon and xon.get("breaches"):
-        xrows = "".join(f"<tr><td><b>{_esc(b)}</b></td></tr>" for b in xon["breaches"])
-        risk = xon.get("risk") or {}
-        xon_block = (
-            f"<div class='stats'><div class='stat bad'><b>{len(xon['breaches'])}</b>"
-            f"<span>утечек (XposedOrNot)</span></div>"
-            f"<div class='stat'><b>{_esc(risk.get('risk_label', '—'))}</b>"
-            f"<span>риск-скор {_esc(risk.get('risk_score', '—'))}</span></div></div>"
-            f"<h3>Утечки по XposedOrNot <span class='count'>{len(xon['breaches'])}</span></h3>"
-            f"<div class='tablewrap'><table><thead><tr><th>Сервис</th></tr></thead>"
-            f"<tbody>{xrows}</tbody></table></div>")
-
-    if found:
-        summary = (f"<div class='stats'>"
-                   f"<div class='stat bad'><b>{found}</b><span>записей в утечках</span></div>"
-                   f"<div class='stat warn'><b>{lc.get('source_count', 0)}</b><span>источников</span></div>"
-                   f"<div class='stat'><b>{len(fl)}</b><span>типов данных</span></div></div>"
-                   f"<p class='hint'>Утекли данные: <b style='color:var(--bad)'>{_esc(', '.join(fl))}</b></p>")
-    elif found == 0:
-        summary = "<div class='stats'><div class='stat ok'><b>0</b><span>утечек не найдено</span></div></div>"
-    else:
-        summary = f"<p class='hint' style='color:var(--bad)'>{_esc(lc.get('error') or 'нет данных')}</p>"
-
-    body = f"""
-    {summary}
-    {xon_block}
-    {ss_block}
-    {_toolbar(res)}
-    <h3>Источники утечек <span class="count">{lc.get('source_count', 0)}</span></h3>
-    <div class="tablewrap"><table><thead><tr><th>Сервис / сайт</th><th>Дата</th></tr></thead>
-    <tbody>{srows or '<tr><td colspan="2" class="empty">Утечек не найдено</td></tr>'}</tbody></table></div>
-    <h3>Полный отчёт</h3>
-    {_jblock(res)}
-    """
-    return _page("tab-leaks").replace('<div id="leaks-result"></div>', f'<div id="leaks-result">{body}</div>')
-
-
-@app.post("/exact", response_class=HTMLResponse)
-def exact_route(telegram: str = Form(""), email: str = Form(""),
-                vk: str = Form(""), phone: str = Form("")):
-    blocks = []
-
-    if telegram.strip():
-        r = search_telegram(telegram.strip())
-        p = r.get("profile", {})
-        lk = r.get("leaks", {}) or {}
-        avatar = (f"<img src='{_esc(p.get('avatar'))}' style='width:64px;height:64px;"
-                  f"border-radius:8px;border:1px solid var(--line2)'>") if p.get("avatar") else ""
-        meta_rows = "".join(
-            f"<tr><td style='width:150px;color:var(--muted)'>{_esc(k)}</td><td><b>{_esc(v)}</b></td></tr>"
-            for k, v in [("Имя", p.get("name")), ("Описание", p.get("bio")),
-                         ("Подписчики", p.get("subscribers")),
-                         ("Ссылка", p.get("profile_url"))] if v)
-        blocks.append(
-            f"<h3>Telegram <span class='count'>@{_esc(r.get('username'))}</span></h3>"
-            f"<div style='display:flex;gap:16px;align-items:flex-start'>"
-            f"<div>{avatar}</div><div style='flex:1'><table><tbody>{meta_rows}</tbody></table></div></div>"
-            f"{_leaks_block(lk)}"
-            f"{_mentions_block(r.get('mentions') or [])}"
-            f"<details><summary>Полный отчёт</summary>{_jblock(r)}</details>")
-
-    if email.strip():
-        r = search_email_detailed(email.strip())
-        g = r.get("gravatar", {}) or {}
-        lk = r.get("leaks", {}) or {}
-        gv = g.get("found")
-        meta_rows = "".join(
-            f"<tr><td style='width:150px;color:var(--muted)'>{_esc(k)}</td><td><b>{_esc(v)}</b></td></tr>"
-            for k, v in [("Профиль Gravatar", g.get("profile_url") or ("не найден" if not gv else "")),
-                         ("Имя", g.get("name")), ("Описание", g.get("about")),
-                         ("Локация", g.get("location")),
-                         ("Домен", r.get("domain"))] if v)
-        accounts = ""
-        if g.get("accounts"):
-            links = "".join(f"<li><a href='{_esc(a.get('url'))}' target='_blank'>{_esc(a.get('name'))}</a></li>"
-                            for a in g["accounts"] if a.get("url"))
-            accounts = f"<tr><td style='width:150px;color:var(--muted'>Связи</td><td><ul style='margin-left:16px'>{links}</ul></td></tr>"
-        blocks.append(
-            f"<h3>Email <span class='count'>{_esc(r.get('email'))}</span></h3>"
-            f"<table><tbody>{meta_rows}{accounts}</tbody></table>"
-            f"{_leaks_block(lk)}"
-            f"{_mentions_block(r.get('mentions') or [])}"
-            f"<details><summary>Полный отчёт</summary>{_jblock(r)}</details>")
-
-    if vk.strip():
-        r = search_vk(vk.strip())
-        p = r.get("profile", {}) or {}
-        lk = r.get("leaks", {}) or {}
-        avatar = (f"<img src='{_esc(p.get('avatar'))}' style='width:64px;height:64px;"
-                  f"border-radius:8px;border:1px solid var(--line2)'>") if p.get("avatar") else ""
-        meta_rows = "".join(
-            f"<tr><td style='width:150px;color:var(--muted)'>{_esc(k)}</td><td><b>{_esc(v)}</b></td></tr>"
-            for k, v in [("Имя", p.get("name")), ("Ник", p.get("screen_name")),
-                         ("Город", p.get("city")), ("Работа", p.get("work")),
-                         ("Статус", (p.get("status") or "")[:200]),
-                         ("Ссылка", r.get("profile_url"))] if v)
-        blocks.append(
-            f"<h3>ВКонтакте <span class='count'>{_esc(r.get('profile_url') or '')}</span></h3>"
-            f"<div style='display:flex;gap:16px;align-items:flex-start'>"
-            f"<div>{avatar}</div><div style='flex:1'><table><tbody>{meta_rows}</tbody></table></div></div>"
-            f"{_leaks_block(lk)}"
-            f"{_mentions_block(r.get('mentions') or [])}"
-            f"<details><summary>Полный отчёт</summary>{_jblock(r)}</details>")
-
-    if phone.strip():
-        r = search_phone_deep(phone.strip())
-        n = r.get("normalized", {}) or {}
-        op = r.get("operator", {}) or {}
-        lk = r.get("leaks", {}) or {}
-        meta_rows = "".join(
-            f"<tr><td style='width:150px;color:var(--muted)'>{_esc(k)}</td><td><b>{_esc(v)}</b></td></tr>"
-            for k, v in [("Нормализован", n.get("e164")), ("Страна", n.get("country")),
-                         ("Оператор", op.get("carrier")), ("Тип линии", op.get("line_type")),
-                         ("Локация", op.get("location"))] if v)
-        blocks.append(
-            f"<h3>Телефон <span class='count'>{_esc(r.get('input'))}</span></h3>"
-            f"<table><tbody>{meta_rows}</tbody></table>"
-            f"{_leaks_block(lk)}"
-            f"{_mentions_block(r.get('mentions') or [])}"
-            f"<details><summary>Полный отчёт</summary>{_jblock(r)}</details>")
-
-    if not blocks:
-        blocks.append('<p class="hint">Заполните хотя бы одно поле.</p>')
-
-    body = "".join(blocks)
-    return _page("tab-exact").replace('<div id="exact-result"></div>', f'<div id="exact-result">{body}</div>')
-
-
-def _leaks_block(lk: Dict[str, Any]) -> str:
-    """Блок с данными об утечках."""
-    if not lk:
-        return ""
-    found = lk.get("found")
-    if found in (None, 0):
-        return ('<div class="stats"><div class="stat ok"><b>0</b>'
-                '<span>утечек не найдено</span></div></div>')
-    srcs = lk.get("sources") or []
-    rows = "".join(f"<tr><td><b>{_esc(s.get('name'))}</b></td><td>{_esc(s.get('date'))}</td></tr>"
-                   for s in srcs[:60])
-    fields = lk.get("fields") or lk.get("leaked_field_labels") or []
-    fld = f'<p class="hint">Утекли данные: <b style="color:var(--bad)">{_esc(", ".join(fields))}</b></p>' if fields else ""
-    return (f'<div class="stats"><div class="stat bad"><b>{found}</b><span>записей в утечках</span></div>'
-            f'<div class="stat warn"><b>{lk.get("source_count", len(srcs))}</b><span>источников</span></div></div>'
-            f'{fld}'
-            f'<details><summary>Источники утечек ({len(srcs)})</summary>'
-            f'<div class="tablewrap"><table><thead><tr><th>Сервис</th><th>Дата</th></tr></thead>'
-            f'<tbody>{rows}</tbody></table></div></details>')
-
-
-def _mentions_block(mentions: List[Dict[str, Any]]) -> str:
-    """Блок с упоминаниями в интернете."""
-    if not mentions:
-        return ""
-    rows = "".join(
-        f"<tr><td><a href='{_esc(m.get('url'))}' target='_blank'>{_esc(m.get('title'))}</a></td>"
-        f"<td>{_esc(m.get('domain'))}</td><td>{_esc((m.get('snippet') or '')[:150])}</td></tr>"
-        for m in mentions if m.get("url"))
-    return (f'<h3>Упоминания в интернете <span class="count">{len(mentions)}</span></h3>'
-            f'<div class="tablewrap"><table><thead><tr><th>Заголовок</th><th>Домен</th>'
-            f'<th>Фрагмент</th></tr></thead><tbody>{rows}</tbody></table></div>')
+    body = _scan_out(value.strip(), sel)
+    return _page("scan", _scan_section(value) + body)
 
 
 @app.post("/dossier", response_class=HTMLResponse)
-def dossier_route(value: str = Form(...)):
-    d = build_dossier(value.strip())
-    sm = d.get("summary", {})
-    idn, loc, con, br = d["identity"], d["locations"], d["contacts"], d["breaches"]
-
-    def chips(vals):
-        if not vals:
-            return '<span class="hint">— не найдено —</span>'
-        return "".join(f"<span class='tag cat' style='margin:2px 3px 2px 0'>{_esc(v)}</span>"
-                       for v in vals[:25])
-
-    def field(label, vals, badge=""):
-        return (f"<tr><td style='width:190px;color:var(--muted)'>{_esc(label)}</td>"
-                f"<td>{chips(vals)}{badge}</td></tr>")
-
-    srcs = "".join(f"<span class='tag ok' style='margin:2px 3px 2px 0'>{_esc(s)}</span>"
-                   for s in d.get("sources_used", []))
-
-    ev_rows = ""
-    for e in (d.get("profiles", {}).get("web_extractions") or [])[:20]:
-        ex = e.get("extracted", {})
-        chips_ex = "".join(f"<span class='tag cat' style='margin:1px 2px 1px 0'>{_esc(k)}: {_esc(v)}</span>"
-                           for k, v in ex.items())
-        ev_rows += (f"<tr><td><a href='{_esc(e.get('url'))}' target='_blank'>"
-                    f"{_esc(e.get('title') or '')}</a><br>"
-                    f"<span class='hint'>{_esc(e.get('snippet') or '')[:150]}</span></td>"
-                    f"<td>{chips_ex}</td></tr>")
-
-    br_rows = "".join(
-        f"<tr><td><b>{_esc(s.get('name'))}</b></td><td>{_esc(s.get('date'))}</td></tr>"
-        for s in (br.get("sources") or [])[:60])
-
-    accounts = ""
-    acc = d.get("profiles", {}).get("accounts") or {}
-    if acc:
-        rows = "".join(
-            f"<tr><td><b>{_esc(un)}</b></td><td>"
-            + "".join(f"<a href='{_esc(i.get('url'))}' target='_blank'>{_esc(i.get('site'))}</a> "
-                      for i in items) + "</td></tr>"
-            for un, items in acc.items())
-        accounts = (f"<h3>Связанные аккаунты <span class='count'>{sum(len(v) for v in acc.values())}</span></h3>"
-                    f"<div class='tablewrap'><table><thead><tr><th>Логин</th><th>Площадки</th></tr></thead>"
-                    f"<tbody>{rows}</tbody></table></div>")
-
-    ident = d.get("profiles", {}).get("infostealer")
-    ident_block = ""
-    if ident:
-        rows = "".join(f"<tr><td style='width:190px;color:var(--muted)'>{_esc(k)}</td><td><b>{_esc(v)}</b></td></tr>"
-                       for k, v in ident.items() if v)
-        ident_block = (f"<h3>Заражение инфостилером</h3>"
-                       f"<table><tbody>{rows}</tbody></table>")
-
-    # ---------------- ЛИЧНЫЕ ДАННЫЕ ----------------
-    per = d.get("personal") or {}
-    # Дополняем сводку данными из личного блока (найдены в открытых источниках)
-    if per and not per.get("error"):
-        if not idn["full_name"] and per.get("names"):
-            idn["full_name"] = list(per["names"])
-        if not idn["birth_date"] and per.get("birth_dates"):
-            idn["birth_date"] = list(per["birth_dates"])
-        if not idn["gender"] and per.get("genders"):
-            idn["gender"] = list(per["genders"])
-        if not loc["address"] and per.get("addresses"):
-            loc["address"] = list(per["addresses"])
-        if not loc["city"] and per.get("cities"):
-            loc["city"] = list(per["cities"])
-        if not loc["district"] and per.get("districts"):
-            loc["district"] = list(per["districts"])
-        if not loc["zip"] and per.get("zips"):
-            loc["zip"] = list(per["zips"])
-        if not con["usernames"] and per.get("usernames"):
-            con["usernames"] = list(per["usernames"])
-    personal_block = ""
-    if per and not per.get("error"):
-        def plist(vals, empty="— не найдено —"):
-            if not vals:
-                return f"<span class='hint'>{_esc(empty)}</span>"
-            return "".join(f"<span class='tag cat' style='margin:2px 3px 2px 0'>{_esc(v)}</span>"
-                           for v in vals[:25])
-
-        srows = ""
-        sp = per.get("social_profiles") or {}
-        items = sp.items() if isinstance(sp, dict) else []
-        for un, lst in items:
-            if isinstance(lst, list):
-                for it in lst:
-                    srows += (f"<tr><td><b>{_esc(it.get('site'))}</b><br>"
-                              f"<span class='hint'>{_esc(it.get('category',''))}</span></td>"
-                              f"<td><span class='hint'>логин: {_esc(un)}</span></td>"
-                              f"<td><a href='{_esc(it.get('url'))}' target='_blank'>{_esc(it.get('url'))}</a></td></tr>")
-        for it in (sp if isinstance(sp, list) else []):
-            srows += (f"<tr><td><b>{_esc(it.get('site'))}</b></td><td></td>"
-                      f"<td><a href='{_esc(it.get('url'))}' target='_blank'>{_esc(it.get('url'))}</a></td></tr>")
-
-        erows = ""
-        for e in (per.get("evidence") or [])[:30]:
-            ex = e.get("extracted") or {}
-            exchips = "".join(f"<span class='tag cat' style='margin:1px 2px 1px 0'>{_esc(k)}: {_esc(val)}</span>"
-                              for k, val in ex.items())
-            link = (f"<a href='{_esc(e.get('url'))}' target='_blank'>{_esc(e.get('source'))}</a>"
-                    if e.get("url") else _esc(e.get("source")))
-            erows += (f"<tr><td>{link}</td><td>{_esc((e.get('detail') or '')[:220])}</td>"
-                      f"<td>{exchips}</td></tr>")
-
-        personal_block = f"""
-        <h3>🕵️ Личные данные</h3>
-        <div class="stats">
-          <div class="stat ok"><b>{len(per.get('names') or [])}</b><span>имён / ФИО</span></div>
-          <div class="stat"><b>{len(per.get('addresses') or [])}</b><span>адресов</span></div>
-          <div class="stat"><b>{len(per.get('cities') or [])}</b><span>городов</span></div>
-          <div class="stat"><b>{len(per.get('usernames') or [])}</b><span>логинов</span></div>
-          <div class="stat"><b>{len(per.get('birth_dates') or [])}</b><span>дат рождения</span></div>
-          <div class="stat"><b>{len(per.get('genders') or [])}</b><span>пол</span></div>
-          <div class="stat"><b>{len(per.get('districts') or [])}</b><span>районов</span></div>
-          <div class="stat"><b>{len(per.get('zips') or [])}</b><span>индексов</span></div>
-        </div>
-        <table><tbody>
-          <tr><td style='width:190px;color:var(--muted)'>ФИО / имя</td><td>{plist(per.get('names'))}</td></tr>
-          <tr><td style='width:190px;color:var(--muted)'>Владелец номера</td><td>{plist([per.get('phone_owner')] if per.get('phone_owner') else [])}</td></tr>
-          <tr><td style='width:190px;color:var(--muted)'>Дата рождения</td><td>{plist(per.get('birth_dates'))}</td></tr>
-          <tr><td style='width:190px;color:var(--muted)'>Пол</td><td>{plist(per.get('genders'))}</td></tr>
-          <tr><td style='width:190px;color:var(--muted)'>Адрес проживания</td><td>{plist(per.get('addresses'))}</td></tr>
-          <tr><td style='width:190px;color:var(--muted)'>Город</td><td>{plist(per.get('cities'))}</td></tr>
-          <tr><td style='width:190px;color:var(--muted)'>Район</td><td>{plist(per.get('districts'))}</td></tr>
-          <tr><td style='width:190px;color:var(--muted)'>Индекс</td><td>{plist(per.get('zips'))}</td></tr>
-          <tr><td style='width:190px;color:var(--muted)'>Оператор связи</td><td>{plist(per.get('operators'))}</td></tr>
-          <tr><td style='width:190px;color:var(--muted)'>Логины</td><td>{plist(per.get('usernames'))}</td></tr>
-          <tr><td style='width:190px;color:var(--muted)'>Источники</td><td>{plist(per.get('sources'))}</td></tr>
-        </tbody></table>
-        <h3>Все соцсети и профили <span class="count">{srows.count('<tr>')}</span></h3>
-        <div class="tablewrap"><table><thead><tr><th>Сайт</th><th>Логин</th><th>Ссылка</th></tr></thead>
-        <tbody>{srows or '<tr><td colspan="3" class="empty">Профили не найдены</td></tr>'}</tbody></table></div>
-        <h3>Доказательства (откуда взяты данные)</h3>
-        <div class="tablewrap"><table><thead><tr><th>Источник</th><th>Фрагмент</th><th>Извлечено</th></tr></thead>
-        <tbody>{erows or '<tr><td colspan="3" class="empty">—</td></tr>'}</tbody></table></div>
-        """
-
-    chk = d.get("checked") or {}
-    chk_rows = "".join(
-        f"<tr><td style='width:280px;color:var(--muted)'>{_esc(k)}</td><td><b>{_esc(v)}</b></td></tr>"
-        for k, v in (chk.get("counts") or {}).items())
-    chk_srcs = "".join(f"<li>{_esc(s)}</li>" for s in (chk.get("sources") or []))
-    checked_block = f"""
-    <h3>Что было проверено</h3>
-    <table><tbody>{chk_rows}</tbody></table>
-    <details><summary>Источники опроса ({len(chk.get('sources') or [])})</summary>
-    <ul style='padding:14px 20px 14px 34px'>{chk_srcs}</ul></details>
-    """
-
-    body = f"""
-    <div class="stats">
-      <div class="stat ok"><b>{br.get('count', 0)}</b><span>записей в утечках</span></div>
-      <div class="stat warn"><b>{len(br.get('sources') or [])}</b><span>источников утечек</span></div>
-      <div class="stat ok"><b>{len(sm.get('identified_fields') or [])}</b><span>полей установлено</span></div>
-      <div class="stat"><b>{len(d.get('web_evidence') or [])}</b><span>упоминаний</span></div>
-    </div>
-
-    {checked_block}
-    <h3>Установленные сведения</h3>
-    <table><tbody>
-      {field('ФИО / имя', idn['full_name'])}
-      {field('Имя', idn['first_name'])}
-      {field('Фамилия', idn['last_name'])}
-      {field('Отчество', idn['middle_name'])}
-      {field('Дата рождения', idn['birth_date'])}
-      {field('Пол', idn['gender'])}
-      {field('Адрес', loc['address'])}
-      {field('Город', loc['city'])}
-      {field('Регион', loc['region'])}
-      {field('Район', loc['district'])}
-      {field('Страна', loc['country'])}
-      {field('Индекс', loc['zip'])}
-      {field('Телефоны', con['phones'])}
-      {field('Email', con['emails'])}
-      {field('Логины', con['usernames'])}
-      {field('IP-адреса', con['ips'])}
-    </tbody></table>
-
-    <h3>Источники данных</h3>
-    <p>{srcs or '<span class="hint">нет</span>'}</p>
-    {personal_block}
-    {ident_block}
-    {accounts}
-
-    <h3>Источники утечек <span class="count">{len(br.get('sources') or [])}</span></h3>
-    <div class="tablewrap"><table><thead><tr><th>Сервис</th><th>Дата</th></tr></thead>
-    <tbody>{br_rows or '<tr><td colspan="2" class="empty">Утечек не найдено</td></tr>'}</tbody></table></div>
-
-    {('<h3>Извлечённые данные из открытых страниц</h3>'
-      f'<div class="tablewrap"><table><thead><tr><th>Страница</th><th>Извлечено</th></tr></thead>'
-      f'<tbody>{ev_rows}</tbody></table></div>') if ev_rows else ''}
-
-    <details><summary>Полный отчёт (JSON)</summary>{_jblock(d)}</details>
-    """
-    return _page("tab-dossier").replace('<div id="dossier-result"></div>',
-                                         f'<div id="dossier-result">{body}</div>')
+def dossier_route(value: str = Form(...), kind: str = Form("auto")):
+    body = _dossier_section() + _dossier_out(value.strip(), kind)
+    return _page("dossier", body)
 
 
-@app.get("/catalog", response_class=HTMLResponse)
-def catalog_route(q: str = "", request: Request = None):
-    """OSINT Catalog: дерево источников по ветвям таксономии."""
-    import catalog as CAT
+@app.post("/deep", response_class=HTMLResponse)
+def deep_route(seed: str = Form(...), kind: str = Form("auto"), depth: str = Form("2")):
     try:
-        st = CAT.stats()
-        tree_html = CAT.render_tree_html(q)
-    except Exception as e:
-        return _page("tab-catalog").replace(
-            '<div id="catalog-result"></div>',
-            f'<div id="catalog-result"><p class="hint" style="color:var(--bad)">'
-            f'Каталог недоступен: {_esc(str(e))}</p></div>')
-
-    branches = "".join(
-        f"<tr><td><b>{_esc(b['branch'])}</b></td><td>{b['categories']}</td>"
-        f"<td>{b['sources']}</td></tr>"
-        for b in st.get("branches", []))
-    body = f"""
-    <div class="stats">
-      <div class="stat"><b>{st['total_sources']}</b><span>источников</span></div>
-      <div class="stat ok"><b>{st['checkable']}</b><span>проверяемых по нику</span></div>
-      <div class="stat"><b>{st['resources']}</b><span>ресурсов</span></div>
-      <div class="stat"><b>{st['categories']}</b><span>категорий</span></div>
-      <div class="stat warn"><b>{len(st['branches'])}</b><span>ветвей</span></div>
-    </div>
-    <h3>Ветви каталога</h3>
-    <div class="tablewrap"><table><thead><tr><th>Ветвь</th><th>Категорий</th><th>Источников</th></tr></thead>
-    <tbody>{branches}</tbody></table></div>
-    {tree_html}
-    """
-    frag = request is not None and request.query_params.get("frag") == "1"
-    if frag:
-        return HTMLResponse(body)
-    return _page("tab-catalog").replace('<div id="catalog-result"></div>',
-                                         f'<div id="catalog-result">{body}</div>')
+        d = max(1, min(int(depth), 3))
+    except Exception:
+        d = 2
+    body = _deep_section() + _deep_out(seed.strip(), kind, d)
+    return _page("deep", body)
 
 
-@app.get("/kb", response_class=HTMLResponse)
-def kb_route(q: str = "", request: Request = None):
-    """База знаний: статистика, кластеры, поиск по накопленному графу."""
-    from knowledge import KnowledgeBase
-    try:
-        kb = KnowledgeBase()
-    except Exception as e:
-        return _page("tab-kb").replace(
-            '<div id="kb-result"></div>',
-            f'<div id="kb-result"><p class="hint" style="color:var(--bad)">'
-            f'База недоступна: {_esc(str(e))}</p></div>')
-
-    st = kb.stats()
-    query = (q or "").strip()
-
-    stats_html = f"""
-    <div class="stats">
-      <div class="stat"><b>{st['nodes']}</b><span>узлов</span></div>
-      <div class="stat"><b>{st['edges']}</b><span>связей</span></div>
-      <div class="stat"><b>{st['attributes']}</b><span>атрибутов</span></div>
-      <div class="stat"><b>{st['sightings']}</b><span>свидетельств</span></div>
-      <div class="stat {'warn' if st['largest_cluster'] > 3 else 'ok'}">
-        <b>{st['largest_cluster']}</b><span>узлов в кластере</span></div>
-    </div>
-    """
-
-    kinds = "".join(f"<span class='tag cat' style='margin:2px 3px 2px 0'>"
-                    f"{_esc(k)}: {v}</span>" for k, v in (st.get("nodes_by_kind") or {}).items())
-    ekinds = "".join(f"<span class='tag ok' style='margin:2px 3px 2px 0'>"
-                     f"{_esc(k)}: {v}</span>" for k, v in (st.get("edges_by_kind") or {}).items())
-
-    body = stats_html
-    body += f"<h3>Узлы по типам</h3><div class='chips'>{kinds or '<span class=\'hint\'>пусто</span>'}</div>"
-    body += f"<h3>Связи по типам</h3><div class='chips'>{ekinds or '<span class=\'hint\'>пусто</span>'}</div>"
-    body += ("<p class='hint'>База: <code>" + _esc(st.get("path", "")) + "</code> · "
-             "<a href='/kb/graph' target='_blank'>открыть полный граф →</a></p>")
-
-    if query:
-        res = kb.search(query)
-        rows = "".join(
-            f"<tr><td><span class='tag cat'>{_esc(r['kind'])}</span></td>"
-            f"<td>{_esc(r['value'])}</td>"
-            f"<td>{_esc(r.get('source') or '')}</td>"
-            f"<td>{r.get('confidence', '')}</td></tr>" for r in res)
-        body += (f"<h3>Результаты поиска «{_esc(query)}» "
-                 f"<span class='count'>{len(res)}</span></h3>"
-                 f"<div class='tablewrap'><table><thead><tr><th>Тип</th><th>Значение</th>"
-                 f"<th>Источник</th><th>Уверенность</th></tr></thead>"
-                 f"<tbody>{rows or '<tr><td colspan=\'4\' class=\'empty\'>Ничего не найдено</td></tr>'}"
-                 f"</tbody></table></div>")
-
-    g = kb.graph()
-    if g["nodes"]:
-        cl_rows = ""
-        for cl in g["clusters"][:12]:
-            det = kb.cluster_detail(cl)
-            vals = ", ".join(f"{n['kind']}:{n['value']}" for n in det["nodes"][:10])
-            cl_rows += (f"<tr><td>{len(cl)}</td><td>{_esc(vals)}</td>"
-                        f"<td>{_esc(', '.join(sorted({a['key'] for a in det['attributes']})))}</td></tr>")
-        body += (f"<h3>Кластеры «вероятно один человек» <span class='count'>{len(g['clusters'])}</span></h3>"
-                 f"<div class='tablewrap'><table><thead><tr><th>Узлов</th><th>Состав</th>"
-                 f"<th>Атрибуты</th></tr></thead>"
-                 f"<tbody>{cl_rows or '<tr><td colspan=\'3\' class=\'empty\'>Пока нет</td></tr>'}"
-                 f"</tbody></table></div>")
-
-    kb.close()
-    frag = request is not None and request.query_params.get("frag") == "1"
-    if frag:
-        return HTMLResponse(body)
-    return _page("tab-kb").replace('<div id="kb-result"></div>',
-                                    f'<div id="kb-result">{body}</div>')
+@app.post("/tools-leaks", response_class=HTMLResponse)
+def tools_leaks(value: str = Form(...)):
+    v = value.strip()
+    res = full_leak_check(v, is_email=("@" in v))
+    lc = res.get("leakcheck", {})
+    xon = check_xposedornot(v) if "@" in v else None
+    ss = safesurf_ru.check(v)
+    rows = [
+        ["LeakCheck", f"<b>{lc.get('found', 0)}</b>",
+         _esc(", ".join(lc.get("leaked_field_labels", [])[:25]))],
+        ["XposedOrNot", f"<b>{len(xon.get('breaches', [])) if xon else 0}</b>",
+         _esc(", ".join(xon.get("breaches", [])[:25]) if xon else "— только для email")],
+        ["Safe Surf / НКЦКИ", f"<b>{ss.get('matches', '—')}</b>", _esc(ss.get("summary") or "")],
+    ]
+    srcs = [(s.get("name"), s.get("date")) for s in (lc.get("sources") or [])[:60]]
+    body = _tools_section("leaks") + _stats([
+        (lc.get("found", 0), "записей в утечках", "bad"),
+        (len(srcs), "источников", ""),
+        (len(lc.get("leaked_field_labels", [])), "типов данных", "warn"),
+    ])
+    body += ('<div class="panel"><h4>Сводка по базам</h4>' +
+             _table(["База", "Записей", "Какие данные утекли"], rows) + "</div>")
+    body += ('<details><summary>Источники утечек (' + str(len(srcs)) + ")</summary>" +
+             _table(["Сервис", "Дата"], srcs) + "</details>")
+    body += "<details><summary>Полный отчёт (JSON)</summary><pre>" + _esc(
+        json.dumps(res, ensure_ascii=False, indent=2)) + "</pre></details>"
+    return _page("tools", body)
 
 
-@app.get("/kb/graph", response_class=HTMLResponse)
-def kb_graph_route():
-    """Полный накопленный граф базы знаний в виде HTML."""
-    from knowledge import KnowledgeBase
-    import correlator as C
-    kb = KnowledgeBase()
-    g = kb.graph()
-    rep = {
-        "risk": {"score": 0, "level": "—"},
-        "correlation": {
-            "edges": [{"a": f"n{e['a']}", "b": f"n{e['b']}",
-                       "confidence": e["confidence"],
-                       "reasons": [e.get("evidence") or e.get("kind", "")]}
-                      for e in g["edges"]],
-            "clusters": [[f"n{i}" for i in cl] for cl in g["clusters"]],
-        },
-        "identifiers": [{"key": f"n{n['id']}", "value": n["value"],
-                         "type": n["kind"]} for n in g["nodes"]],
-        "profiles": [{"platform": n["kind"], "ident_value": n["value"],
-                      "url": "", "name": n["value"]}
-                     for n in g["nodes"] if n["kind"] == "profile"],
-        "recommendations": [],
-    }
-    html = C.render_graph_html(rep)
-    kb.close()
-    return HTMLResponse(html)
-
-
-@app.post("/correlate", response_class=HTMLResponse)
-def correlate_route(phone: str = Form(""), email: str = Form(""), telegram: str = Form(""),
-                    vk: str = Form(""), username: str = Form(""), name: str = Form(""),
-                    deep: str = Form("")):
-    """Несколько идентификаторов -> одно досье: профили, ФИО, адреса, соцсети, граф."""
-    import correlator as C
-
-    def lst(v: str):
-        return [x.strip() for x in (v or "").replace(",", " ").split() if x.strip()]
-
-    if not any([phone, email, telegram, vk, username, name]):
-        return _page("tab-correlate").replace(
-            '<div id="correlate-result"></div>',
-            '<div id="correlate-result"><p class="hint">Заполните хотя бы одно поле.</p></div>')
-
-    try:
-        rep = C.correlate_all(phone=lst(phone), email=lst(email), telegram=lst(telegram),
-                              vk=lst(vk), username=lst(username), name=lst(name),
-                              deep=bool(deep), pages=18)
-    except Exception as e:
-        return _page("tab-correlate").replace(
-            '<div id="correlate-result"></div>',
-            f'<div id="correlate-result"><p class="hint" style="color:var(--bad)">'
-            f'Ошибка: {_esc(type(e).__name__)}: {_esc(str(e))}</p></div>')
-
-    ident = rep.get("identity") or {}
-    risk = rep.get("risk") or {}
-
-    def rows(items, cols, render):
-        return "".join(f"<tr>{render(it)}</tr>" for it in items)
-
-    name_rows = rows(ident.get("full_names") or [], 3, lambda n:
-                     f"<td><b>{_esc(n['value'])}</b></td><td>{n['confidence']:.2f}</td>"
-                     f"<td>{_esc(', '.join(n['sources']))}</td>")
-    addr_rows = rows(ident.get("addresses") or [], 3, lambda a:
-                     f"<td>{_esc(a['value'])}</td><td>{a['confidence']:.2f}</td>"
-                     f"<td>{_esc(', '.join(a['sources']))}</td>")
-    city_list = ", ".join(f"{_esc(c['value'])} ({c['confidence']:.2f})"
-                          for c in (ident.get("cities") or [])[:12])
-    job_list = ", ".join(f"{_esc(j['value'])} ({j['confidence']:.2f})"
-                         for j in (ident.get("jobs") or [])[:8])
-    social_rows = rows(ident.get("social_links") or [], 2, lambda s:
-                       f"<td><span class='tag cat'>{_esc(s['platform'])}</span></td>"
-                       f"<td><a href='{_esc(s['url'])}' target='_blank'>{_esc(s['url'])}</a></td>")
-    prof_rows = rows(rep.get("profiles") or [], 3, lambda p:
-                     f"<td><span class='tag cat'>{_esc(p['platform'])}</span></td>"
-                     f"<td>{_esc(p.get('name') or '—')}</td>"
-                     f"<td><a href='{_esc(p.get('url') or '')}' target='_blank'>"
-                     f"{_esc(p.get('url') or '')}</a></td>")
-    edge_rows = rows((rep.get("correlation") or {}).get("edges") or [], 4, lambda e:
-                     f"<td>{_esc(e['a'][:32])}</td><td>{_esc(e['b'][:32])}</td>"
-                     f"<td>{e['confidence']:.2f}</td><td>{_esc('; '.join(e['reasons']))}</td>")
-
-    lex = ident.get("leak_exposure") or {}
-    leak_block = ""
-    if lex.get("records") or lex.get("fields"):
-        leak_block = (f"<h3>Экспозиция в утечках</h3>"
-                      f"<p class='hint'>Записей: <b style='color:var(--bad)'>{lex.get('records')}</b> · "
-                      f"поля: {_esc(', '.join(lex.get('fields') or []) or '—')}</p>"
-                      f"<p class='hint'>Источники: {_esc('; '.join((lex.get('sources') or [])[:10]))}</p>")
-
-    body = f"""
-    <div class="stats">
-      <div class="stat {'bad' if risk.get('score',0)>=70 else 'warn' if risk.get('score',0)>=40 else 'ok'}">
-        <b>{risk.get('score',0)}</b><span>экспозиция ({_esc(risk.get('level',''))})</span></div>
-      <div class="stat"><b>{len(rep.get('profiles',[]))}</b><span>профилей</span></div>
-      <div class="stat"><b>{len((rep.get('correlation') or {}).get('edges') or [])}</b><span>связей</span></div>
-      <div class="stat"><b>{len(ident.get('full_names') or [])}</b><span>кандидатов ФИО</span></div>
-    </div>
-    {''.join(f"<p class='hint'>• {_esc(x)}</p>" for x in (risk.get('reasons') or []))}
-    {_toolbar(rep)}
-    <h3>Кандидаты ФИО <span class="count">{len(ident.get('full_names') or [])}</span></h3>
-    <div class="tablewrap"><table><thead><tr><th>ФИО</th><th>Уверенность</th><th>Источники</th></tr></thead>
-    <tbody>{name_rows or '<tr><td colspan="3" class="empty">Не найдено</td></tr>'}</tbody></table></div>
-    <h3>Адреса <span class="count">{len(ident.get('addresses') or [])}</span></h3>
-    <div class="tablewrap"><table><thead><tr><th>Значение</th><th>Уверенность</th><th>Источники</th></tr></thead>
-    <tbody>{addr_rows or '<tr><td colspan="3" class="empty">Не найдено</td></tr>'}</tbody></table></div>
-    {f'<p class="hint">Города/регионы: {city_list}</p>' if city_list else ''}
-    {f'<p class="hint">Места работы: {job_list}</p>' if job_list else ''}
-    {leak_block}
-    <h3>Ссылки на соцсети <span class="count">{len(ident.get('social_links') or [])}</span></h3>
-    <div class="tablewrap"><table><thead><tr><th>Площадка</th><th>Ссылка</th></tr></thead>
-    <tbody>{social_rows or '<tr><td colspan="2" class="empty">Не найдено</td></tr>'}</tbody></table></div>
-    <h3>Профили <span class="count">{len(rep.get('profiles',[]))}</span></h3>
-    <div class="tablewrap"><table><thead><tr><th>Площадка</th><th>Имя</th><th>Ссылка</th></tr></thead>
-    <tbody>{prof_rows or '<tr><td colspan="3" class="empty">Не найдено</td></tr>'}</tbody></table></div>
-    <h3>Граф связей</h3>
-    <div class="tablewrap"><table><thead><tr><th>Узел A</th><th>Узел B</th><th>Ув.</th><th>Основание</th></tr></thead>
-    <tbody>{edge_rows or '<tr><td colspan="4" class="empty">Связей не найдено</td></tr>'}</tbody></table></div>
-    <details><summary>Полный отчёт (JSON)</summary>{_jblock(rep)}</details>
-    """
-    return _page("tab-correlate").replace('<div id="correlate-result"></div>',
-                                          f'<div id="correlate-result">{body}</div>')
-
-
-@app.post("/web", response_class=HTMLResponse)
-def web_route(query: str = Form(...)):
-    sp = serper_search(query.strip())
+@app.post("/tools-web", response_class=HTMLResponse)
+def tools_web(query: str = Form(...)):
+    q = query.strip()
+    sp = serper_search(q, limit=25)
     if sp.get("active") and sp.get("results"):
-        rows = "".join(
-            f"<tr><td><a href='{_esc(r['url'])}' target='_blank'>{_esc(r['title'])}</a></td>"
-            f"<td>{_esc(r['url'].split('/')[2] if r.get('url') else '')}</td>"
-            f"<td>{_esc(r.get('snippet') or '')}</td></tr>" for r in sp["results"])
-        body = f"""
-        <div class="stats"><div class="stat ok"><b>{sp.get('total', 0)}</b><span>результатов Google</span></div>
-        <div class="stat"><b>Serper.dev</b><span>источник</span></div></div>
-        {_toolbar(sp)}
-        <h3>Результаты <span class="count">{sp.get('total', 0)}</span></h3>
-        <div class="tablewrap"><table><thead><tr><th>Заголовок</th><th>Домен</th><th>Фрагмент</th></tr></thead>
-        <tbody>{rows}</tbody></table></div>
-        """
-        return _page("tab-web").replace('<div id="web-result"></div>', f'<div id="web-result">{body}</div>')
+        rows = [(f"<a href='{_esc(r['url'])}' target='_blank'>{_esc(r.get('title'))}</a>",
+                 _esc(r.get("domain")), _esc((r.get("snippet") or "")[:180]))
+                for r in sp["results"]]
+        engine = "Google / Serper.dev"
+    else:
+        res = web_search(q, limit=25)
+        rows = [(f"<a href='{_esc(r['url'])}' target='_blank'>{_esc(r.get('title'))}</a>",
+                 _esc(r.get("domain")), _esc((r.get("snippet") or "")[:180]))
+                for r in res.get("results", [])]
+        engine = "DuckDuckGo"
+    body = _tools_section("web") + _stats([(len(rows), "результатов", "ok"),
+                                           (engine, "источник", "")])
+    body += '<div class="panel"><h4>Результаты</h4>' + _table(
+        ["Заголовок", "Домен", "Фрагмент"], rows) + "</div>"
+    return _page("tools", body)
 
-    res = web_search(query.strip())
-    rows = "".join(
-        f"<tr><td><a href='{_esc(r['url'])}' target='_blank'>{_esc(r['title'])}</a></td>"
-        f"<td>{_esc(r['domain'])}</td><td>{_esc(r['snippet'])}</td></tr>" for r in res.get("results", []))
-    err = f"<p class='hint' style='color:var(--bad)'>{_esc(res.get('error'))}</p>" if res.get("error") else ""
-    extra = ("<p class='hint'>Совет: добавьте ключ Serper.dev во вкладке «Ключи» &mdash; "
-             "поиск пойдёт через настоящий Google.</p>")
-    body = f"""{err}{extra}
-    <div class="stats"><div class="stat"><b>{res.get('count', 0)}</b><span>упоминаний (DuckDuckGo)</span></div></div>
-    <h3>Результаты</h3>
-    <div class="tablewrap"><table><thead><tr><th>Заголовок</th><th>Домен</th><th>Фрагмент</th></tr></thead>
-    <tbody>{rows or '<tr><td colspan="3" class="empty">Ничего не найдено</td></tr>'}</tbody></table></div>
-    """
-    return _page("tab-web").replace('<div id="web-result"></div>', f'<div id="web-result">{body}</div>')
+
+@app.post("/tools-net", response_class=HTMLResponse)
+def tools_net(ip: str = Form(""), domain: str = Form(""),
+              phone: str = Form(""), name: str = Form("")):
+    out: Dict[str, Any] = {}
+    if ip.strip():
+        out["IP"] = search_ip(ip.strip())
+    if domain.strip():
+        out["Домен"] = search_domain(domain.strip())
+    if phone.strip():
+        out["Телефон"] = search_phone(phone.strip())
+    if name.strip():
+        out["ФИО"] = search_name(name.strip())
+    body = _tools_section("net")
+    if out:
+        body += ('<div class="panel"><h4>Собранные данные</h4>' +
+                 _table(["Раздел", "Данные"],
+                        [[k, f"<pre style='max-height:340px'>{_esc(json.dumps(v, ensure_ascii=False, indent=2))}</pre>"]
+                         for k, v in out.items()]) + "</div>")
+    return _page("tools", body)
+
+
+@app.post("/tools-corr", response_class=HTMLResponse)
+def tools_corr(value: str = Form(...)):
+    v = value.strip()
+    body = _tools_section("corr")
+    try:
+        from correlator import username_variants, name_match
+        variants = username_variants(v)
+        body += _stats([(len(variants), "вариантов ника", "acc"), (1, "введён запрос", "")])
+        body += ('<div class="panel"><h4>Варианты написания ника</h4><div class="tags">' +
+                 "".join(f'<span class="tag acc" style="margin:2px 4px 2px 0">{_esc(x)}</span>'
+                         for x in variants) + "</div></div>")
+    except Exception as e:
+        body += f'<div class="panel"><h4>Ошибка</h4><pre>{_esc(str(e))}</pre></div>'
+    return _page("tools", body)
 
 
 @app.post("/keys", response_class=HTMLResponse)
@@ -1862,46 +935,94 @@ async def keys_route(request: Request):
         v = (form.get(name) or "").strip()
         if not v:
             continue
-        # Если поле предзаполнено маской активного ключа — не трогаем реальное значение
         st = current.get(name, {})
         if st.get("active") and v == st.get("masked"):
             continue
         keys[name] = v
-    ok = save_keys(keys) if keys else False
     if keys:
-        msg = ("<p class='hint' style='color:var(--ok)'>Ключи сохранены в osint_keys.json "
-               "и подхвачены автоматически.</p>")
-    else:
-        msg = "<p class='hint'>Новые ключи не заданы — текущие остались без изменений.</p>"
-    return _page("tab-keys").replace('<div id="keys-result"></div>', f'<div id="keys-result">{msg}</div>')
-
-
-@app.post("/other", response_class=HTMLResponse)
-def other_route(ip: str = Form(""), domain: str = Form(""),
-                phone: str = Form(""), name: str = Form("")):
-    out = {}
-    if ip.strip():
-        out["ip"] = search_ip(ip.strip())
-    if domain.strip():
-        out["domain"] = search_domain(domain.strip())
-    if phone.strip():
-        out["phone"] = search_phone(phone.strip())
-    if name.strip():
-        out["name"] = search_name(name.strip())
-    body = f"<h3>Собранные данные</h3>{_jblock(out)}"
-    return _page("tab-other").replace('<div id="other-result"></div>', f'<div id="other-result">{body}</div>')
+        save_keys(keys)
+    body = _keys_section()
+    body = ('<div class="panel"><h4>Сохранено</h4>'
+            + ("<p>Ключи сохранены в osint_keys.json и подхвачены автоматически.</p>" if keys
+               else "<p>Новые ключи не заданы.</p>") + "</div>") + body
+    return _page("keys", body)
 
 
 @app.get("/api/scan", response_class=JSONResponse)
 async def api_scan(value: str, cats: str = ""):
-    """JSON-API для автоматизации."""
     sel = [c.strip() for c in cats.split(",") if c.strip()] or None
     return JSONResponse(await scan(value, sel))
 
 
+# ==========================================================================
+#  Статика / PWA
+# ==========================================================================
+@app.get("/favicon.ico")
+def favicon():
+    from fastapi.responses import Response
+    svg = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">'
+           '<rect width="100" height="100" rx="14" fill="#0a0d13"/>'
+           '<path d="M50 26 L74 38 L74 62 L50 74 L26 62 L26 38 Z" fill="#e8b23a"/></svg>')
+    return Response(svg, media_type="image/svg+xml")
+
+
+@app.get("/manifest.json")
+def manifest():
+    from fastapi.responses import Response
+    import json as _j
+    data = {
+        "name": "Gotham OSINT",
+        "short_name": "Gotham OSINT",
+        "description": "Поиск публичной информации по username, email, телефону и домену",
+        "start_url": "/",
+        "scope": "/",
+        "display": "standalone",
+        "background_color": "#0a0d13",
+        "theme_color": "#0a0d13",
+        "lang": "ru",
+        "icons": [{"src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}],
+        "shortcuts": [
+            {"name": "Сканирование", "url": "/?s=scan"},
+            {"name": "Досье", "url": "/?s=dossier"},
+            {"name": "Источники", "url": "/?s=sources"},
+        ],
+    }
+    return Response(_j.dumps(data, ensure_ascii=False), media_type="application/manifest+json")
+
+
+@app.get("/icon.svg")
+def icon():
+    from fastapi.responses import Response
+    svg = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">'
+           '<rect width="512" height="512" rx="110" fill="#0a0d13"/>'
+           '<path d="M256 133 L373 197 L373 315 L256 379 L139 315 L139 197 Z" fill="#e8b23a"/>'
+           '<path d="M256 186 L314 216 L314 276 L256 306 L198 276 L198 216 Z" fill="#0a0d13"/></svg>')
+    return Response(svg, media_type="image/svg+xml")
+
+
+@app.get("/sw.js")
+def service_worker():
+    from fastapi.responses import Response
+    sw = """
+const CACHE='gotham-osint-v1';
+const CORE=['/','/manifest.json','/icon.svg','/favicon.ico'];
+self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting()));});
+self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==CACHE).map(x=>caches.delete(x)))).then(()=>self.clients.claim()));});
+self.addEventListener('fetch',e=>{
+  if(e.request.method!=='GET')return;
+  const u=new URL(e.request.url);
+  if(u.origin!==location.origin)return;
+  if(u.pathname.startsWith('/api/'))return;
+  e.respondWith(fetch(e.request).then(r=>{const cp=r.clone();caches.open(CACHE).then(c=>c.put(e.request,cp)).catch(()=>{});return r;}).catch(()=>caches.match(e.request).then(r=>r||caches.match('/'))));
+});
+"""
+    return Response(sw, media_type="application/javascript",
+                    headers={"Cache-Control": "no-cache"})
+
+
 if __name__ == "__main__":
-    import os as _os
-    port = int(_os.environ.get("PORT", "8765"))
-    host = _os.environ.get("HOST", "127.0.0.1")
+    import uvicorn
+    port = int(os.environ.get("PORT", "8765"))
+    host = os.environ.get("HOST", "127.0.0.1")
     print(f"[Gotham OSINT] http://{host}:{port}")
     uvicorn.run(app, host=host, port=port)
