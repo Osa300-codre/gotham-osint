@@ -40,7 +40,9 @@ CATEGORY_LIST = [
     "startup", "maps", "health", "mail", "cloud", "forum", "email", "phone",
 ]
 
-ICON = open(os.path.join(BASE, "icon.svg"), encoding="utf-8").read()
+ICON = ('<svg viewBox="0 0 100 60"><path d="M50 6c-5 6-12 8-20 7-6-1-12-5-18-9-2 8-4 14-10 20 '
+        '6 0 10 2 13 5 4-1 8-1 12 1 4-1 8-1 12 1 4-2 8-2 12-1 4-2 8-2 12 1 3-3 7-5 13-5'
+        '-6-6-8-12-10-20-6 4-12 8-18 9-8 1-15-1-20-7z"/></svg>')
 
 HTML = """<!DOCTYPE html>
 <html lang="ru">
@@ -284,8 +286,9 @@ background:radial-gradient(circle,var(--gold) 0%,rgba(245,197,66,.16) 32%,transp
 header{padding:30px 0 22px;margin-bottom:22px;border-bottom:1px solid var(--line)}
 .brand{display:flex;align-items:center;gap:20px}
 .emblem{width:70px;height:70px;flex:0 0 70px;display:grid;place-items:center;
-background:radial-gradient(circle at 50% 42%,#ffd979,#f5c542 42%,#8a6f1e);clip-path:polygon(50% 0%,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);box-shadow:0 0 32px rgba(245,197,66,.45)}
-.emblem svg{width:54px;height:32px;fill:#05070b}
+background:radial-gradient(circle at 50% 42%,#ffd979,#f5c542 42%,#8a6f1e);
+clip-path:polygon(50% 0%,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);box-shadow:0 0 32px rgba(245,197,66,.45)}
+.emblem svg{width:56px;height:34px;fill:#05070b}
 h1{font-family:var(--f-d);font-size:44px;letter-spacing:3px;text-transform:uppercase;color:var(--gold2);text-shadow:0 0 24px rgba(245,197,66,.35)}
 .subtitle{font-size:12px;letter-spacing:3.2px;text-transform:uppercase;color:var(--muted);margin-top:5px;font-weight:600}
 .hdr{margin-left:auto;text-align:right;font-family:var(--f-m);font-size:11.5px;color:var(--dim);line-height:1.8}
