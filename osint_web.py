@@ -35,6 +35,7 @@ from identify import (
     identify, search_telegram, search_email_detailed,
     search_vk, search_phone_deep,
 )
+from dossier import build_dossier
 
 app = FastAPI(title="Gotham OSINT")
 
@@ -339,6 +340,7 @@ HTML = """<!DOCTYPE html>
   <div class="tab" data-t="tab-email">__ICO_MAIL__Email</div>
   <div class="tab" data-t="tab-leaks">__ICO_LEAK__Утечки</div>
   <div class="tab" data-t="tab-exact">__ICO_TARGET__Точный поиск</div>
+  <div class="tab" data-t="tab-dossier">__ICO_SHIELD__Досье</div>
   <div class="tab" data-t="tab-web">__ICO_GLOBE__Веб-поиск</div>
   <div class="tab" data-t="tab-keys">__ICO_KEY__Ключи</div>
   <div class="tab" data-t="tab-other">__ICO_TARGET__IP / домен / тел.</div>
@@ -420,6 +422,25 @@ HTML = """<!DOCTYPE html>
     <div class="hint">Заполните любое из полей — можно несколько сразу. Тип определяется автоматически.</div>
   </form>
   <div id="exact-result"></div>
+</div>
+
+<div class="panel" id="tab-dossier">
+  <div class="panel-title">Досье</div>
+  <div class="panel-sub">Максимум доступных публичных данных по email или телефону: ФИО, дата рождения, адрес, контакты, утечки, связанные аккаунты.</div>
+
+  <form method="post" action="/dossier" id="dossierform">
+    <div class="row">
+      <div>
+        <label>Email или номер телефона</label>
+        <input name="value" placeholder="ivanov@example.com или +79991234567" required>
+      </div>
+      <div style="display:flex;align-items:flex-end">
+        <button type="submit" style="width:100%">Собрать досье</button>
+      </div>
+    </div>
+    <div class="hint">Значения ФИО, даты рождения и адреса берутся из <b>публичных баз утечек</b> (DeHashed) и из открытых страниц. Требуется ключ DeHashed — вкладка «Ключи».</div>
+  </form>
+  <div id="dossier-result"></div>
 </div>
 
 <div class="panel" id="tab-web">
@@ -555,6 +576,7 @@ $('#scanform').addEventListener('submit',e=>{
 document.querySelector('#tab-email form').addEventListener('submit',()=>showLoading('email-result','Анализируем email...'));
 document.querySelector('#tab-leaks form').addEventListener('submit',()=>showLoading('leaks-result','Проверяем базы утечек...'));
 document.querySelector('#tab-exact form').addEventListener('submit',()=>showLoading('exact-result','Собираем досье...'));
+document.querySelector('#tab-dossier form').addEventListener('submit',()=>showLoading('dossier-result','Собираем полное досье... Это может занять до минуты...'));
 document.querySelector('#tab-web form').addEventListener('submit',()=>showLoading('web-result','Ищем в Google...'));
 document.querySelector('#tab-other form').addEventListener('submit',()=>showLoading('other-result','Собираем данные...'));
 
@@ -1014,6 +1036,106 @@ def _mentions_block(mentions: List[Dict[str, Any]]) -> str:
     return (f'<h3>Упоминания в интернете <span class="count">{len(mentions)}</span></h3>'
             f'<div class="tablewrap"><table><thead><tr><th>Заголовок</th><th>Домен</th>'
             f'<th>Фрагмент</th></tr></thead><tbody>{rows}</tbody></table></div>')
+
+
+@app.post("/dossier", response_class=HTMLResponse)
+def dossier_route(value: str = Form(...)):
+    d = build_dossier(value.strip())
+    sm = d.get("summary", {})
+    idn, loc, con, br = d["identity"], d["locations"], d["contacts"], d["breaches"]
+
+    def chips(vals):
+        if not vals:
+            return '<span class="hint">— не найдено —</span>'
+        return "".join(f"<span class='tag cat' style='margin:2px 3px 2px 0'>{_esc(v)}</span>"
+                       for v in vals[:25])
+
+    def field(label, vals, badge=""):
+        return (f"<tr><td style='width:190px;color:var(--muted)'>{_esc(label)}</td>"
+                f"<td>{chips(vals)}{badge}</td></tr>")
+
+    srcs = "".join(f"<span class='tag ok' style='margin:2px 3px 2px 0'>{_esc(s)}</span>"
+                   for s in d.get("sources_used", []))
+
+    ev_rows = ""
+    for e in (d.get("profiles", {}).get("web_extractions") or [])[:20]:
+        ex = e.get("extracted", {})
+        chips_ex = "".join(f"<span class='tag cat' style='margin:1px 2px 1px 0'>{_esc(k)}: {_esc(v)}</span>"
+                           for k, v in ex.items())
+        ev_rows += (f"<tr><td><a href='{_esc(e.get('url'))}' target='_blank'>"
+                    f"{_esc(e.get('title') or '')}</a><br>"
+                    f"<span class='hint'>{_esc(e.get('snippet') or '')[:150]}</span></td>"
+                    f"<td>{chips_ex}</td></tr>")
+
+    br_rows = "".join(
+        f"<tr><td><b>{_esc(s.get('name'))}</b></td><td>{_esc(s.get('date'))}</td></tr>"
+        for s in (br.get("sources") or [])[:60])
+
+    accounts = ""
+    acc = d.get("profiles", {}).get("accounts") or {}
+    if acc:
+        rows = "".join(
+            f"<tr><td><b>{_esc(un)}</b></td><td>"
+            + "".join(f"<a href='{_esc(i.get('url'))}' target='_blank'>{_esc(i.get('site'))}</a> "
+                      for i in items) + "</td></tr>"
+            for un, items in acc.items())
+        accounts = (f"<h3>Связанные аккаунты <span class='count'>{sum(len(v) for v in acc.values())}</span></h3>"
+                    f"<div class='tablewrap'><table><thead><tr><th>Логин</th><th>Площадки</th></tr></thead>"
+                    f"<tbody>{rows}</tbody></table></div>")
+
+    ident = d.get("profiles", {}).get("infostealer")
+    ident_block = ""
+    if ident:
+        rows = "".join(f"<tr><td style='width:190px;color:var(--muted)'>{_esc(k)}</td><td><b>{_esc(v)}</b></td></tr>"
+                       for k, v in ident.items() if v)
+        ident_block = (f"<h3>Заражение инфостилером</h3>"
+                       f"<table><tbody>{rows}</tbody></table>")
+
+    body = f"""
+    <div class="stats">
+      <div class="stat"><b>{br.get('count', 0)}</b><span>записей в утечках</span></div>
+      <div class="stat warn"><b>{len(br.get('sources') or [])}</b><span>источников утечек</span></div>
+      <div class="stat ok"><b>{len(sm.get('identified_fields') or [])}</b><span>полей установлено</span></div>
+      <div class="stat"><b>{len(d.get('web_evidence') or [])}</b><span>упоминаний</span></div>
+    </div>
+
+    <h3>Установленные сведения</h3>
+    <table><tbody>
+      {field('ФИО / имя', idn['full_name'])}
+      {field('Имя', idn['first_name'])}
+      {field('Фамилия', idn['last_name'])}
+      {field('Отчество', idn['middle_name'])}
+      {field('Дата рождения', idn['birth_date'])}
+      {field('Пол', idn['gender'])}
+      {field('Адрес', loc['address'])}
+      {field('Город', loc['city'])}
+      {field('Регион', loc['region'])}
+      {field('Район', loc['district'])}
+      {field('Страна', loc['country'])}
+      {field('Индекс', loc['zip'])}
+      {field('Телефоны', con['phones'])}
+      {field('Email', con['emails'])}
+      {field('Логины', con['usernames'])}
+      {field('IP-адреса', con['ips'])}
+    </tbody></table>
+
+    <h3>Источники данных</h3>
+    <p>{srcs or '<span class="hint">нет</span>'}</p>
+    {ident_block}
+    {accounts}
+
+    <h3>Источники утечек <span class="count">{len(br.get('sources') or [])}</span></h3>
+    <div class="tablewrap"><table><thead><tr><th>Сервис</th><th>Дата</th></tr></thead>
+    <tbody>{br_rows or '<tr><td colspan="2" class="empty">Утечек не найдено</td></tr>'}</tbody></table></div>
+
+    {('<h3>Извлечённые данные из открытых страниц</h3>'
+      f'<div class="tablewrap"><table><thead><tr><th>Страница</th><th>Извлечено</th></tr></thead>'
+      f'<tbody>{ev_rows}</tbody></table></div>') if ev_rows else ''}
+
+    <details><summary>Полный отчёт (JSON)</summary>{_jblock(d)}</details>
+    """
+    return _page("tab-dossier").replace('<div id="dossier-result"></div>',
+                                         f'<div id="dossier-result">{body}</div>')
 
 
 @app.post("/web", response_class=HTMLResponse)

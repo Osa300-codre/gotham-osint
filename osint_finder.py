@@ -33,6 +33,7 @@ from identify import (
     identify, search_telegram, search_email_detailed,
     search_vk, search_phone_deep,
 )
+from dossier import build_dossier
 
 console = Console()
 
@@ -309,6 +310,8 @@ def main():
     parser.add_argument("--vk", action="append", default=[], help="Досье по ссылке ВК (vk.com/...)")
     parser.add_argument("--identify", action="append", default=[],
                         help="Универсальный поиск (auto: Telegram / email / ВК / телефон)")
+    parser.add_argument("--dossier", action="append", default=[],
+                        help="Полное досье по email или телефону (ФИО, ДР, адрес, контакты)")
     parser.add_argument("--set-key", action="append", default=[], metavar="NAME=VALUE",
                         help="Сохранить ключ (напр. HIBP_API_KEY=abc123)")
     parser.add_argument("--categories", default="", help="Категории через запятую (см. --list-cats)")
@@ -441,6 +444,22 @@ def main():
         report["results"].append({"type": "identify", "data": r})
         console.print(Panel(json.dumps(r, ensure_ascii=False, indent=2),
                             title=f"Точный поиск: {idv} ({r.get('kind')})", border_style="cyan"))
+
+    for dv in args.dossier:
+        d = build_dossier(dv.strip())
+        report["results"].append({"type": "dossier", "data": d})
+        idn, loc, con = d["identity"], d["locations"], d["contacts"]
+        console.print(Panel(json.dumps(d, ensure_ascii=False, indent=2),
+                            title=f"Досье: {dv}", border_style="red"))
+        console.print(f"  [bold {GOLD}]ФИО:[/bold {GOLD}] {', '.join(idn['full_name']) or '—'}")
+        console.print(f"  [bold {GOLD}]Дата рождения:[/bold {GOLD}] {', '.join(idn['birth_date']) or '—'}")
+        console.print(f"  [bold {GOLD}]Адрес:[/bold {GOLD}] {', '.join(loc['address']) or '—'}")
+        console.print(f"  [bold {GOLD}]Город:[/bold {GOLD}] {', '.join(loc['city']) or '—'}")
+        console.print(f"  [bold {GOLD}]Утечки:[/bold {GOLD}] {d['breaches']['count']} "
+                      f"({len(d['breaches']['sources'])} источников)")
+        console.print(f"  [bold {GOLD}]Контакты:[/bold {GOLD}] "
+                      f"тел: {len(con['phones'])}, email: {len(con['emails'])}, "
+                      f"логины: {len(con['usernames'])}")
 
     if not any([args.email, args.username, args.ip, args.domain, args.phone, args.name, args.search, args.leaks]):
         console.print("[yellow]Не указаны данные. Используйте --help.[/yellow]")
