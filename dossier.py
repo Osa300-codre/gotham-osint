@@ -23,6 +23,7 @@ from leaks import (
     check_leakcheck, check_infostealer, check_hibp, check_xposedornot,
 )
 import safesurf_ru
+import personal
 from websearch import web_search
 
 # ---------------------------------------------------------------------------
@@ -404,9 +405,109 @@ def build_dossier(value: str, kind: str = "auto") -> Dict[str, Any]:
     except Exception as e:
         dossier["notes"].append(f"сканер: {e}")
 
+    # ---------------- ЛИЧНЫЕ ДАННЫЕ (без платных ключей) ----------------
+    try:
+        dossier["personal"] = _collect_personal(v, kind)
+    except Exception as e:
+        dossier["personal"] = {"error": str(e)}
+        dossier["notes"].append(f"личные данные: {e}")
+
     # ---------------- Итоговая сводка ----------------
     dossier["summary"] = _summary(dossier)
     return dossier
+
+
+def _collect_personal(value: str, kind: str) -> Dict[str, Any]:
+    """Собирает ФИО, адреса, контакты и все соцсети — по бесплатным источникам."""
+    res: Dict[str, Any] = {
+        "names": [], "birth_dates": [], "addresses": [], "cities": [],
+        "operators": [], "phone_owner": None, "usernames": [],
+        "social_profiles": [], "evidence": [], "sources": [], "notes": [],
+    }
+
+    # --- ФИО из коммитов GitHub ---
+    if kind == "email":
+        try:
+            gh = personal.github_commits_identity(value)
+            for n in gh.get("names", []):
+                if n not in res["names"]:
+                    res["names"].append(n)
+            if gh.get("names"):
+                res["sources"].append("GitHub (коммиты)")
+            res["evidence"].append({"source": "GitHub commits",
+                                    "detail": f"{len(gh.get('repos', []))} репозиториев, "
+                                              f"автор: {', '.join(gh.get('names', [])[:3])}",
+                                    "repos": gh.get("repos", [])[:15]})
+        except Exception as e:
+            res["notes"].append(f"GitHub commits: {e}")
+
+    # --- Владелец номера (Kaspersky Who Calls) ---
+    if kind == "phone":
+        try:
+            wc = personal.whocalls_lookup(value)
+            if wc.get("owner"):
+                res["phone_owner"] = wc["owner"]
+                res["names"].append(wc["owner"])
+                res["sources"].append("Kaspersky Who Calls")
+            if wc.get("city"):
+                res["cities"].append(wc["city"])
+            if wc.get("operator"):
+                res["operators"].append(wc["operator"])
+            if wc.get("comment"):
+                res["evidence"].append({"source": "Kaspersky Who Calls",
+                                        "detail": wc["comment"][:250]})
+        except Exception as e:
+            res["notes"].append(f"Who Calls: {e}")
+
+    # --- Целевые веб-поиски (ФИО / адрес / объявления) ---
+    try:
+        dk = personal.personal_dorks(value, kind)
+        res["sources"].append("веб-поиск (dorks)")
+        for r in dk.get("results", [])[:25]:
+            text = f"{r.get('title', '')} {r.get('snippet', '')}"
+            ex = personal.extract_personal(text)
+            for n in ex["names"]:
+                if n not in res["names"]:
+                    res["names"].append(n)
+            for a in ex["addresses"]:
+                if a not in res["addresses"]:
+                    res["addresses"].append(a)
+            for c in ex["cities"]:
+                if c not in res["cities"]:
+                    res["cities"].append(c)
+            res["evidence"].append({
+                "source": r.get("domain") or "веб",
+                "detail": (r.get("snippet") or r.get("title") or "")[:220],
+                "url": r.get("url"),
+                "extracted": ex,
+            })
+    except Exception as e:
+        res["notes"].append(f"dorks: {e}")
+
+    # --- Логины и все профили в соцсетях ---
+    try:
+        usernames = personal.collect_usernames(value, kind)
+        res["usernames"] = usernames
+        if usernames:
+            res["sources"].append("сканер 506 сайтов")
+            res["social_profiles"] = personal.scan_usernames(usernames, limit=3)
+    except Exception as e:
+        res["notes"].append(f"логины: {e}")
+
+    # --- Steam по email ---
+    if kind == "email":
+        try:
+            st = personal.steam_search_by_email(value)
+            for p in st.get("profiles", []):
+                res["social_profiles"].append({"site": "Steam", "category": "games",
+                                               "url": p, "profile_url": p})
+        except Exception:
+            pass
+
+    res["names"] = list(dict.fromkeys(res["names"]))[:20]
+    res["addresses"] = list(dict.fromkeys(res["addresses"]))[:20]
+    res["cities"] = list(dict.fromkeys(res["cities"]))[:20]
+    return res
 
 
 def _summary(d: Dict[str, Any]) -> Dict[str, Any]:

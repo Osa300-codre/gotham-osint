@@ -1133,6 +1133,65 @@ def dossier_route(value: str = Form(...)):
         ident_block = (f"<h3>Заражение инфостилером</h3>"
                        f"<table><tbody>{rows}</tbody></table>")
 
+    # ---------------- ЛИЧНЫЕ ДАННЫЕ ----------------
+    per = d.get("personal") or {}
+    personal_block = ""
+    if per and not per.get("error"):
+        def plist(vals, empty="— не найдено —"):
+            if not vals:
+                return f"<span class='hint'>{_esc(empty)}</span>"
+            return "".join(f"<span class='tag cat' style='margin:2px 3px 2px 0'>{_esc(v)}</span>"
+                           for v in vals[:25])
+
+        srows = ""
+        sp = per.get("social_profiles") or {}
+        items = sp.items() if isinstance(sp, dict) else []
+        for un, lst in items:
+            if isinstance(lst, list):
+                for it in lst:
+                    srows += (f"<tr><td><b>{_esc(it.get('site'))}</b><br>"
+                              f"<span class='hint'>{_esc(it.get('category',''))}</span></td>"
+                              f"<td><span class='hint'>логин: {_esc(un)}</span></td>"
+                              f"<td><a href='{_esc(it.get('url'))}' target='_blank'>{_esc(it.get('url'))}</a></td></tr>")
+        for it in (sp if isinstance(sp, list) else []):
+            srows += (f"<tr><td><b>{_esc(it.get('site'))}</b></td><td></td>"
+                      f"<td><a href='{_esc(it.get('url'))}' target='_blank'>{_esc(it.get('url'))}</a></td></tr>")
+
+        erows = ""
+        for e in (per.get("evidence") or [])[:30]:
+            ex = e.get("extracted") or {}
+            exchips = "".join(f"<span class='tag cat' style='margin:1px 2px 1px 0'>{_esc(k)}: {_esc(val)}</span>"
+                              for k, val in ex.items())
+            link = (f"<a href='{_esc(e.get('url'))}' target='_blank'>{_esc(e.get('source'))}</a>"
+                    if e.get("url") else _esc(e.get("source")))
+            erows += (f"<tr><td>{link}</td><td>{_esc((e.get('detail') or '')[:220])}</td>"
+                      f"<td>{exchips}</td></tr>")
+
+        personal_block = f"""
+        <h3>🕵️ Личные данные</h3>
+        <div class="stats">
+          <div class="stat ok"><b>{len(per.get('names') or [])}</b><span>имён / ФИО</span></div>
+          <div class="stat"><b>{len(per.get('addresses') or [])}</b><span>адресов</span></div>
+          <div class="stat"><b>{len(per.get('cities') or [])}</b><span>городов</span></div>
+          <div class="stat"><b>{len(per.get('usernames') or [])}</b><span>логинов</span></div>
+        </div>
+        <table><tbody>
+          <tr><td style='width:190px;color:var(--muted)'>ФИО / имя</td><td>{plist(per.get('names'))}</td></tr>
+          <tr><td style='width:190px;color:var(--muted)'>Владелец номера</td><td>{plist([per.get('phone_owner')] if per.get('phone_owner') else [])}</td></tr>
+          <tr><td style='width:190px;color:var(--muted)'>Адрес проживания</td><td>{plist(per.get('addresses'))}</td></tr>
+          <tr><td style='width:190px;color:var(--muted)'>Город</td><td>{plist(per.get('cities'))}</td></tr>
+          <tr><td style='width:190px;color:var(--muted)'>Оператор связи</td><td>{plist(per.get('operators'))}</td></tr>
+          <tr><td style='width:190px;color:var(--muted)'>Логины</td><td>{plist(per.get('usernames'))}</td></tr>
+          <tr><td style='width:190px;color:var(--muted)'>Источники</td><td>{plist(per.get('sources'))}</td></tr>
+        </tbody></table>
+        <h3>Все соцсети и профили <span class="count">{srows.count('<tr>')}</span></h3>
+        <div class="tablewrap"><table><thead><tr><th>Сайт</th><th>Логин</th><th>Ссылка</th></tr></thead>
+        <tbody>{srows or '<tr><td colspan="3" class="empty">Профили не найдены</td></tr>'}</tbody></table></div>
+        <h3>Доказательства (откуда взяты данные)</h3>
+        <div class="tablewrap"><table><thead><tr><th>Источник</th><th>Фрагмент</th><th>Извлечено</th></tr></thead>
+        <tbody>{erows or '<tr><td colspan="3" class="empty">—</td></tr>'}</tbody></table></div>
+        """
+
     body = f"""
     <div class="stats">
       <div class="stat"><b>{br.get('count', 0)}</b><span>записей в утечках</span></div>
@@ -1163,6 +1222,7 @@ def dossier_route(value: str = Form(...)):
 
     <h3>Источники данных</h3>
     <p>{srcs or '<span class="hint">нет</span>'}</p>
+    {personal_block}
     {ident_block}
     {accounts}
 
