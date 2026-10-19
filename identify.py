@@ -568,7 +568,9 @@ def identify(value: str) -> Dict[str, Any]:
         kind = "vk"
     elif re.match(r"^(https?://)?(www\.)?t\.me/", v, re.I) or v.startswith("@"):
         kind = "telegram"
-    elif re.fullmatch(r"[\d\s()+\-]{7,20}", v) and re.search(r"\d{5,}", v):
+    elif re.fullmatch(r"[+\-\s()\d]{7,25}", v) and len(re.sub(r"\D", "", v)) >= 7:
+        # телефон: важно считать ВСЕ цифры, а не только идущие подряд
+        # ("8 999 123-45-67" — цифры идут группами по 3)
         kind = "phone"
     else:
         kind = "telegram" if v.isascii() else "unknown"

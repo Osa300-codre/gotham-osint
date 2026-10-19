@@ -215,7 +215,8 @@ def build_dossier(value: str, kind: str = "auto") -> Dict[str, Any]:
     }
 
     # ---------------- Утечки ----------------
-    lc = check_leakcheck(v)
+    query_val = _phone_digits(v) if kind == "phone" else v
+    lc = check_leakcheck(query_val)
     if lc.get("found"):
         dossier["breaches"]["count"] = lc.get("found") or 0
         dossier["breaches"]["sources"] = lc.get("sources", [])
@@ -280,7 +281,7 @@ def build_dossier(value: str, kind: str = "auto") -> Dict[str, Any]:
 
     # ---------------- Safe Surf / НКЦКИ (РФ, бесплатно) ----------------
     try:
-        ss = safesurf_ru.check(v)
+        ss = safesurf_ru.check(query_val if kind == "phone" else v)
         if ss.get("matches") is not None:
             dossier["breaches"]["safe_surf"] = ss["matches"]
             dossier["profiles"]["safe_surf"] = ss
@@ -412,9 +413,61 @@ def build_dossier(value: str, kind: str = "auto") -> Dict[str, Any]:
         dossier["personal"] = {"error": str(e)}
         dossier["notes"].append(f"личные данные: {e}")
 
+    # ---------------- ЧТО ИМЕННО ПРОВЕРЕНО ----------------
+    dossier["checked"] = _what_was_checked(dossier, v, kind)
+
     # ---------------- Итоговая сводка ----------------
     dossier["summary"] = _summary(dossier)
     return dossier
+
+
+def _what_was_checked(d: Dict[str, Any], value: str, kind: str) -> Dict[str, Any]:
+    """Отчёт: какие источники опрослены и с каким результатом."""
+    per = d.get("personal") or {}
+    br = d.get("breaches", {})
+    checked = {
+        "kind": kind,
+        "sources": [],
+        "counts": {},
+    }
+    lc = br.get("count")
+    checked["counts"]["утечки (LeakCheck)"] = lc if lc is not None else "—"
+    checked["counts"]["утечки (XposedOrNot)"] = len(br.get("xposedornot") or []) or 0
+    checked["counts"]["утечки (НКЦКИ)"] = br.get("safe_surf", "—")
+    checked["counts"]["упоминаний в интернете"] = len(d.get("web_evidence") or [])
+    checked["counts"]["веб-запросов выполнено"] = len(per.get("queries") or [])
+    checked["counts"]["логинов найдено"] = len(per.get("usernames") or [])
+    checked["counts"]["соцпрофилей найдено"] = sum(
+        len(v) for v in (per.get("social_profiles") or {}).values()
+    ) if isinstance(per.get("social_profiles"), dict) else len(per.get("social_profiles") or [])
+
+    srcs = []
+    srcs.append("LeakCheck — базы утечек (метаданные)")
+    srcs.append("XposedOrNot — 792 утечки / 11.6 млрд записей")
+    srcs.append("Safe Surf (НКЦКИ) — российская база утечек")
+    srcs.append("Hudson Rock — проверка инфостилеров")
+    if kind == "email":
+        srcs.append("GitHub Search — коммиты (ФИО) и аккаунты по email")
+    else:
+        srcs.append("Kaspersky Who Calls — владелец номера, город, оператор")
+    srcs.append("Веб-поиск — объявления и страницы с ФИО/адресом")
+    srcs.append("Сканер 506 сайтов — профили по найденным логинам")
+    checked["sources"] = srcs
+    return checked
+
+
+def _phone_digits(value: str) -> str:
+    """Приводит номер к «голым» цифрам в формате, который понимают базы утечек.
+
+    «8 999 123-45-67» -> «79991234567», «+7 (999) 123-45-67» -> «79991234567».
+    """
+    import re as _re
+    d = _re.sub(r"\D", "", value or "")
+    if len(d) == 11 and d.startswith("8"):
+        d = "7" + d[1:]
+    if len(d) == 10:
+        d = "7" + d
+    return d
 
 
 def _collect_personal(value: str, kind: str) -> Dict[str, Any]:
@@ -444,7 +497,7 @@ def _collect_personal(value: str, kind: str) -> Dict[str, Any]:
     # --- Владелец номера (Kaspersky Who Calls) ---
     if kind == "phone":
         try:
-            wc = personal.whocalls_lookup(value)
+            wc = personal.whocalls_lookup(query_val)
             if wc.get("owner"):
                 res["phone_owner"] = wc["owner"]
                 res["names"].append(wc["owner"])
@@ -463,6 +516,8 @@ def _collect_personal(value: str, kind: str) -> Dict[str, Any]:
     try:
         dk = personal.personal_dorks(value, kind)
         res["sources"].append("веб-поиск (dorks)")
+        res["queries"] = dk.get("queries", [])
+        res["variants"] = dk.get("variants", [])
         for r in dk.get("results", [])[:25]:
             text = f"{r.get('title', '')} {r.get('snippet', '')}"
             ex = personal.extract_personal(text)

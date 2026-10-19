@@ -17,6 +17,7 @@
 
 import json
 import os
+import time
 from typing import Any, Dict, List, Optional
 
 import requests
@@ -283,9 +284,18 @@ def serper_search(query: str, limit: int = 25) -> Dict[str, Any]:
                               headers={"X-API-KEY": key, "Content-Type": "application/json"},
                               timeout=TIMEOUT)
 
-    try:
-        r = _post(query)
-    except Exception:
+    r = None
+    for attempt in range(3):
+        try:
+            r = _post(query)
+        except Exception:
+            out["error"] = "Serper недоступен"
+            return out
+        if r.status_code != 429:
+            break
+        time.sleep(1.5 * (attempt + 1))   # лимит 5 запросов/сек
+
+    if r is None:
         out["error"] = "Serper недоступен"
         return out
 

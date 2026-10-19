@@ -203,38 +203,111 @@ DORKS_EMAIL = [
 ]
 
 
+def phone_variants(phone: str) -> List[str]:
+    """Все варианты записи номера, которые встречаются в объявлениях и утечках.
+
+    Поиск только по одной форме записи почти ничего не находит: в вакансиях
+    пишут «8 999 123-45-67», в утечках «79991234567», в WhatsApp «+7 999 123 45 67».
+    """
+    raw = (phone or "").strip()
+    digits = re.sub(r"\D", "", raw)
+    variants: List[str] = []
+
+    def add(v):
+        if v and v not in variants:
+            variants.append(v)
+
+    if digits:
+        if len(digits) == 11 and digits.startswith("8"):
+            digits = "7" + digits[1:]
+        if len(digits) == 10:
+            digits = "7" + digits
+        add(digits)
+        add("+" + digits)
+        if len(digits) == 11 and digits.startswith("7"):
+            add(digits[1:])                 # без кода страны
+            add(digits[2:])                 # последние 9
+        add(digits[-10:])                   # последние 10
+        if len(digits) == 11 and digits.startswith("7"):
+            add(digits[3:])                 # последние 8
+        # форматированные варианты
+        if len(digits) == 11 and digits.startswith("7"):
+            rest = digits[1:]
+            add(f"8 {rest[0:3]} {rest[3:6]}-{rest[6:8]}-{rest[8:10]}")
+            add(f"8 ({rest[0:3]}) {rest[3:6]}-{rest[6:8]}-{rest[8:10]}")
+            add(f"+7 {rest[0:3]} {rest[3:6]} {rest[6:8]} {rest[8:10]}")
+            add(f"8-{rest[0:3]}-{rest[3:6]}-{rest[6:8]}-{rest[8:10]}")
+    if raw:
+        add(raw)
+    return variants[:8]
+
+
 def personal_dorks(value: str, kind: str = "phone") -> Dict[str, Any]:
-    """Серия целевых веб-поисков для извлечения ФИО и адреса."""
-    out: Dict[str, Any] = {"results": [], "queries": [], "error": None}
+    """Целевые веб-поиски для извлечения ФИО и адреса.
+
+    Для телефона ищется сразу по нескольким формам записи номера —
+    иначе объявления не находятся (в вакансиях «8 999 123-45-67»,
+    в утечках «79991234567», в мессенджерах «+7 999 123 45 67»).
+
+    Два прохода: сначала быстрый общий поиск по всем вариантам записи
+    (параллельно), затем точечные уточнения «Имя:» / «Адрес:» — только
+    если общего поиска не хватило.
+    """
+    from concurrent.futures import ThreadPoolExecutor
+
+    out: Dict[str, Any] = {"results": [], "queries": [], "variants": [], "error": None}
     try:
         from premium import serper_search
     except Exception:
         out["error"] = "нет доступа к веб-поиску"
         return out
 
-    templates = DORKS_PHONE if kind == "phone" else DORKS_EMAIL
+    if kind == "phone":
+        variants = phone_variants(value)
+    else:
+        variants = [value]
+    out["variants"] = variants
+
     seen = set()
-    for tpl in templates:
-        q = tpl.format(v=value)
-        out["queries"].append(q)
+
+    def run(q):
         try:
-            res = serper_search(q, limit=10)
+            return q, serper_search(q, limit=8) or {}
         except Exception:
-            continue
-        for r in (res.get("results") or []):
-            url = r.get("url")
-            if not url or url in seen:
-                continue
-            seen.add(url)
-            out["results"].append({
-                "title": r.get("title"),
-                "url": url,
-                "snippet": (r.get("snippet") or "")[:400],
-                "domain": r.get("domain"),
-                "query": q,
-            })
-        if len(out["results"]) >= 30:
-            break
+            return q, {}
+
+    def collect(pairs):
+        for _q, res in pairs:
+            for r in (res.get("results") or []):
+                url = r.get("url")
+                if not url or url in seen:
+                    continue
+                seen.add(url)
+                out["results"].append({
+                    "title": r.get("title"),
+                    "url": url,
+                    "snippet": (r.get("snippet") or "")[:400],
+                    "domain": r.get("domain"),
+                    "query": _q,
+                })
+
+    # --- проход 1: общий поиск по всем вариантам записи (параллельно) ---
+    queries1 = [f'"{v}"' for v in variants]
+    out["queries"].extend(queries1)
+    with ThreadPoolExecutor(max_workers=3) as ex:
+        collect(list(ex.map(run, queries1)))
+
+    # --- проход 2: точечные уточнения, если нашлось мало ---
+    if len(out["results"]) < 12:
+        templates = DORKS_PHONE if kind == "phone" else DORKS_EMAIL
+        queries2 = []
+        for v in variants[:4]:
+            for tpl in templates[:4]:
+                queries2.append(tpl.format(v=v))
+        out["queries"].extend(queries2)
+        with ThreadPoolExecutor(max_workers=3) as ex:
+            collect(list(ex.map(run, queries2)))
+
     return out
 
 
@@ -263,6 +336,14 @@ _NAME_STOP = {
     "Результаты", "Найдено", "Поиск", "Вход", "Регистрация", "Мой", "Ваш", "Скидка",
     "Страница", "Сайт", "Новости", "Статьи", "Авито", "ВКонтакте", "WhatsApp",
     "Телеграм", "Отзывы", "Объявления", "Информация", "Каталог", "Размещено",
+    # служебные слова — в паре «Город Служебное» это не ФИО
+    "Оператор", "Связь", "Мобильный", "Мобильная", "Телефон", "Телефоны", "Интернет",
+    "Продавец", "Покупатель", "Заказчик", "Исполнитель", "Подрядчик", "Клиент",
+    "Администратор", "Менеджер", "Менеджеры", "Курьер", "Водитель", "Мастер",
+    "Специалист", "Магазин", "Компания", "Организация", "Фирма", "Служба",
+    "Сервис", "Центр", "Группа", "Отдел", "Филиал", "Офис", "Салон", "Студия",
+    "Работа", "Вакансия", "Резюме", "Профиль", "Аккаунт", "Кабинет", "Личный",
+    "Вопрос", "Ответ", "Помощь", "Поддержка", "Обратная", "Связь", "Заказать",
 }
 
 
@@ -277,9 +358,15 @@ def extract_personal(text: str) -> Dict[str, List[str]]:
     if not names:
         for m in _FIO_FREE.finditer(text):
             v = m.group(1).strip()
+            parts = v.split()
+            if len(parts) < 2:
+                continue
+            # «Город Оператор», «Отзывы Продавец» и т.п. — не ФИО
+            if parts[0] in _NAME_STOP or parts[1] in _NAME_STOP:
+                continue
             if v in _NAME_STOP or any(v.startswith(s) for s in _NAME_STOP):
                 continue
-            if len(v.split()) >= 2 and v not in names:
+            if len(parts) >= 2 and v not in names:
                 names.append(v)
                 break
     for m in _ADDR.finditer(text):
@@ -329,16 +416,22 @@ def collect_usernames(value: str, kind: str = "phone", extra: Optional[List[str]
 
 def scan_usernames(usernames: List[str], limit: int = 2) -> Dict[str, List[Dict[str, Any]]]:
     """Прогоняет 506-сайтовый сканер по списку логинов."""
+    from concurrent.futures import ThreadPoolExecutor
+
     out: Dict[str, List[Dict[str, Any]]] = {}
     try:
         from scanner import scan_sync
     except Exception:
         return out
-    for u in usernames[:limit]:
+
+    def run(u):
         try:
-            res = scan_sync(u, ["social", "dev", "professional", "media"])
+            return u, scan_sync(u, ["social", "dev", "professional", "media"]) or {}
         except Exception:
-            continue
-        if res.get("found_count"):
-            out[u] = res["found"]
+            return u, {}
+
+    with ThreadPoolExecutor(max_workers=3) as ex:
+        for u, res in ex.map(run, usernames[:limit]):
+            if res.get("found_count"):
+                out[u] = res["found"]
     return out

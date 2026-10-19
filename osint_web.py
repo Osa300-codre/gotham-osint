@@ -433,13 +433,18 @@ HTML = """<!DOCTYPE html>
     <div class="row">
       <div>
         <label>Email или номер телефона</label>
-        <input name="value" placeholder="ivanov@example.com или +79991234567" required>
+        <input name="value" placeholder="ivanov@example.com или +7 999 123-45-67" required>
       </div>
       <div style="display:flex;align-items:flex-end">
         <button type="submit" style="width:100%">Собрать досье</button>
       </div>
     </div>
-    <div class="hint">Значения ФИО, даты рождения и адреса берутся из <b>публичных баз утечек</b> (DeHashed) и из открытых страниц. Требуется ключ DeHashed — вкладка «Ключи».</div>
+    <div class="hint">
+      Номер можно вводить в <b>любом формате</b> — <b>+79991234567</b>, <b>8 999 123-45-67</b>,
+      <b>89991234567</b>: программа сама подберёт все варианты записи и найдёт объявления.
+      Проверяются базы утечек (LeakCheck, XposedOrNot, НКЦКИ), ФИО и адрес с открытых страниц,
+      владелец номера и все профили в 506 соцсетях. Сбор занимает 20–40 секунд.
+    </div>
   </form>
   <div id="dossier-result"></div>
 </div>
@@ -1192,14 +1197,27 @@ def dossier_route(value: str = Form(...)):
         <tbody>{erows or '<tr><td colspan="3" class="empty">—</td></tr>'}</tbody></table></div>
         """
 
+    chk = d.get("checked") or {}
+    chk_rows = "".join(
+        f"<tr><td style='width:280px;color:var(--muted)'>{_esc(k)}</td><td><b>{_esc(v)}</b></td></tr>"
+        for k, v in (chk.get("counts") or {}).items())
+    chk_srcs = "".join(f"<li>{_esc(s)}</li>" for s in (chk.get("sources") or []))
+    checked_block = f"""
+    <h3>Что было проверено</h3>
+    <table><tbody>{chk_rows}</tbody></table>
+    <details><summary>Источники опроса ({len(chk.get('sources') or [])})</summary>
+    <ul style='padding:14px 20px 14px 34px'>{chk_srcs}</ul></details>
+    """
+
     body = f"""
     <div class="stats">
-      <div class="stat"><b>{br.get('count', 0)}</b><span>записей в утечках</span></div>
+      <div class="stat ok"><b>{br.get('count', 0)}</b><span>записей в утечках</span></div>
       <div class="stat warn"><b>{len(br.get('sources') or [])}</b><span>источников утечек</span></div>
       <div class="stat ok"><b>{len(sm.get('identified_fields') or [])}</b><span>полей установлено</span></div>
       <div class="stat"><b>{len(d.get('web_evidence') or [])}</b><span>упоминаний</span></div>
     </div>
 
+    {checked_block}
     <h3>Установленные сведения</h3>
     <table><tbody>
       {field('ФИО / имя', idn['full_name'])}
