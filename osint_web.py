@@ -1140,6 +1140,24 @@ def dossier_route(value: str = Form(...)):
 
     # ---------------- ЛИЧНЫЕ ДАННЫЕ ----------------
     per = d.get("personal") or {}
+    # Дополняем сводку данными из личного блока (найдены в открытых источниках)
+    if per and not per.get("error"):
+        if not idn["full_name"] and per.get("names"):
+            idn["full_name"] = list(per["names"])
+        if not idn["birth_date"] and per.get("birth_dates"):
+            idn["birth_date"] = list(per["birth_dates"])
+        if not idn["gender"] and per.get("genders"):
+            idn["gender"] = list(per["genders"])
+        if not loc["address"] and per.get("addresses"):
+            loc["address"] = list(per["addresses"])
+        if not loc["city"] and per.get("cities"):
+            loc["city"] = list(per["cities"])
+        if not loc["district"] and per.get("districts"):
+            loc["district"] = list(per["districts"])
+        if not loc["zip"] and per.get("zips"):
+            loc["zip"] = list(per["zips"])
+        if not con["usernames"] and per.get("usernames"):
+            con["usernames"] = list(per["usernames"])
     personal_block = ""
     if per and not per.get("error"):
         def plist(vals, empty="— не найдено —"):
