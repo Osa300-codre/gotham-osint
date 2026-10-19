@@ -1,0 +1,38 @@
+{
+  "name": "Gotham OSINT — поиск публичных данных",
+  "short_name": "Gotham OSINT",
+  "description": "Поиск публичной информации по username, email, телефону, IP и домену. 506 сайтов, проверка утечек, веб-поиск.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#05070b",
+  "theme_color": "#f5c542",
+  "lang": "ru",
+  "categories": ["utilities", "security", "productivity"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Сканирование username",
+      "short_name": "Сканировать",
+      "url": "/#tab-scan"
+    },
+    {
+      "name": "Проверка утечек",
+      "short_name": "Утечки",
+      "url": "/#tab-leaks"
+    },
+    {
+      "name": "Веб-поиск",
+      "short_name": "Поиск",
+      "url": "/#tab-web"
+    }
+  ]
+}

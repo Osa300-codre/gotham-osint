@@ -1,0 +1,43 @@
+# Файлы с ключами и секретами — НИКОГДА не коммитить
+osint_keys.json
+*.key
+*.pem
+.env
+.env.*
+!.env.example
+
+# Отчёты и результаты
+report*.json
+osint-report.json
+osint-profiles.csv
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+venv/
+.venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Ядро Windows
+*.sys
