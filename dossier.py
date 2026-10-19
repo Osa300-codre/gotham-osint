@@ -476,6 +476,7 @@ def _collect_personal(value: str, kind: str) -> Dict[str, Any]:
         "names": [], "birth_dates": [], "addresses": [], "cities": [],
         "operators": [], "phone_owner": None, "usernames": [],
         "social_profiles": [], "evidence": [], "sources": [], "notes": [],
+        "genders": [], "districts": [], "zips": [], "queries": [],
     }
 
     # --- ФИО из коммитов GitHub ---
@@ -530,6 +531,18 @@ def _collect_personal(value: str, kind: str) -> Dict[str, Any]:
             for c in ex["cities"]:
                 if c not in res["cities"]:
                     res["cities"].append(c)
+            for b in ex["birth_dates"]:
+                if b not in res["birth_dates"]:
+                    res["birth_dates"].append(b)
+            for g in ex["genders"]:
+                if g not in res["genders"]:
+                    res["genders"].append(g)
+            for d in ex["districts"]:
+                if d not in res["districts"]:
+                    res["districts"].append(d)
+            for z in ex["zips"]:
+                if z not in res["zips"]:
+                    res["zips"].append(z)
             res["evidence"].append({
                 "source": r.get("domain") or "веб",
                 "detail": (r.get("snippet") or r.get("title") or "")[:220],
@@ -560,8 +573,15 @@ def _collect_personal(value: str, kind: str) -> Dict[str, Any]:
             pass
 
     res["names"] = list(dict.fromkeys(res["names"]))[:20]
-    res["addresses"] = list(dict.fromkeys(res["addresses"]))[:20]
+    # убираем из адресов то, что совпадает с городом
+    cities_norm = {c.lower().strip(" г.") for c in res["cities"]}
+    res["addresses"] = [a for a in dict.fromkeys(res["addresses"])
+                        if a.lower().strip(" г.") not in cities_norm][:20]
     res["cities"] = list(dict.fromkeys(res["cities"]))[:20]
+    res["birth_dates"] = list(dict.fromkeys(res["birth_dates"]))[:10]
+    res["genders"] = list(dict.fromkeys(res["genders"]))[:5]
+    res["districts"] = list(dict.fromkeys(res["districts"]))[:10]
+    res["zips"] = list(dict.fromkeys(res["zips"]))[:10]
     return res
 
 

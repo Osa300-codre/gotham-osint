@@ -1179,12 +1179,20 @@ def dossier_route(value: str = Form(...)):
           <div class="stat"><b>{len(per.get('addresses') or [])}</b><span>адресов</span></div>
           <div class="stat"><b>{len(per.get('cities') or [])}</b><span>городов</span></div>
           <div class="stat"><b>{len(per.get('usernames') or [])}</b><span>логинов</span></div>
+          <div class="stat"><b>{len(per.get('birth_dates') or [])}</b><span>дат рождения</span></div>
+          <div class="stat"><b>{len(per.get('genders') or [])}</b><span>пол</span></div>
+          <div class="stat"><b>{len(per.get('districts') or [])}</b><span>районов</span></div>
+          <div class="stat"><b>{len(per.get('zips') or [])}</b><span>индексов</span></div>
         </div>
         <table><tbody>
           <tr><td style='width:190px;color:var(--muted)'>ФИО / имя</td><td>{plist(per.get('names'))}</td></tr>
           <tr><td style='width:190px;color:var(--muted)'>Владелец номера</td><td>{plist([per.get('phone_owner')] if per.get('phone_owner') else [])}</td></tr>
+          <tr><td style='width:190px;color:var(--muted)'>Дата рождения</td><td>{plist(per.get('birth_dates'))}</td></tr>
+          <tr><td style='width:190px;color:var(--muted)'>Пол</td><td>{plist(per.get('genders'))}</td></tr>
           <tr><td style='width:190px;color:var(--muted)'>Адрес проживания</td><td>{plist(per.get('addresses'))}</td></tr>
           <tr><td style='width:190px;color:var(--muted)'>Город</td><td>{plist(per.get('cities'))}</td></tr>
+          <tr><td style='width:190px;color:var(--muted)'>Район</td><td>{plist(per.get('districts'))}</td></tr>
+          <tr><td style='width:190px;color:var(--muted)'>Индекс</td><td>{plist(per.get('zips'))}</td></tr>
           <tr><td style='width:190px;color:var(--muted)'>Оператор связи</td><td>{plist(per.get('operators'))}</td></tr>
           <tr><td style='width:190px;color:var(--muted)'>Логины</td><td>{plist(per.get('usernames'))}</td></tr>
           <tr><td style='width:190px;color:var(--muted)'>Источники</td><td>{plist(per.get('sources'))}</td></tr>
