@@ -27,6 +27,7 @@ from scanner import scan
 from site_checks import all_categories
 from websearch import web_search
 from leaks import full_leak_check, check_xposedornot
+import safesurf_ru
 from premium import (
     key_status, save_keys, KEY_MAP, serper_search,
     hunter_domain_emails, dehashed_search,
@@ -893,6 +894,24 @@ def leaks_route(value: str = Form(...), hibp_key: str = Form("")):
         except Exception:
             xon = None
 
+    # Safe Surf (НКЦКИ, РФ) — российский сервис, бесплатно
+    ss = None
+    try:
+        ss = safesurf_ru.check(v)
+    except Exception:
+        ss = None
+
+    ss_block = ""
+    if ss and ss.get("matches") is not None:
+        ok = ss["matches"] > 0
+        ss_block = (
+            f"<div class='stats'>"
+            f"<div class='stat {'bad' if ok else 'ok'}'><b>{ss['matches']}</b>"
+            f"<span>совпадений в базе НКЦКИ</span></div></div>"
+            f"<h3>Safe Surf / НКЦКИ (РФ)</h3>"
+            f"<p class='hint'>{_esc(ss.get('summary', ''))} &mdash; "
+            f"тип поиска: {_esc(ss.get('entity', ''))}</p>")
+
     srows = "".join(
         f"<tr><td><b>{_esc(s.get('name'))}</b></td><td>{_esc(s.get('date'))}</td></tr>"
         for s in (lc.get("sources") or []))
@@ -925,6 +944,7 @@ def leaks_route(value: str = Form(...), hibp_key: str = Form("")):
     body = f"""
     {summary}
     {xon_block}
+    {ss_block}
     {_toolbar(res)}
     <h3>Источники утечек <span class="count">{lc.get('source_count', 0)}</span></h3>
     <div class="tablewrap"><table><thead><tr><th>Сервис / сайт</th><th>Дата</th></tr></thead>

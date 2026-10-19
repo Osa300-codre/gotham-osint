@@ -19,7 +19,10 @@
 import re
 from typing import Any, Dict, List, Optional
 
-from leaks import check_leakcheck, check_infostealer, check_hibp, check_xposedornot
+from leaks import (
+    check_leakcheck, check_infostealer, check_hibp, check_xposedornot,
+)
+import safesurf_ru
 from websearch import web_search
 
 # ---------------------------------------------------------------------------
@@ -273,6 +276,18 @@ def build_dossier(value: str, kind: str = "auto") -> Dict[str, Any]:
                 dossier["notes"].append(f"XposedOrNot: {xn['error']}")
         except Exception as e:
             dossier["notes"].append(f"XposedOrNot: {e}")
+
+    # ---------------- Safe Surf / НКЦКИ (РФ, бесплатно) ----------------
+    try:
+        ss = safesurf_ru.check(v)
+        if ss.get("matches") is not None:
+            dossier["breaches"]["safe_surf"] = ss["matches"]
+            dossier["profiles"]["safe_surf"] = ss
+            dossier["sources_used"].append("Safe Surf (НКЦКИ)")
+        elif ss.get("error"):
+            dossier["notes"].append(f"Safe Surf: {ss['error']}")
+    except Exception as e:
+        dossier["notes"].append(f"Safe Surf: {e}")
 
     # ---------------- HIBP ----------------
     if kind == "email":
