@@ -201,8 +201,8 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:var(--r-s);p
 
 /* ---- карта нитей ---- */
 .mapwrap{border:1px solid var(--line);border-radius:var(--r);background:var(--panel);
-  padding:14px;margin:12px 0}
-.mapwrap svg{display:block;margin:0 auto;width:100%;height:auto}
+  padding:14px;margin:12px 0;overflow-x:auto}
+.mapwrap svg{display:block;margin:0;width:100%;max-width:none;height:auto}
 .mapwrap .branch text{cursor:pointer;transition:.15s}
 .mapwrap .branch:hover text{fill:var(--accent)}
 .bdetail{border:1px solid var(--line);border-radius:var(--r);background:var(--panel);margin:6px 0}
