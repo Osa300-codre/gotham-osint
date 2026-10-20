@@ -205,6 +205,23 @@ pre{background:var(--bg);border:1px solid var(--line);border-radius:var(--r-s);p
 .mapwrap svg{display:block;margin:0;width:100%;max-width:none;height:auto}
 .mapwrap .branch text{cursor:pointer;transition:.15s}
 .mapwrap .branch:hover text{fill:var(--accent)}
+.mapwrap .node{cursor:pointer}
+.mapwrap .node circle{transition:.15s}
+.mapwrap .node:hover circle:first-of-type{fill:#e8b23a}
+.mapwrap .node:hover .node-halo{opacity:.4}
+.mapwrap .leaf{cursor:pointer;text-decoration:none}
+.mapwrap .leaf:hover text{fill:#e8b23a}
+.mapwrap .leaf:hover circle{fill:#e8b23a}
+/* всплывающая подсказка */
+#tip{
+  position:fixed;z-index:120;pointer-events:none;opacity:0;transition:opacity .12s;
+  background:#151d2a;border:1px solid #2a3646;border-radius:6px;padding:8px 11px;
+  max-width:290px;box-shadow:0 10px 30px rgba(0,0,0,.65);
+}
+#tip.show{opacity:1}
+#tip b{display:block;color:#e8b23a;font-size:12.5px;margin-bottom:3px}
+#tip span{display:block;color:#8a97ab;font-size:11px;line-height:1.45}
+#tip .u{color:#6aa8ff;text-decoration:none;word-break:break-all}
 .bdetail{border:1px solid var(--line);border-radius:var(--r);background:var(--panel);margin:6px 0}
 .bdetail summary{cursor:pointer;padding:9px 13px;font-size:13px;display:flex;align-items:center;gap:8px}
 .bdetail summary::-webkit-details-marker{display:none}
@@ -258,6 +275,7 @@ HTML = """<!DOCTYPE html>
     __BODY__
   </main>
 </div>
+<div id="tip"></div>
 <script>__JS__</script>
 </body>
 </html>
@@ -306,6 +324,53 @@ function toast(msg){
     'padding:9px 16px;border-radius:4px;font-size:12.5px;font-weight:700;z-index:99';
   document.body.appendChild(t); setTimeout(function(){ t.remove(); }, 1900);
 }
+
+/* --- всплывающая подсказка на узлах паутины --- */
+(function(){
+  var tip = document.getElementById('tip');
+  if (!tip) return;
+  var current = null;
+
+  function show(el, x, y){
+    var title = el.getAttribute('data-title') || '';
+    var url = el.getAttribute('data-url') || '';
+    var thread = el.getAttribute('data-thread') || '';
+    var count = el.getAttribute('data-count') || '';
+    var host = '';
+    try { host = new URL(url, location.href).hostname; } catch(e){ host = url; }
+    var html = '<b>' + title + '</b>';
+    if (thread) html += '<span>нить: ' + thread + (count ? ' · связей: ' + count : '') + '</span>';
+    if (host) html += '<span class="u">' + host + '</span>';
+    tip.innerHTML = html;
+    tip.classList.add('show');
+    move(x, y);
+  }
+  function move(x, y){
+    var w = tip.offsetWidth, h = tip.offsetHeight;
+    var left = x + 14, top = y + 16;
+    if (left + w > window.innerWidth - 10) left = x - w - 14;
+    if (top + h > window.innerHeight - 10) top = y - h - 14;
+    tip.style.left = Math.max(6, left) + 'px';
+    tip.style.top = Math.max(6, top) + 'px';
+  }
+  function hide(){ tip.classList.remove('show'); current = null; }
+
+  document.addEventListener('mouseover', function(e){
+    var n = e.target.closest && e.target.closest('.node, .leaf');
+    if (n && n !== current){ current = n; show(n, e.clientX, e.clientY); }
+  });
+  document.addEventListener('mousemove', function(e){
+    if (current) move(e.clientX, e.clientY);
+  });
+  document.addEventListener('mouseout', function(e){
+    var n = e.target.closest && e.target.closest('.node, .leaf');
+    if (n && n === current) hide();
+  });
+  document.addEventListener('click', function(e){
+    var n = e.target.closest && e.target.closest('.node');
+    if (n){ var u = n.getAttribute('data-url'); if (u) window.open(u, '_blank'); }
+  });
+})();
 """
 
 

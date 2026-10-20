@@ -59,12 +59,17 @@ THREAD_STEP = LEAF_COUNT * LEAF_LINE + 46
 
 def _load() -> Dict[str, List[Tuple[str, str]]]:
     sites_by_cat: Dict[str, List[Tuple[str, str]]] = {}
+
+    def fix(url: str) -> str:
+        # в каталоге URL-шаблоны содержат плейсхолдер {} — подставляем пример
+        return url.replace("{}", "username") if "{}" in url else url
+
     try:
         import site_checks as SC
         for name, cat, url, _t, _m in SC.SITES:
-            sites_by_cat.setdefault(cat, []).append((name, url))
+            sites_by_cat.setdefault(cat, []).append((name, fix(url)))
         for name, cat, url, _chk, _f in SC.API_SITES:
-            sites_by_cat.setdefault(cat, []).append((name + " (API)", url))
+            sites_by_cat.setdefault(cat, []).append((name + " (API)", fix(url)))
     except Exception:
         pass
     return sites_by_cat
@@ -75,7 +80,8 @@ def _catalog_tools() -> Dict[str, List[Tuple[str, str]]]:
     try:
         import catalog as CAT
         for cat in CAT.CATEGORIES:
-            out.setdefault(cat["name"], []).extend([(n, u) for n, u, _d in cat["tools"]])
+            out.setdefault(cat["name"], []).extend(
+                [(n, u.replace("{}", "username")) for n, u, _d in cat["tools"]])
     except Exception:
         pass
     return out
@@ -211,16 +217,44 @@ def render_svg(branches: List[Dict[str, Any]]) -> str:
             if ly > height - 12:
                 break
             leaves.append(
-                f'<a href="{html.escape(surl)}" target="_blank">'
+                f'<a class="leaf" href="{html.escape(surl)}" target="_blank" '
+                f'data-title="{html.escape(sname)}" data-url="{html.escape(surl)}" '
+                f'data-thread="{html.escape(b["title"])}">'
+                f'<title>{html.escape(sname)}</title>'
                 f'<circle cx="{leaf_x - 10}" cy="{ly - 5}" r="2.6" fill="{NODE}"/>'
                 f'<text x="{leaf_x}" y="{ly}" fill="{MUTED}" font-size="17" '
                 f'font-family="Inter,sans-serif">{html.escape(sname[:26])}</text></a>')
 
-    # --- узлы-переплетения ---
-    for ring in rings:
+    # --- узлы-переплетения: каждому соответствует конкретный источник ---
+    pool: List[Tuple[str, str, str]] = []   # (название, url, нить)
+    for b in branches:
+        for sname, surl in b["items"][:6]:
+            pool.append((sname, surl, b["title"]))
+    if not pool:
+        pool = [("Gotham OSINT", "https://github.com/Osa300-codre/gotham-osint", "ядро")]
+
+    node_usage: Dict[Tuple[float, float], int] = {}
+    for i, b in enumerate(branches):
+        for pt in (r1[i % len(r1)], r2[(i * 2) % len(r2)], r3[(i * 3) % len(r3)]):
+            key = (round(pt[0], 1), round(pt[1], 1))
+            node_usage[key] = node_usage.get(key, 0) + 1
+
+    ndots: List[str] = []
+    for ring_idx, ring in enumerate(rings):
         for pt in ring:
-            ndots.append(f'<circle cx="{pt[0]:.1f}" cy="{pt[1]:.1f}" r="2.8" '
-                         f'fill="{INK_SOFT}" stroke="#0a0d13" stroke-width="1"/>')
+            key = (round(pt[0], 1), round(pt[1], 1))
+            sname, surl, thread = pool[(hash(key) + ring_idx * 7) % len(pool)]
+            threads = node_usage.get(key, 1)
+            ndots.append(
+                f'<g class="node" data-title="{html.escape(sname)}" '
+                f'data-url="{html.escape(surl)}" data-thread="{html.escape(thread)}" '
+                f'data-count="{threads}">'
+                f'<title>{html.escape(sname)} — {html.escape(thread)}</title>'
+                f'<circle cx="{pt[0]:.1f}" cy="{pt[1]:.1f}" r="3.2" '
+                f'fill="{INK_SOFT}" stroke="#0a0d13" stroke-width="1"/>'
+                f'<circle cx="{pt[0]:.1f}" cy="{pt[1]:.1f}" r="7" fill="none" '
+                f'stroke="{GOLD}" stroke-width="1" opacity="0" class="node-halo"/>'
+                f'</g>')
 
     # --- ядро ---
     total = sum(b["count"] for b in branches)
