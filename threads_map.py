@@ -2,27 +2,24 @@
 # -*- coding: utf-8 -*-
 """
 Паутина источников: центральный узел -> узлы-переплетения -> нити категорий ->
-конкретные источники на концах. Нити переплетаются в середине (общие узлы
-и перекрёстные связи между кольцами), образуя сеть.
+конкретные источники на концах.
+
+Оформление: монохромная «сталь + золото», структурные пунктирные кольца,
+плавное затухание нитей от центра, никакого визуального шума.
 """
 
 import html
 import math
 from typing import Any, Dict, List, Tuple
 
-BRANCH_COLOR = {
-    "social": "#e8b23a", "messenger": "#e8b23a", "dev": "#4a9fe8",
-    "code": "#4a9fe8", "work": "#3ecf8e", "workplace": "#3ecf8e",
-    "professional": "#3ecf8e", "business": "#3ecf8e", "market": "#e8a13a",
-    "wallet": "#e8a13a", "transport": "#ef5b5b", "travel": "#ef5b5b",
-    "food": "#ef5b5b", "threat": "#ef5b5b", "network": "#ef5b5b",
-    "domains": "#a78bfa", "geo": "#22d3ee", "maps": "#22d3ee",
-    "media": "#f472b6", "files": "#f472b6", "mail": "#f0c040",
-    "email": "#f0c040", "phone": "#f0c040", "health": "#34d399",
-    "education": "#34d399", "creative": "#c084fc", "startup": "#c084fc",
-    "cloud": "#94a3b8", "forum": "#94a3b8", "monitoring": "#94a3b8",
-    "search": "#dde5f1", "archive": "#dde5f1", "dating": "#fb7185",
-}
+# Приглушённая палитра: сталь для линий, золото для акцентов
+INK = "#3c4a60"
+INK_SOFT = "#4d5d78"
+NODE = "#64748b"
+GOLD = "#e8b23a"
+GOLD_SOFT = "#b98f2c"
+TEXT = "#dde5f1"
+MUTED = "#8a97ab"
 
 BRANCH_ORDER = [
     "Поиск и мониторинг", "Люди и контакты", "Соцсети и мессенджеры",
@@ -55,12 +52,9 @@ CATALOG_FOR_BRANCH = {
     "Поиск и мониторинг": ["Поиск и мониторинг"],
 }
 
-# Сколько конкретных источников показывать на конце нитки
 LEAF_COUNT = 3
-# Вертикальный шаг между нитями: источники одной нити не должны наезжать
-# на подпись следующей
-LEAF_LINE = 19
-THREAD_STEP = LEAF_COUNT * LEAF_LINE + 40
+LEAF_LINE = 21
+THREAD_STEP = LEAF_COUNT * LEAF_LINE + 46
 
 
 def _load() -> Dict[str, List[Tuple[str, str]]]:
@@ -109,12 +103,7 @@ def build_branches() -> List[Dict[str, Any]]:
                     continue
                 used_sites.add(s)
                 items.append(s)
-        out.append({
-            "title": title,
-            "color": BRANCH_COLOR.get(CAT_ALIASES.get(title, [""])[0], "#8b93a7"),
-            "items": items,
-            "count": len(items),
-        })
+        out.append({"title": title, "items": items, "count": len(items)})
     rest: List[Tuple[str, str]] = []
     for cat, items in sites_by_cat.items():
         if cat in used_cats:
@@ -125,16 +114,14 @@ def build_branches() -> List[Dict[str, Any]]:
             used_sites.add(s)
             rest.append(s)
     if rest:
-        out.append({"title": "Прочие источники", "color": "#64748b",
-                    "items": rest, "count": len(rest)})
+        out.append({"title": "Прочие источники", "items": rest, "count": len(rest)})
     return out
 
 
 # ==========================================================================
-#  Геометрия паутины
+#  Геометрия
 # ==========================================================================
 def _catmull_rom(points: List[Tuple[float, float]], tension: float = 1.0) -> str:
-    """Плавная кривая через точки (Catmull-Rom -> кубический Bezier)."""
     if len(points) < 2:
         return ""
     d = f"M {points[0][0]:.1f},{points[0][1]:.1f}"
@@ -150,114 +137,131 @@ def _catmull_rom(points: List[Tuple[float, float]], tension: float = 1.0) -> str
 
 
 def _rings(cx: float, cy: float) -> List[List[Tuple[float, float]]]:
-    """Кольца узлов-переплетения: три эллиптических кольца, узлы разнесены по кругу.
-
-    Эллипс (сплюснутый по X) нужен, чтобы паутина не вылезала левее центра.
-    """
+    """Три эллиптических кольца узлов-переплетения."""
     rings: List[List[Tuple[float, float]]] = []
-    specs = [(120, 6, 0.0), (225, 9, 0.38), (340, 12, 0.75)]
+    specs = [(105, 5, 0.0), (205, 8, 0.42), (310, 11, 0.85)]
     for radius, count, phase in specs:
         pts = []
         for i in range(count):
             a = phase + 2 * math.pi * i / count
-            pts.append((cx + radius * 0.66 * math.cos(a),
-                        cy + radius * 0.5 * math.sin(a)))
+            pts.append((cx + radius * 0.72 * math.cos(a),
+                        cy + radius * 0.56 * math.sin(a)))
         rings.append(pts)
     return rings
 
 
 def render_svg(branches: List[Dict[str, Any]]) -> str:
-    """Паутина: центр -> узлы-переплетения -> нити -> конкретные источники."""
+    """Паутина источников: центр -> узлы-переплетения -> нити -> источники."""
     n = len(branches)
-    top = 70
-    height = top * 2 + THREAD_STEP * (n - 1)
-    cx, cy = 185, height / 2
-    end_x = 610
-    leaf_x = 636
+    top = 78
+    # высота учитывает хвост источников последней нити
+    height = top + (n - 1) * THREAD_STEP + 52 + LEAF_COUNT * LEAF_LINE + 34
+    cx, cy = 250, height / 2
+    end_x = 570
+    leaf_x = 594
 
     rings = _rings(cx, cy)
     r1, r2, r3 = rings
 
-    paths: List[str] = []
-    dots: List[str] = []
-    jdots: List[str] = []
+    parts: List[str] = []
+    defs: List[str] = []
     labels: List[str] = []
     leaves: List[str] = []
-    webs: List[str] = []
+    ndots: List[str] = []
 
-    # --- перекрёстные связи между кольцами (эффект сплетения) ---
-    for a_ring, b_ring in ((r1, r2), (r2, r3)):
-        for i, a in enumerate(a_ring):
-            b = b_ring[(i * 3 + 2) % len(b_ring)]
-            webs.append(
-                f'<path d="{_catmull_rom([a, ((a[0]+b[0])/2, (a[1]+b[1])/2), b], 1.0)}" '
-                f'fill="none" stroke="#39445a" stroke-width="0.7" opacity="0.55"/>')
-    # хорды внутри колец
-    for ring in rings:
-        for i in range(len(ring)):
-            a = ring[i]
-            b = ring[(i + 1) % len(ring)]
-            webs.append(
-                f'<path d="{_catmull_rom([a, b], 1.0)}" fill="none" '
-                f'stroke="#2a3646" stroke-width="0.6" opacity="0.5"/>')
+    # --- структурные кольца (пунктирные эллипсы) ---
+    for i, (rx, ry) in enumerate([(76, 59), (148, 115), (223, 174)], start=1):
+        parts.append(
+            f'<ellipse cx="{cx}" cy="{cy}" rx="{rx}" ry="{ry}" fill="none" '
+            f'stroke="{INK}" stroke-width="0.8" stroke-dasharray="2 7" opacity="0.75"/>')
 
-    # --- нити: центр -> узлы колец -> категория ---
+    # --- нити: центр -> узлы -> категория (с градиентом) ---
     for i, b in enumerate(branches):
-        color = b["color"]
+        gid = f"g{i}"
+        defs.append(
+            f'<linearGradient id="{gid}" x1="{cx}" y1="{cy}" x2="{end_x}" y2="{cy}" '
+            f'gradientUnits="userSpaceOnUse">'
+            f'<stop offset="0%" stop-color="{GOLD}" stop-opacity="0.06"/>'
+            f'<stop offset="45%" stop-color="{INK_SOFT}" stop-opacity="0.55"/>'
+            f'<stop offset="100%" stop-color="{GOLD_SOFT}" stop-opacity="0.9"/>'
+            f'</linearGradient>')
         y_target = top + i * THREAD_STEP
         end = (float(end_x), y_target)
-
         j1 = r1[i % len(r1)]
         j2 = r2[(i * 2) % len(r2)]
         j3 = r3[(i * 3) % len(r3)]
         pts = [(cx, cy), j1, j2, j3, end]
-        paths.append(f'<path d="{_catmull_rom(pts, 1.0)}" fill="none" '
-                     f'stroke="{color}" stroke-width="1.2" opacity="0.6"/>')
+        parts.append(f'<path d="{_catmull_rom(pts, 1.0)}" fill="none" '
+                     f'stroke="url(#{gid})" stroke-width="1.5" stroke-linecap="round"/>')
 
-        dots.append(f'<circle cx="{end[0]}" cy="{end[1]}" r="3.6" fill="{color}"/>')
+        ndots.append(f'<circle cx="{end[0]}" cy="{end[1]}" r="4" fill="{GOLD}"/>')
+        ndots.append(f'<circle cx="{end[0]}" cy="{end[1]}" r="8" fill="{GOLD}" opacity="0.14"/>')
         labels.append(
             f'<g class="branch" data-cat="{html.escape(b["title"])}" tabindex="0">'
-            f'<text x="{end[0] + 14}" y="{end[1] + 6}" fill="#dde5f1" font-size="23" '
+            f'<text x="{end[0] + 16}" y="{end[1] + 6}" fill="{TEXT}" font-size="23" '
             f'font-family="Inter,Segoe UI,sans-serif" style="cursor:pointer">'
-            f'{html.escape(b["title"])}'
-            f'<tspan fill="{color}" font-size="19" dx="8">{b["count"]}</tspan>'
-            f'</text></g>')
+            f'{html.escape(b["title"])}</text>'
+            f'<text x="{end[0] + 16}" y="{end[1] + 26}" fill="{GOLD_SOFT}" font-size="18" '
+            f'font-family="Inter,sans-serif">{b["count"]} источников</text>'
+            f'</g>')
 
         # конкретные источники на конце нитки
-        picks = b["items"][:LEAF_COUNT]
-        for k, (sname, surl) in enumerate(picks):
-            ly = end[1] + 22 + k * LEAF_LINE
-            if ly > height - 10:
+        for k, (sname, surl) in enumerate(b["items"][:LEAF_COUNT]):
+            ly = end[1] + 48 + k * LEAF_LINE
+            if ly > height - 12:
                 break
             leaves.append(
                 f'<a href="{html.escape(surl)}" target="_blank">'
-                f'<circle cx="{leaf_x - 9}" cy="{ly - 4.5}" r="2.4" fill="{color}" opacity="0.75"/>'
-                f'<text x="{leaf_x}" y="{ly}" fill="#8494ad" font-size="17" '
+                f'<circle cx="{leaf_x - 10}" cy="{ly - 5}" r="2.6" fill="{NODE}"/>'
+                f'<text x="{leaf_x}" y="{ly}" fill="{MUTED}" font-size="17" '
                 f'font-family="Inter,sans-serif">{html.escape(sname[:26])}</text></a>')
 
     # --- узлы-переплетения ---
     for ring in rings:
         for pt in ring:
-            jdots.append(f'<circle cx="{pt[0]:.1f}" cy="{pt[1]:.1f}" r="2.2" '
-                         f'fill="#5b6982" opacity="0.85"/>')
+            ndots.append(f'<circle cx="{pt[0]:.1f}" cy="{pt[1]:.1f}" r="2.8" '
+                         f'fill="{INK_SOFT}" stroke="#0a0d13" stroke-width="1"/>')
 
-    # --- центральный узел ---
-    core = (f'<circle cx="{cx}" cy="{cy}" r="44" fill="url(#coreGlow)" opacity="0.20"/>'
-            f'<circle cx="{cx}" cy="{cy}" r="5.5" fill="#e8b23a"/>'
-            f'<text x="{cx-186}" y="{cy-4}" fill="#e8edf7" font-size="21" font-weight="700" '
-            f'font-family="Bebas Neue,Oswald,Impact,sans-serif" letter-spacing="1">GOTHAM OSINT</text>'
-            f'<text x="{cx-186}" y="{cy+17}" fill="#8494ad" font-size="12" '
-            f'font-family="Inter,sans-serif">'
-            f'{sum(b["count"] for b in branches)} источников · {len(branches)} нитей</text>')
+    # --- ядро ---
+    total = sum(b["count"] for b in branches)
+    core = (f'<circle cx="{cx}" cy="{cy}" r="92" fill="url(#coreGlow)"/>'
+            f'<circle cx="{cx}" cy="{cy}" r="9" fill="{GOLD}"/>'
+            f'<circle cx="{cx}" cy="{cy}" r="17" fill="none" stroke="{GOLD}" '
+            f'stroke-width="1" opacity="0.35"/>'
+            f'<text x="{cx}" y="{cy-32}" fill="{TEXT}" font-size="25" font-weight="700" '
+            f'text-anchor="middle" letter-spacing="1.2" '
+            f'font-family="Bebas Neue,Oswald,Impact,sans-serif">GOTHAM OSINT</text>'
+            f'<text x="{cx}" y="{cy+40}" fill="{MUTED}" font-size="14" text-anchor="middle" '
+            f'font-family="Inter,sans-serif">{total} источников · {len(branches)} нитей</text>')
+
+    # --- легенда в свободной зоне слева снизу ---
+    ly0 = height - 104
+    legend = [
+        (f'<circle cx="{cx-176}" cy="{ly0}" r="6" fill="{GOLD}"/>',
+         "категория (нить)"),
+        (f'<circle cx="{cx-176}" cy="{ly0+26}" r="3.2" fill="{INK_SOFT}" '
+         f'stroke="#0a0d13" stroke-width="1"/>',
+         "узел переплетения"),
+        (f'<circle cx="{cx-176}" cy="{ly0+52}" r="2.6" fill="{NODE}"/>',
+         "конкретный источник"),
+    ]
+    lsvg = []
+    for i, (shape, text) in enumerate(legend):
+        lsvg.append(shape)
+        lsvg.append(f'<text x="{cx-162}" y="{ly0 + 5 + i * 26}" fill="{MUTED}" '
+                    f'font-size="14" font-family="Inter,sans-serif">{text}</text>')
 
     return (
-        f'<svg viewBox="0 0 900 {height:.0f}" '
-        f'preserveAspectRatio="xMidYMin meet">'
-        f'<defs><radialGradient id="coreGlow">'
-        f'<stop offset="0%" stop-color="#e8b23a" stop-opacity="0.85"/>'
-        f'<stop offset="100%" stop-color="#e8b23a" stop-opacity="0"/></radialGradient></defs>'
-        + "".join(webs) + "".join(paths) + "".join(jdots) + "".join(dots)
-        + "".join(labels) + "".join(leaves) + core +
+        f'<svg viewBox="0 0 900 {height:.0f}" preserveAspectRatio="xMidYMin meet">'
+        f'<defs>'
+        f'<radialGradient id="coreGlow">'
+        f'<stop offset="0%" stop-color="{GOLD}" stop-opacity="0.22"/>'
+        f'<stop offset="60%" stop-color="{GOLD}" stop-opacity="0.05"/>'
+        f'<stop offset="100%" stop-color="{GOLD}" stop-opacity="0"/></radialGradient>'
+        + "".join(defs) +
+        f'</defs>'
+        + "".join(parts) + "".join(ndots) + "".join(labels) + "".join(leaves)
+        + "".join(lsvg) + core +
         f'</svg>'
     )
 
@@ -272,7 +276,7 @@ def render_detail(branches: List[Dict[str, Any]]) -> str:
             for n, u in b["items"][:400])
         out.append(
             f"<details class='bdetail' data-cat='{html.escape(b['title'])}'>"
-            f"<summary><span style='color:{b['color']}'>●</span> "
+            f"<summary><span style='color:{GOLD}'>●</span> "
             f"<b>{html.escape(b['title'])}</b> "
             f"<span class='count'>{b['count']}</span></summary>"
             f"<div class='wrap'><table class='tbl'><thead><tr><th>Источник</th><th>Ссылка</th></tr></thead>"
